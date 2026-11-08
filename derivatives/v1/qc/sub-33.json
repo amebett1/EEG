@@ -1,0 +1,68 @@
+{
+  "subject": "sub-33",
+  "task_misunderstood": false,
+  "irregular_recording": false,
+  "high_impedance": false,
+  "n_recording_joins": 0,
+  "cropped_outside_task_s": 35.3,
+  "n_stimuli": 660,
+  "n_bad_channels": 4,
+  "bad_channels": [
+    "F9",
+    "FFT9h",
+    "T8",
+    "TP9"
+  ],
+  "bad_channel_reasons": {
+    "noisy_or_flat": [
+      "T8"
+    ],
+    "uncorrelated": [
+      "TP9",
+      "T8",
+      "F9",
+      "FFT9h"
+    ],
+    "mirrored": []
+  },
+  "n_ic_excluded": 18,
+  "ic_excluded": [
+    "eye blink (0.99)",
+    "eye blink (1.00)",
+    "muscle artifact (0.99)",
+    "muscle artifact (1.00)",
+    "muscle artifact (1.00)",
+    "muscle artifact (0.99)",
+    "muscle artifact (0.97)",
+    "muscle artifact (0.99)",
+    "muscle artifact (0.97)",
+    "muscle artifact (0.99)",
+    "muscle artifact (0.95)",
+    "muscle artifact (0.99)",
+    "muscle artifact (0.97)",
+    "muscle artifact (0.94)",
+    "muscle artifact (0.89)",
+    "muscle artifact (0.99)",
+    "muscle artifact (0.95)",
+    "muscle artifact (1.00)"
+  ],
+  "fp1_p99_before_ica_uv": 136.0,
+  "fp1_p99_after_ica_uv": 26.1,
+  "target_rt_ms": 491.1,
+  "target_omission_pct": 0.0,
+  "false_alarm_distractor_pct": 6.17,
+  "false_alarm_standard_pct": 0.2,
+  "n_standard_in": 498,
+  "n_target_in": 81,
+  "n_distractor_in": 81,
+  "n_standard_kept": 498,
+  "n_target_kept": 81,
+  "n_distractor_kept": 81,
+  "pct_trials_dropped": 0.0,
+  "pz_p3_standard_uv": 2.99,
+  "pz_p3_target_uv": 11.42,
+  "pz_p3_distractor_uv": 7.03,
+  "n_channels": 128,
+  "n_times": 301,
+  "runtime_s": 228
+}

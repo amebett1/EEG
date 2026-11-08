@@ -1,1 +1,13 @@
 docs
+.venv/
+data/
+# Outputs: share only the small QC files; epochs, ICA and zips go to the Release / Drive
+derivatives/*
+!derivatives/v1/
+derivatives/v1/*
+!derivatives/v1/qc_summary.csv
+!derivatives/v1/qc/
+!derivatives/v1/figures/
+__pycache__/
+.ipynb_checkpoints/
+.ruff_cache/
