@@ -1,13 +1,17 @@
-docs
 .venv/
 data/
-# Outputs: share only the small QC files; epochs, ICA and zips go to the Release / Drive
+# Outputs: chỉ commit file QC nhỏ; epochs, ICA, zip nằm ở GitHub Release / Drive
 derivatives/*
 !derivatives/v1/
 derivatives/v1/*
 !derivatives/v1/qc_summary.csv
 !derivatives/v1/qc/
 !derivatives/v1/figures/
+results/models/*
+!**/.gitkeep
 __pycache__/
+*.pyc
 .ipynb_checkpoints/
 .ruff_cache/
+.env
+.DS_Store
