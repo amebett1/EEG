@@ -20,29 +20,30 @@ EEG/
 │       └── figures/                  # ERP từng người và grand_average.png từ tiền xử lý
 ├── docs/
 │   ├── dataset_cheatsheet.md         # Ghi chú và nguồn dataset
-│   └── contributions.md              # File dành cho ghi nhận đóng góp; hiện còn trống
+│   └── contributions.md              # Phân công vai trò (V1-V6) và nhật ký đóng góp
 ├── notebooks/
 │   ├── 00_explore_dataset.ipynb       # Khảo sát ban đầu: liệt kê dữ liệu trong RAW_DIR
-│   └── 01_preprocessing.ipynb         # Tải dữ liệu, tiền xử lý, xuất epoch/ICA và QC
+│   ├── 01_preprocessing.ipynb         # Tải dữ liệu, tiền xử lý, xuất epoch/ICA và QC
+│   └── 02_erp_visualization.ipynb     # V3: Trực quan hóa ERP, Scalp Topomap & kiểm tra P300
 ├── src/
 │   ├── preprocessing/
 │   │   └── README.md                 # Chỉ dẫn tới pipeline trong notebook
 │   ├── utils/
 │   │   └── io.py                     # Đọc epoch, tạo X/y/groups để chia tập theo người
 │   ├── erp/
-│   │   └── plot_erp.py               # Khung TODO: ERP Fz/Pz, topomap, kiểm tra P300
+│   │   └── plot_erp.py               # V3: ERP Fz/Cz/Pz, difference waves, topomap, kiểm tra P300
 │   ├── features/
-│   │   └── extract_features.py       # Khung TODO: biên độ đỉnh, latency, band power
+│   │   └── extract_features.py       # Khung TODO (V4): biên độ đỉnh, latency, band power
 │   ├── ml/
-│   │   └── train_baseline.py         # Khung TODO: SVM, LDA, Random Forest
+│   │   └── train_baseline.py         # Khung TODO (V5): SVM, LDA, Random Forest
 │   └── dl/
-│       └── train_eegnet.py           # Khung TODO: EEGNet và giải thích mô hình
+│       └── train_eegnet.py           # Khung TODO (V6): EEGNet và giải thích mô hình
 ├── results/
-│   ├── figures/                      # Nơi lưu hình kết quả phân tích
+│   ├── figures/                      # Nơi lưu hình kết quả phân tích ERP & topomap
 │   ├── tables/                       # Nơi lưu bảng kết quả
 │   └── models/                       # Nơi lưu mô hình đã huấn luyện; không commit
 └── report/
-    ├── README.md                     # File dành cho nội dung báo cáo; hiện còn trống
+    ├── README.md                     # Báo cáo phương pháp luận Polich và tiêu chuẩn P300
     └── figures/                      # Nơi lưu hình dùng trong báo cáo
 ```
 
