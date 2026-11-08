@@ -30,7 +30,7 @@ COLOR_MAP = {
 }
 
 MIDLINE_CHANNELS = ("Fz", "Cz", "Pz")
-P3_WINDOW = (0.3, 0.6)
+P3_WINDOW = (0.3, 0.5)
 
 
 def load_subject_epochs(
@@ -98,7 +98,7 @@ def plot_midline_erp(
             ax.set_title(f"{ch} (N/A)")
             continue
 
-        ax.axvspan(w_start_ms, w_end_ms, color="#efefef", alpha=0.9, label="P300 (300-600ms)")
+        ax.axvspan(w_start_ms, w_end_ms, color="#efefef", alpha=0.9, label=f"P300 ({int(w_start_ms)}-{int(w_end_ms)}ms)")
 
         for cond in ("standard", "target", "distractor"):
             if cond not in epochs.event_id or len(epochs[cond]) == 0:
@@ -153,11 +153,29 @@ def plot_midline_erp(
     fig.tight_layout()
 
     if save_path:
+        save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(save_path, dpi=200, bbox_inches="tight")
         print(f"  -> Đã lưu ERP midline: {save_path}")
 
     return fig
+
+
+def plot_fz_pz_erp(
+    epochs: mne.Epochs,
+    sub: str,
+    window: Tuple[float, float] = P3_WINDOW,
+    save_path: Optional[Path] = None
+) -> plt.Figure:
+    return plot_midline_erp(
+        epochs=epochs,
+        sub=sub,
+        channels=("Fz", "Pz"),
+        window=window,
+        show_sem=True,
+        show_diff=True,
+        save_path=save_path
+    )
 
 
 def plot_difference_waves(
@@ -413,7 +431,8 @@ def verify_p300(
         "rule3_target_pz_latency_valid": bool(latency_valid),
         "rule3_latency_ms": t_pz_lat,
         "rule4_distractor_frontal_tendency": bool(distractor_more_frontal),
-        "p300_detected": bool(parietal_gradient and oddball_effect and latency_valid)
+        "p300_detected": bool(parietal_gradient and oddball_effect and latency_valid),
+        "window_ms": (int(w_start_ms), int(w_end_ms))
     }
 
     return report
@@ -423,13 +442,14 @@ def print_verification_summary(report: Dict[str, Any]) -> None:
     sub = report["subject"]
     m = report["metrics"]
     r = report["polich_rules"]
+    w_start, w_end = r.get("window_ms", (300, 500))
 
     print("=" * 68)
     print(f"       KẾT QUẢ KIỂM CHỨNG SÓNG P300 (POLICH 2007) – {sub}")
     print("=" * 68)
     print(f"Số lượng trial: {report['n_trials']}")
     print("-" * 68)
-    print("1. Biên độ trung bình cửa sổ 300-600 ms (µV):")
+    print(f"1. Biên độ trung bình cửa sổ {w_start}-{w_end} ms (µV):")
     print(f"   Kênh  |    Standard    |     Target     |   Distractor   | Hiệu (T - S)")
     for ch in ("Fz", "Cz", "Pz"):
         chl = ch.lower()
@@ -440,7 +460,7 @@ def print_verification_summary(report: Dict[str, Any]) -> None:
         print(f"   {ch:<5} | {s_val:>12.2f} µV | {t_val:>12.2f} µV | {d_val:>12.2f} µV | {diff:>10.2f} µV")
 
     print("-" * 68)
-    print("2. Đỉnh Target P3b (Peak in 300-600 ms):")
+    print(f"2. Đỉnh Target P3b (Peak in {w_start}-{w_end} ms):")
     for ch in ("Fz", "Cz", "Pz"):
         chl = ch.lower()
         p_val = m.get(f"target_{chl}_peak_uv", np.nan)
@@ -456,7 +476,7 @@ def print_verification_summary(report: Dict[str, Any]) -> None:
     print(f"   {c2} Hiệu ứng Oddball (Target > Std): Chênh lệch tại Pz = {r['rule2_diff_uv']:+.2f} µV")
 
     c3 = "[PASS]" if r["rule3_target_pz_latency_valid"] else "[FAIL]"
-    print(f"   {c3} Độ trễ sinh lý P3b (300-600ms) : Đạt đỉnh tại {r['rule3_latency_ms']:.1f} ms")
+    print(f"   {c3} Độ trễ sinh lý P3b ({w_start}-{w_end}ms) : Đạt đỉnh tại {r['rule3_latency_ms']:.1f} ms")
 
     c4 = "[PASS]" if r["rule4_distractor_frontal_tendency"] else "[INFO]"
     print(f"   {c4} Xu hướng trán của Distractor (P3a) : {r['rule4_distractor_frontal_tendency']}")
@@ -486,6 +506,9 @@ def run_subject_erp_analysis(
     f_midline = save_dir / f"{sub}_midline_erp.png"
     fig_midline = plot_midline_erp(epochs, sub, save_path=f_midline)
 
+    f_fzpz = save_dir / f"{sub}_fz_pz_erp.png"
+    fig_fzpz = plot_fz_pz_erp(epochs, sub, save_path=f_fzpz)
+
     f_diff = save_dir / f"{sub}_difference_waves.png"
     fig_diff = plot_difference_waves(epochs, sub, save_path=f_diff)
 
@@ -499,12 +522,110 @@ def run_subject_erp_analysis(
         plt.show()
     else:
         plt.close(fig_midline)
+        plt.close(fig_fzpz)
         plt.close(fig_diff)
         plt.close(fig_topo)
         plt.close(fig_summary)
 
     print(f"[V3] Hoàn tất toàn bộ hình ảnh và phân tích cho {sub} tại: {save_dir}\n")
     return report
+
+
+def plot_grand_average_erp(
+    channels: Tuple[str, ...] = ("Fz", "Pz"),
+    window: Tuple[float, float] = P3_WINDOW,
+    save_path: Optional[Path] = None
+) -> plt.Figure:
+    epoch_files = sorted(list(EPOCH_DIR.glob("*_task-oddball_v1-epo.fif")))
+    if not epoch_files:
+        raise FileNotFoundError(f"Chưa có file epoch nào trong {EPOCH_DIR}")
+
+    subs_included = []
+    per_condition: Dict[str, List[np.ndarray]] = {name: [] for name in EVENT_ID}
+    times_ms = None
+
+    for p in epoch_files:
+        sub_id = p.name.split("_")[0]
+        if sub_id in TASK_MISUNDERSTOOD:
+            continue
+        try:
+            ep = mne.read_epochs(p, preload=True, verbose="error")
+            if ep.metadata is not None and "correct" in ep.metadata:
+                ep = ep[ep.metadata["correct"].values]
+            if times_ms is None:
+                times_ms = ep.times * 1000.0
+            for name in EVENT_ID:
+                if name in ep.event_id and len(ep[name]) > 0:
+                    per_condition[name].append(ep[name].average(picks=list(channels)).data * 1e6)
+            subs_included.append(sub_id)
+        except Exception:
+            continue
+
+    if not subs_included or not per_condition["target"]:
+        raise RuntimeError("Không đủ dữ liệu để tính Grand Average.")
+
+    n_subs = len(subs_included)
+    w_start_ms, w_end_ms = window[0] * 1000.0, window[1] * 1000.0
+    w_mask = (times_ms >= w_start_ms) & (times_ms <= w_end_ms)
+
+    n_chan = len(channels)
+    fig, axes = plt.subplots(1, n_chan, figsize=(5.6 * n_chan, 4.6), sharey=True)
+    if n_chan == 1:
+        axes = [axes]
+
+    for i, (ax, ch) in enumerate(zip(axes, channels)):
+        ax.axvspan(w_start_ms, w_end_ms, color="#efefef", alpha=0.9, label=f"P300 ({int(w_start_ms)}-{int(w_end_ms)}ms)")
+        for name in ("standard", "target", "distractor"):
+            if not per_condition[name]:
+                continue
+            cond_stack = np.array(per_condition[name])[:, i, :]
+            mean_uv = np.mean(cond_stack, axis=0)
+            sem_uv = stats.sem(cond_stack, axis=0) if len(cond_stack) > 1 else np.zeros_like(mean_uv)
+            color = COLOR_MAP.get(name, "#333333")
+            ax.plot(times_ms, mean_uv, color=color, lw=2.2, label=f"{name.capitalize()}")
+            if len(cond_stack) > 1:
+                ax.fill_between(times_ms, mean_uv - sem_uv, mean_uv + sem_uv, color=color, alpha=0.18)
+
+            if name == "target" and np.any(w_mask):
+                w_times = times_ms[w_mask]
+                w_data = mean_uv[w_mask]
+                peak_idx = np.argmax(w_data)
+                peak_lat = w_times[peak_idx]
+                peak_amp = w_data[peak_idx]
+                ax.plot(peak_lat, peak_amp, marker="o", markersize=6, color="#b20000")
+                ax.annotate(
+                    f"{peak_amp:.1f} µV\n{peak_lat:.0f} ms",
+                    xy=(peak_lat, peak_amp),
+                    xytext=(peak_lat + 15, peak_amp + 0.8),
+                    fontsize=9,
+                    fontweight="bold",
+                    color="#b20000",
+                    arrowprops=dict(arrowstyle="->", color="#b20000", lw=0.8)
+                )
+
+        if len(per_condition["target"]) > 0 and len(per_condition["standard"]) > 0:
+            diff_mean = np.mean(np.array(per_condition["target"])[:, i, :], axis=0) - np.mean(np.array(per_condition["standard"])[:, i, :], axis=0)
+            ax.plot(times_ms, diff_mean, color=COLOR_MAP["diff_target"], lw=1.6, ls="--", label="Target - Standard")
+
+        ax.axvline(0, color="k", lw=0.8, ls=":")
+        ax.axhline(0, color="k", lw=0.8, ls=":")
+        sub_desc = f"N={n_subs}" if n_subs > 1 else f"sub-01 (N=1)"
+        ax.set_title(f"Grand Average – {ch} ({sub_desc})", fontsize=12.5, fontweight="bold")
+        ax.set_xlabel("Thời gian (ms)", fontsize=10.5)
+        ax.grid(True, linestyle=":", alpha=0.5)
+
+    axes[0].set_ylabel("Điện thế (µV)", fontsize=10.5)
+    axes[0].legend(loc="upper left", frameon=False, fontsize=8.5)
+    fig.suptitle(f"Grand Average ERP (Fz, Pz) – Oddball Paradigm\nCửa sổ P300: [{int(w_start_ms)}, {int(w_end_ms)}] ms", fontsize=13, fontweight="bold", y=1.02)
+    fig.tight_layout()
+
+    if save_path:
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=300, bbox_inches="tight")
+        print(f"  -> Đã lưu biểu đồ Grand Average: {save_path}")
+
+    return fig
 
 
 def plot_population_summary(
@@ -622,10 +743,13 @@ if __name__ == "__main__":
     parser.add_argument("--sub", type=str, default="sub-01", help="Mã người tham gia (mặc định: sub-01)")
     parser.add_argument("--out-dir", type=str, default=str(FIG_DIR), help="Thư mục xuất ảnh kết quả")
     parser.add_argument("--population", action="store_true", help="Vẽ thống kê quần thể 42 người từ qc_summary.csv")
+    parser.add_argument("--grand-average", action="store_true", help="Vẽ Grand Average ERP (Fz, Pz)")
     parser.add_argument("--show", action="store_true", help="Hiển thị đồ họa tương tác")
     args = parser.parse_args()
 
     if args.population:
         plot_population_summary(save_path=Path(args.out_dir) / "population_p300_summary.png")
+    elif args.grand_average:
+        plot_grand_average_erp(save_path=Path(args.out_dir) / "grand_average_fz_pz.png")
     else:
         run_subject_erp_analysis(sub=args.sub, save_dir=Path(args.out_dir), show_plots=args.show)

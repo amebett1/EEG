@@ -44,26 +44,30 @@ KÍCH THÍCH XAO NHÃNG (Distractor)                 KÍCH THÍCH ĐÍCH (Target
 
 ## 3. Hệ thống Tiêu chuẩn Kiểm chứng P300 (Verification Rules)
 
-Áp dụng cho từng đối tượng trong cửa sổ phân tích $[300, 600]\text{ ms}$:
+Áp dụng cho từng đối tượng trong cửa sổ phân tích trọng tâm $[300, 500]\text{ ms}$ (mở rộng kiểm tra đến $600\text{ ms}$):
 1. **Parietal Gradient (Gradient vùng đỉnh)**:
    $$\text{Amplitude}(Pz) > \text{Amplitude}(Fz)$$
    Đối với Target, điện thế tại Pz phải vượt trội so với Fz, khẳng định đặc tính P3b.
 2. **Oddball Effect (Hiệu ứng chênh lệch kích thích)**:
    $$\text{Amplitude}(Pz, \text{Target}) - \text{Amplitude}(Pz, \text{Standard}) \ge 1.5\,\mu\text{V}$$
-   Khẳng định có sự phân biệt nhận thức giữa kích thích đích và kích thích nền.
+   Khẳng định có sự phân biệt nhận thức rõ ràng giữa kích thích đích và kích thích nền.
 3. **Physiological Latency Window (Cửa sổ độ trễ sinh lý)**:
-   $$300\text{ ms} \le \text{Peak Latency}(Pz) \le 600\text{ ms}$$
-   Đỉnh cực đại của P3b phải xuất hiện trong khoảng thời gian kích hoạt nhận thức chuẩn.
+   $$300\text{ ms} \le \text{Peak Latency}(Pz) \le 500\text{ ms}$$
+   Đỉnh cực đại của P3b xuất hiện chuẩn xác trong cửa sổ kích hoạt nhận thức chuẩn 300–500 ms.
 4. **Fronto-Central Tendency của P3a (Xu hướng vùng trán của Distractor)**:
-   Phân bố năng lượng của Distractor dịch chuyển về phía trước (Fz/Cz) so với Target.
+   Phân bố năng lượng của Distractor dịch chuyển rõ rệt về phía trước (Fz/Cz) so với Target.
 
 ---
 
-## 4. Danh mục Trực quan hóa (Vai trò V3)
+## 4. Danh mục Trực quan hóa & Hình ảnh Báo cáo / Slide (Vai trò V3 – Trương Huy Hoàng)
 
-Mỗi đối tượng được xuất 4 biểu đồ phân tích chuyên sâu tại `results/figures/`:
-1. `{sub}_midline_erp.png`: Dạng sóng ERP so sánh 3 điều kiện và dải sai số chuẩn (SEM) tại Fz, Cz, Pz.
-2. `{sub}_difference_waves.png`: So sánh trực diện hai sóng hiệu số P3a và P3b.
-3. `{sub}_scalp_topomap.png`: Tiến trình không gian 128 kênh từ 150 ms đến 550 ms.
-4. `{sub}_p300_summary_topomap.png`: Bản đồ trung bình cửa sổ P300 nhận diện tiêu điểm dương tính đỉnh (Parietal Hotspot).
+Tất cả hình ảnh chất lượng cao (300 DPI, tối ưu cho slide thuyết trình và chèn báo cáo) được lưu tại `results/figures/` và `report/figures/`:
+1. `{sub}_fz_pz_erp.png`: Dạng sóng ERP chuẩn 2 kênh mốc **Fz** và **Pz** với cửa sổ 300–500 ms tô sáng, font lớn chuẩn slide.
+2. `grand_average_fz_pz.png`: Dạng sóng **Grand Average ERP (Fz, Pz)** trung bình toàn thể.
+3. `grand_average_39subs.png`: Biểu đồ Grand Average tổng hợp 39 đối tượng chuẩn (từ pipeline tiền xử lý).
+4. `{sub}_midline_erp.png`: Dạng sóng ERP 3 kênh đường giữa Fz, Cz, Pz kèm dải sai số chuẩn (SEM).
+5. `{sub}_difference_waves.png`: Sóng hiệu số bóc tách trực diện P3a và P3b.
+6. `{sub}_scalp_topomap.png`: Bản đồ địa hình da đầu 128 kênh (Scalp map) diễn tiến từ 150 ms đến 550 ms.
+7. `{sub}_p300_summary_topomap.png`: Scalp map trung bình toàn cửa sổ P300 (300–500 ms) chỉ rõ tiêu điểm dương tính vùng đỉnh (Parietal Positivity).
+8. `population_p300_summary.png`: Phân tích thống kê quần thể 42 đối tượng kiểm chứng ảnh hưởng của nhóm hiểu sai nhiệm vụ.
 
