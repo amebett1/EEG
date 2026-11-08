@@ -1,0 +1,57 @@
+{
+  "subject": "sub-21",
+  "task_misunderstood": false,
+  "irregular_recording": false,
+  "high_impedance": false,
+  "n_recording_joins": 0,
+  "cropped_outside_task_s": 50.6,
+  "n_stimuli": 660,
+  "n_bad_channels": 2,
+  "bad_channels": [
+    "Fp1",
+    "Fp2"
+  ],
+  "bad_channel_reasons": {
+    "noisy_or_flat": [
+      "Fp1",
+      "Fp2"
+    ],
+    "uncorrelated": [],
+    "mirrored": []
+  },
+  "n_ic_excluded": 13,
+  "ic_excluded": [
+    "eye blink (1.00)",
+    "eye blink (1.00)",
+    "muscle artifact (0.98)",
+    "muscle artifact (0.86)",
+    "muscle artifact (0.99)",
+    "heart beat (0.99)",
+    "muscle artifact (0.90)",
+    "muscle artifact (0.98)",
+    "muscle artifact (0.89)",
+    "muscle artifact (0.92)",
+    "muscle artifact (0.93)",
+    "muscle artifact (0.98)",
+    "muscle artifact (0.81)"
+  ],
+  "fp1_p99_before_ica_uv": 89.7,
+  "fp1_p99_after_ica_uv": 26.1,
+  "target_rt_ms": 603.3,
+  "target_omission_pct": 2.47,
+  "false_alarm_distractor_pct": 1.23,
+  "false_alarm_standard_pct": 0.0,
+  "n_standard_in": 498,
+  "n_target_in": 81,
+  "n_distractor_in": 81,
+  "n_standard_kept": 496,
+  "n_target_kept": 80,
+  "n_distractor_kept": 81,
+  "pct_trials_dropped": 0.5,
+  "pz_p3_standard_uv": 0.48,
+  "pz_p3_target_uv": 5.6,
+  "pz_p3_distractor_uv": 5.08,
+  "n_channels": 128,
+  "n_times": 301,
+  "runtime_s": 179
+}
