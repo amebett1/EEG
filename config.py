@@ -1,4 +1,3 @@
-"""Quy ước chung cho cả nhóm. Khớp với pipeline trong notebooks/01_preprocessing.ipynb."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
