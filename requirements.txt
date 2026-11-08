@@ -8,3 +8,8 @@ scikit-learn==1.9.1
 ipykernel
 nbclient
 nbformat
+# V3-V6
+scipy
+seaborn
+torch
+braindecode
