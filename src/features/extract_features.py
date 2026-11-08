@@ -23,9 +23,9 @@ KEY_CHANNELS = ["Fz", "Cz", "Pz", "Oz", "FCz", "CPz", "F3", "F4", "C3", "C4", "P
 WINDOWS = {
     "early": (0.1, 0.2),
     "p3a": (0.25, 0.4),
-    "p3b": (0.4, 0.6),
-    "p3_full": (0.3, 0.6),
-    "late": (0.6, 0.8)
+    "p3b": (0.4, 0.5),
+    "p3_window": (0.3, 0.5),
+    "late": (0.5, 0.8)
 }
 BANDS = {
     "delta": (0.5, 4.0),
@@ -90,7 +90,7 @@ def extract_epoch_features(epoch_data: np.ndarray, times: np.ndarray, ch_names: 
                 feats[f"{ch}_{w_name}_mean"] = float(np.mean(w_sig))
                 feats[f"{ch}_{w_name}_std"] = float(np.std(w_sig))
 
-        p3_mask = (times >= 0.3) & (times <= 0.6)
+        p3_mask = (times >= 0.3) & (times <= 0.5)
         if np.any(p3_mask):
             p3_sig = sig[p3_mask]
             p3_times = times[p3_mask]
