@@ -98,7 +98,7 @@ def plot_midline_erp(
             ax.set_title(f"{ch} (N/A)")
             continue
 
-        ax.axvspan(w_start_ms, w_end_ms, color="#efefef", alpha=0.9, label=f"P300 ({int(w_start_ms)}-{int(w_end_ms)}ms)")
+        ax.axvspan(w_start_ms, w_end_ms, color="#efefef", alpha=0.9, label=f"P300 Window ({int(w_start_ms)}–{int(w_end_ms)} ms)")
 
         for cond in ("standard", "target", "distractor"):
             if cond not in epochs.event_id or len(epochs[cond]) == 0:
@@ -138,16 +138,16 @@ def plot_midline_erp(
         ax.axvline(0, color="k", lw=0.8, ls=":")
         ax.axhline(0, color="k", lw=0.8, ls=":")
         ax.set_title(f"{sub} – {ch}", fontsize=12, fontweight="bold")
-        ax.set_xlabel("Thời gian (ms)", fontsize=10)
+        ax.set_xlabel("Time (ms)", fontsize=10.5)
         ax.grid(True, linestyle=":", alpha=0.6)
         ax.set_xlim(-150, 900)
 
-    axes[0].set_ylabel("Biên độ (µV)", fontsize=11)
+    axes[0].set_ylabel("Amplitude (µV)", fontsize=11)
     axes[-1].legend(loc="upper right", frameon=True, fontsize=8.5)
 
     fig.suptitle(
-        f"Phân tích dạng sóng ERP đường giữa ({', '.join(channels)}) – {sub}\n"
-        f"Kiểm chứng giả thuyết Polich: P3b cực đại tại Pz (Pz > Cz > Fz)",
+        f"Midline ERP waveforms ({', '.join(channels)}) – {sub}\n"
+        f"Polich (2007) hypothesis verification: parietal P3b maximum (Pz > Cz > Fz)",
         fontsize=13, fontweight="bold", y=1.03
     )
     fig.tight_layout()
@@ -156,7 +156,7 @@ def plot_midline_erp(
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(save_path, dpi=200, bbox_inches="tight")
-        print(f"  -> Đã lưu ERP midline: {save_path}")
+        print(f"  -> Saved Midline ERP figure: {save_path}")
 
     return fig
 
@@ -212,24 +212,25 @@ def plot_difference_waves(
 
         ax.axvline(0, color="k", lw=0.7, ls=":")
         ax.axhline(0, color="k", lw=0.7, ls=":")
-        ax.set_title(f"Hiệu số tại {ch}", fontsize=11, fontweight="bold")
-        ax.set_xlabel("Thời gian (ms)", fontsize=10)
+        ax.set_title(f"Difference Wave – {ch}", fontsize=11.5, fontweight="bold")
+        ax.set_xlabel("Time (ms)", fontsize=10.5)
         ax.grid(True, linestyle=":", alpha=0.5)
         ax.set_xlim(-100, 850)
 
-    axes[0].set_ylabel("Hiệu biên độ (µV)", fontsize=11)
+    axes[0].set_ylabel("Difference amplitude (µV)", fontsize=11)
     axes[-1].legend(loc="upper right", frameon=True, fontsize=9)
 
     fig.suptitle(
-        f"Sóng hiệu số (Difference Waves) – {sub}: Tách biệt P3a (Trán) và P3b (Đỉnh)",
+        f"Difference waves – {sub}: isolating frontal P3a vs. parietal P3b",
         fontsize=12.5, fontweight="bold", y=1.02
     )
     fig.tight_layout()
 
     if save_path:
+        save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(save_path, dpi=200, bbox_inches="tight")
-        print(f"  -> Đã lưu Difference waves: {save_path}")
+        print(f"  -> Saved Difference Waves figure: {save_path}")
 
     return fig
 
@@ -291,19 +292,20 @@ def plot_erp_topomap(
 
     cbar_ax = fig.add_axes([0.92, 0.25, 0.018, 0.5])
     cbar = fig.colorbar(last_im, cax=cbar_ax)
-    cbar.set_label("Biên độ (µV)", fontsize=10)
+    cbar.set_label("Amplitude (µV)", fontsize=10)
 
     fig.suptitle(
-        f"Bản đồ điện thế da đầu (Topomap) theo thời gian – {sub}\n"
-        f"Montage 128 kênh (Colin27) – Dải màu: [{vlim[0]:.1f}, {vlim[1]:.1f}] µV",
+        f"Scalp potential topomap over time – {sub}\n"
+        f"128-channel montage (Colin27) – scale: [{vlim[0]:.1f}, {vlim[1]:.1f}] µV",
         fontsize=13, fontweight="bold", y=0.99
     )
     plt.subplots_adjust(right=0.90, top=0.92, hspace=0.25, wspace=0.15)
 
     if save_path:
+        save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(save_path, dpi=200, bbox_inches="tight")
-        print(f"  -> Đã lưu Scalp Topomap: {save_path}")
+        print(f"  -> Saved Scalp Topomap figure: {save_path}")
 
     return fig
 
@@ -326,7 +328,7 @@ def plot_p300_summary_topomap(
         "standard": "Standard",
         "target": "Target (P3b)",
         "distractor": "Distractor (P3a)",
-        "diff_target": "Hiệu số (Target - Standard)"
+        "diff_target": "Difference (Target - Standard)"
     }
 
     window_data = {}
@@ -354,19 +356,20 @@ def plot_p300_summary_topomap(
 
     cbar_ax = fig.add_axes([0.92, 0.2, 0.016, 0.6])
     cbar = fig.colorbar(last_im, cax=cbar_ax)
-    cbar.set_label("Biên độ TB (µV)", fontsize=9.5)
+    cbar.set_label("Mean amplitude (µV)", fontsize=9.5)
 
     fig.suptitle(
-        f"Topomap trung bình cửa sổ P300 ({int(window[0]*1000)}-{int(window[1]*1000)} ms) – {sub}\n"
-        f"Kiểm chứng tiêu điểm dương tính vùng chẩm-đỉnh (Parietal Hotspot)",
+        f"Mean P300 window topomap ({int(window[0]*1000)}–{int(window[1]*1000)} ms) – {sub}\n"
+        f"Parietal positivity hotspot (P3b component)",
         fontsize=12, fontweight="bold", y=1.04
     )
     plt.subplots_adjust(right=0.90)
 
     if save_path:
+        save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(save_path, dpi=200, bbox_inches="tight")
-        print(f"  -> Đã lưu Summary Topomap: {save_path}")
+        print(f"  -> Saved Summary Topomap figure: {save_path}")
 
     return fig
 
@@ -610,20 +613,20 @@ def plot_grand_average_erp(
         ax.axvline(0, color="k", lw=0.8, ls=":")
         ax.axhline(0, color="k", lw=0.8, ls=":")
         sub_desc = f"N={n_subs}" if n_subs > 1 else f"sub-01 (N=1)"
-        ax.set_title(f"Grand Average – {ch} ({sub_desc})", fontsize=12.5, fontweight="bold")
-        ax.set_xlabel("Thời gian (ms)", fontsize=10.5)
+        ax.set_title(f"Grand average – {ch} ({sub_desc})", fontsize=12.5, fontweight="bold")
+        ax.set_xlabel("Time (ms)", fontsize=10.5)
         ax.grid(True, linestyle=":", alpha=0.5)
 
-    axes[0].set_ylabel("Điện thế (µV)", fontsize=10.5)
+    axes[0].set_ylabel("Amplitude (µV)", fontsize=10.5)
     axes[0].legend(loc="upper left", frameon=False, fontsize=8.5)
-    fig.suptitle(f"Grand Average ERP (Fz, Pz) – Oddball Paradigm\nCửa sổ P300: [{int(w_start_ms)}, {int(w_end_ms)}] ms", fontsize=13, fontweight="bold", y=1.02)
+    fig.suptitle(f"Grand average ERP (Fz, Pz) – Oddball paradigm\nP300 analysis window: [{int(w_start_ms)}, {int(w_end_ms)}] ms", fontsize=13, fontweight="bold", y=1.02)
     fig.tight_layout()
 
     if save_path:
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(save_path, dpi=300, bbox_inches="tight")
-        print(f"  -> Đã lưu biểu đồ Grand Average: {save_path}")
+        print(f"  -> Saved Grand Average figure: {save_path}")
 
     return fig
 
@@ -637,7 +640,7 @@ def plot_population_summary(
     qc_csv_path = Path(qc_csv_path)
 
     if not qc_csv_path.exists():
-        raise FileNotFoundError(f"Không tìm thấy file: {qc_csv_path}")
+        raise FileNotFoundError(f"File not found: {qc_csv_path}")
 
     df = pd.read_csv(qc_csv_path)
     fig, axes = plt.subplots(1, 3, figsize=(16, 4.8))
@@ -664,8 +667,8 @@ def plot_population_summary(
         x = np.random.normal(idx, 0.04, size=len(vals))
         ax1.scatter(x, vals, alpha=0.8, color=color, edgecolors="k", s=30, zorder=3)
 
-    ax1.set_ylabel("Biên độ Pz trong 300–600 ms (µV)", fontsize=11)
-    ax1.set_title("A. Phân bố biên độ Pz theo điều kiện (N=42)", fontsize=11.5, fontweight="bold")
+    ax1.set_ylabel("Pz mean amplitude in 300–600 ms (µV)", fontsize=11)
+    ax1.set_title("A. Pz amplitude distribution across conditions (N=42)", fontsize=11.5, fontweight="bold")
     ax1.grid(True, linestyle=":", alpha=0.6)
 
     ax2 = axes[1]
@@ -692,13 +695,13 @@ def plot_population_summary(
         patch.set_alpha(0.65)
 
     ax2.set_xticks([1.5, 4.5])
-    ax2.set_xticklabels(["Pz Target (µV)", "Tỷ lệ False Alarm (%)"], fontsize=10.5)
-    ax2.set_title("B. Ảnh hưởng hiểu sai nhiệm vụ (N=39 vs N=3)", fontsize=11.5, fontweight="bold")
+    ax2.set_xticklabels(["Pz target (µV)", "False alarm rate (%)"], fontsize=10.5)
+    ax2.set_title("B. Impact of task misunderstanding (N=39 vs. N=3)", fontsize=11.5, fontweight="bold")
     ax2.grid(True, linestyle=":", alpha=0.6)
 
     legend_elements = [
-        Patch(facecolor="#2b83ba", alpha=0.65, label="Bình thường (N=39)"),
-        Patch(facecolor="#d7191c", alpha=0.65, label="Hiểu sai task (sub-02/14/17)")
+        Patch(facecolor="#2b83ba", alpha=0.65, label="Normal responders (N=39)"),
+        Patch(facecolor="#d7191c", alpha=0.65, label="Misunderstood task (sub-02/14/17)")
     ]
     ax2.legend(handles=legend_elements, loc="upper right", fontsize=8.5)
 
@@ -714,17 +717,17 @@ def plot_population_summary(
         x_line = np.linspace(x_rt.min(), x_rt.max(), 50)
         y_line = slope * x_line + intercept
         ax3.plot(x_line, y_line, color="#b20000", lw=2, ls="--",
-                 label=f"Hồi quy: r = {r_value:.2f} (p = {p_value:.3f})")
+                 label=f"Linear fit: r = {r_value:.2f} (p = {p_value:.3f})")
         ax3.legend(loc="upper right", fontsize=9)
 
-    ax3.set_xlabel("Thời gian phản xạ Target RT (ms)", fontsize=10.5)
-    ax3.set_ylabel("Biên độ Pz Target (µV)", fontsize=10.5)
-    ax3.set_title("C. Tương quan RT và Biên độ P3b (Polich 2007)", fontsize=11.5, fontweight="bold")
+    ax3.set_xlabel("Target reaction time (ms)", fontsize=10.5)
+    ax3.set_ylabel("Target Pz amplitude (µV)", fontsize=10.5)
+    ax3.set_title("C. Reaction time vs. P3b amplitude (Polich, 2007)", fontsize=11.5, fontweight="bold")
     ax3.grid(True, linestyle=":", alpha=0.6)
 
     fig.suptitle(
-        "Phân tích Thống kê Quần thể 42 Đối tượng (GigaDB 100990) – Vai trò V3\n"
-        "Kiểm chứng Hiệu ứng Oddball và Phân tách Nhận thức quy mô lớn",
+        "Population statistical analysis (42 subjects, GigaDB 100990)\n"
+        "Oddball effect and cognitive segregation",
         fontsize=13, fontweight="bold", y=1.03
     )
     fig.tight_layout()
@@ -733,7 +736,9 @@ def plot_population_summary(
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(save_path, dpi=200, bbox_inches="tight")
-        print(f"  -> Đã lưu biểu đồ quần thể: {save_path}")
+        print(f"  -> Saved Population Summary figure: {save_path}")
+
+    return fig
 
     return fig
 

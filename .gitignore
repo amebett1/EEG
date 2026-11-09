@@ -1,5 +1,6 @@
 .venv/
 data/
+tai_lieu/
 # Outputs: chỉ commit file QC nhỏ; epochs, ICA, zip nằm ở GitHub Release / Drive
 derivatives/*
 !derivatives/v1/
