@@ -46,7 +46,7 @@ Dự án nghiên cứu và phân loại sóng P300 trên tín hiệu EEG (Oddbal
 - **Chi tiết thực hiện**:
   1. **Tiếp nhận bản đầu** `src/features/extract_features.py` do Trương Huy Hoàng viết (8–9/11): biên độ theo cửa sổ, đỉnh P3, band power, Hjorth, spectral entropy.
   2. **Kiểm tra cửa sổ P3 trên 10 người**: với 300–500 ms, 5/10 người có đỉnh P300 ở Pz sau 500 ms (560–690 ms) nên đặc trưng bị cắt mất đỉnh. Đổi sang **300–600 ms** theo paper dataset và Laton et al. (2014) (P300 thị giác: 350–600 ms). AUC của `Pz_p3_window_mean` tăng từ 0,77 lên 0,81, tốt hơn ở 9/10 người.
-  3. **Tìm đỉnh theo phương pháp Laton et al. (2014)**: đỉnh là cực trị cục bộ, dùng tùy chọn "force" khi cửa sổ chỉ có sườn dốc. Tỉ lệ trial target có đỉnh P3 nằm ở mép cửa sổ còn 2,5%.
+  3. **Tìm đỉnh theo phương pháp Laton et al. (2014)**: đỉnh là cực trị cục bộ, dùng tùy chọn "force" khi cửa sổ chỉ có sườn dốc. Ở Pz, tỉ lệ trial target có đỉnh P3 nằm ở mép cửa sổ còn 2,5%.
   4. **Thêm đỉnh N100/P200/N200** ở Fz, Cz, Pz theo Bảng 2 của Laton et al. (2014).
   5. **Thêm wavelet db4** (thư viện PyWavelets): năng lượng các dải 0–8, 8–16, 16–31 Hz trong cửa sổ P3.
   6. **Chạy toàn bộ 39 người**: 21.878 trial × 402 đặc trưng, không có giá trị thiếu. Xếp hạng đặc trưng bằng `src/features/rank_features.py` → `results/tables/v4_feature_auc.csv`.
