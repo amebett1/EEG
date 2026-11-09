@@ -156,3 +156,58 @@ Có 32/402 đặc trưng đạt mức phân biệt ≥ 0,7 và 156/402 đặc tr
 - Polich J. Updating P300: An integrative theory of P3a and P3b. *Clin Neurophysiol* 2007;118:2128–2148.
 - Hjorth B. EEG analysis based on time domain properties. *Electroencephalogr Clin Neurophysiol* 1970;29:306–310.
 
+---
+
+## 6. Mô hình Học máy Truyền thống Baseline (Vai trò V5)
+
+### 6.1 Thiết lập bài toán & Xử lý mất cân bằng lớp
+- **Bài toán phân loại đơn trial (Single-trial classification)**: Phân loại nhị phân giữa kích thích Thường (Standard - 0) và Đích (Target - 1). Kích thích xao nhãng (Distractor) được loại khỏi bài toán nhị phân này để tập trung vào cơ chế P3b phục vụ giao tiếp não - máy tính (BCI).
+- **Mất cân bằng lớp nghiêm trọng**: Tỷ lệ trial Target chỉ chiếm khoảng 11,3% - 13,5% (tỷ lệ xấp xỉ 1:7).
+- **Chiến lược khắc phục**:
+  - Không sử dụng độ chính xác thô (Raw Accuracy) vì mô hình dự đoán toàn bộ là Standard vẫn đạt ~88,7% accuracy nhưng hoàn toàn vô dụng cho việc nhận diện sóng P300.
+  - Sử dụng tham số `class_weight="balanced"` trên các mô hình Logistic Regression, RBF SVM và `balanced_subsample` trên Random Forest.
+  - Đánh giá đa chiều qua bộ chỉ số: **Balanced Accuracy**, **ROC-AUC**, **PR-AUC (Average Precision)**, **F1-macro**, **Sensitivity (Target Recall)** và **Specificity**.
+
+### 6.2 Kiểm định không rò rỉ dữ liệu (Cross-Validation Scheme)
+- **Chuẩn hóa trong fold (Inside-fold Scaling)**: Đóng gói `StandardScaler` bên trong `Pipeline` của `scikit-learn`. Quá trình tính toán trung bình và độ lệch chuẩn chỉ được thực hiện trên fold huấn luyện (train fold) và ánh xạ sang fold kiểm thử (test fold), loại bỏ hoàn toàn nguy cơ rò rỉ thông tin tập test.
+- **Cơ chế phân chia theo đối tượng (Subject-wise CV)**:
+  - Khi chạy trên toàn bộ tập dữ liệu (39 người), sử dụng `GroupKFold(n_splits=5)` theo `subject_id` để kiểm chứng khả năng tổng quát hóa xuyên đối tượng (Cross-subject generalization).
+  - Khi chạy thử nghiệm trên đối tượng đơn lẻ (`sub-01`), sử dụng `StratifiedKFold(n_splits=5)` nhằm bảo toàn tỷ lệ lớp trong từng fold.
+
+### 6.3 Danh mục mô hình baseline
+1. **Dummy (Stratified Chance Level)**: Mô hình ngẫu nhiên làm mốc so sánh cơ sở (Balanced Accuracy 50%, ROC-AUC 0,500, PR-AUC bằng đúng prevalence 11,3%).
+2. **Linear Discriminant Analysis (LDA)**: Mô hình tiêu chuẩn vàng (Gold standard) trong các nghiên cứu BCI P300 kinh điển, sử dụng bộ giải `lsqr` kết hợp tự động điều chuẩn độ co rút (`shrinkage="auto"`).
+3. **Logistic Regression**: Mô hình tuyến tính với điều chuẩn L2, tối ưu hóa phân loại xác suất với trọng số lớp cân bằng.
+4. **Support Vector Machine (RBF SVM)**: Mô hình nhân phi tuyến (Radial Basis Function) với trọng số lớp cân bằng.
+5. **Random Forest**: Mô hình tập hợp (Ensemble) 100 cây quyết định với cân bằng lớp trên từng cây con (`balanced_subsample`).
+
+### 6.4 Kết quả thực nghiệm (Dữ liệu thử nghiệm sub-01: 540 trials, 402 đặc trưng)
+
+| Mô hình | Balanced Accuracy | ROC-AUC | PR-AUC (AP) | F1-Macro | Sensitivity | Specificity |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| Dummy | 0,512 ± 0,062 | 0,512 ± 0,062 | 0,126 ± 0,023 | 0,512 ± 0,063 | 0,129 ± 0,107 | 0,894 ± 0,017 |
+| Random Forest | 0,547 ± 0,033 | 0,853 ± 0,065 | 0,593 ± 0,130 | 0,555 ± 0,057 | 0,097 ± 0,067 | **0,996 ± 0,006** |
+| RBF SVM | 0,682 ± 0,050 | 0,884 ± 0,065 | **0,679 ± 0,143** | 0,730 ± 0,063 | 0,378 ± 0,099 | 0,985 ± 0,023 |
+| LDA | 0,731 ± 0,057 | 0,880 ± 0,057 | 0,621 ± 0,136 | 0,740 ± 0,058 | 0,512 ± 0,120 | 0,950 ± 0,032 |
+| **Logistic Regression** | **0,772 ± 0,083** | **0,887 ± 0,071** | 0,627 ± 0,157 | **0,755 ± 0,065** | **0,610 ± 0,173** | 0,933 ± 0,034 |
+
+![Baseline model comparison](figures/baseline_model_comparison.png)
+
+### 6.5 Phân tích & Nhận xét chuyên môn
+1. **Ưu thế của các mô hình tuyến tính có điều chuẩn (Logistic Regression và LDA)**:
+   - Logistic Regression đạt Balanced Accuracy cao nhất (0,772), ROC-AUC 0,887 và Sensitivity 61,0% ở ngưỡng quyết định 0,5.
+   - LDA thể hiện tính ổn định cao với ROC-AUC 0,880 và Balanced Accuracy 0,731. Trong không gian 402 chiều với số lượng trial hữu hạn, tính chất chiếu tuyến tính của LDA và Logistic Regression giúp kiểm soát hiện tượng quá khớp (overfitting) hiệu quả hơn các mô hình phi tuyến phức tạp.
+2. **Khả năng phân tách xác suất (Ranking Quality)**:
+   - Cả ba mô hình LDA, Logistic Regression và RBF SVM đều đạt ROC-AUC rất cao (> 0,88), vượt trội hoàn toàn so với mức ngẫu nhiên (0,50).
+   - Đồ thị Precision-Recall chỉ ra PR-AUC của các mô hình đạt từ 0,59 đến 0,68, cao gấp 5 đến 6 lần so với đường cơ sở xác suất nền (Prevalence = 11,3%). RBF SVM đạt PR-AUC cao nhất (0,679), chứng minh khả năng xếp hạng độ tin cậy của các trial target rất tốt khi áp dụng ngưỡng xác suất cao.
+3. **Hiện tượng của Random Forest trên dữ liệu bảng EEG**:
+   - Mặc dù ROC-AUC của Random Forest đạt 0,853, độ nhạy (Sensitivity) ở ngưỡng xác suất 0,5 bị suy giảm (0,097) trong khi Specificity đạt gần như tuyệt đối (0,996). Nguyên nhân do không gian đặc trưng chứa nhiều kênh và cửa sổ có tương quan cao (multicollinearity); việc lấy mẫu ngẫu nhiên đặc trưng tại mỗi nhánh cây khiến các đặc trưng P300 mạnh bị loãng, dẫn đến xác suất dự đoán của Random Forest bị nén về phía lớp đa số.
+
+![Baseline ROC curves](figures/baseline_roc_curves.png)
+![Baseline PR curves](figures/baseline_pr_curves.png)
+
+### Tài liệu tham khảo bổ sung (mục 6)
+- Blankertz B, Lemm S, Treder M, Haufe S, Müller KR. Single-trial analysis and classification of ERP components -- a tutorial. *NeuroImage* 2011;56(2):814–825.
+- Lotte F, Bougrain L, Cichocki A, Clerc M, Congedo M, Chouvellon A, Yger F. A review of classification algorithms for EEG-based brain-computer interfaces: a 10 year update. *J Neural Eng* 2018;15(3):031005.
+
+

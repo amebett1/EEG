@@ -24,7 +24,8 @@ EEG/
 ├── notebooks/
 │   ├── 00_explore_dataset.ipynb       # Khảo sát ban đầu: liệt kê dữ liệu trong RAW_DIR
 │   ├── 01_preprocessing.ipynb         # Tải dữ liệu, tiền xử lý, xuất epoch/ICA và QC
-│   └── 02_erp_visualization.ipynb     # V3: Trực quan hóa ERP, Scalp Topomap & kiểm tra P300
+│   ├── 02_erp_visualization.ipynb     # V3: Trực quan hóa ERP, Scalp Topomap & kiểm tra P300
+│   └── 03_machine_learning.ipynb      # V5: Huấn luyện và đánh giá benchmark ML baseline
 ├── src/
 │   ├── preprocessing/
 │   │   └── README.md                 # Chỉ dẫn tới pipeline trong notebook
@@ -36,7 +37,7 @@ EEG/
 │   │   ├── extract_features.py       # V4: 402 đặc trưng/trial (đỉnh ERP, biên độ cửa sổ, band power, Hjorth, entropy, wavelet)
 │   │   └── rank_features.py          # V4: xếp hạng đặc trưng theo AUC -> results/tables/v4_feature_auc.csv
 │   ├── ml/
-│   │   └── train_baseline.py         # Khung TODO (V5): SVM, LDA, Random Forest
+│   │   └── train_baseline.py         # V5: Pipeline huấn luyện và đánh giá LDA, SVM, RF, LR
 │   └── dl/
 │       └── train_eegnet.py           # Khung TODO (V6): EEGNet và giải thích mô hình
 ├── results/

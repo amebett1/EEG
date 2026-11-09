@@ -11,7 +11,7 @@ Dự án nghiên cứu và phân loại sóng P300 trên tín hiệu EEG (Oddbal
 | **V1** | **Tiền xử lý dữ liệu (Preprocessing)**<br>- Lọc dải tần 0.5 - 40 Hz<br>- Phát hiện và nội suy kênh hỏng (IQR, tương quan lân cận)<br>- Picard ICA kết hợp ICLabel loại bỏ artifact (mắt, cơ, tim)<br>- Cắt epoch (-200..+1000 ms), decimation 4 (1000 Hz -> 250 Hz)<br>- Xuất file QC từng người và `qc_summary.csv` | `notebooks/01_preprocessing.ipynb`<br>`src/preprocessing/`<br>`derivatives/v1/qc/` | **Hoàn thành** |
 | **V3** | **Trực quan hóa & Phân tích ERP (Visualization / ERP)**<br>- **Người phụ trách**: **Trương Huy Hoàng**<br>- **Nhiệm vụ chi tiết**: Grand average ERP (Fz, Pz), scalp map, kiểm tra P300 ở khoảng 300–500 ms<br>- **Đầu ra bàn giao**: Hình ERP và topomap chất lượng cao cho báo cáo, slide<br>- Code vẽ dạng sóng ERP đường giữa (**Fz, Pz**, Fz/Cz/Pz) kèm sai số chuẩn SEM<br>- Code vẽ sóng hiệu số (**Difference Waves** Target-Std, Distractor-Std)<br>- Code vẽ bản đồ địa hình điện thế da đầu (**Scalp Topomap** 128 kênh)<br>- Kiểm tra định lượng tiêu chuẩn Polich trong cửa sổ 300–500 ms (Parietal gradient, Oddball effect) | `src/erp/plot_erp.py`<br>`notebooks/02_erp_visualization.ipynb`<br>`results/figures/`<br>`report/figures/` | **Hoàn thành (Tuần 1)** |
 | **V4** | **Trích xuất đặc trưng (Feature Extraction)**<br>- **Người phụ trách**: **Nguyễn Công Kiên**<br>- Biên độ đỉnh (Peak amplitude) và độ trễ (Peak latency) của P300 và N100/P200/N200 theo Laton et al. (2014)<br>- Biên độ trung bình các cửa sổ thời gian quan trọng<br>- Năng lượng dải sóng (Delta, Theta, Alpha, Beta) và tham số Hjorth<br>- Đặc trưng phi tuyến và thời gian - tần số (Spectral entropy, Wavelet db4)<br>- **Đầu ra bàn giao**: ma trận đặc trưng 21.878 trial × 402 đặc trưng (39 người) cho V5 | `src/features/extract_features.py`<br>`src/features/rank_features.py`<br>`derivatives/v1/features/`<br>`results/tables/v4_feature_auc.csv` | **Hoàn thành (Tuần 2)** |
-| **V5** | **Mô hình học máy truyền thống (Machine Learning Baseline)**<br>- Huấn luyện SVM, LDA, Random Forest<br>- Chia tập kiểm định theo người (Leave-One-Subject-Out / GroupKFold)<br>- Xử lý mất cân bằng lớp (Class weights, resampling) | `src/ml/train_baseline.py`<br>`results/models/`<br>`results/tables/` | Kế hoạch Tuần 3 |
+| **V5** | **Mô hình học máy truyền thống (Machine Learning Baseline)**<br>- Huấn luyện Dummy, LDA, Logistic Regression, RBF SVM, Random Forest<br>- Chia tập kiểm định chống rò rỉ dữ liệu (GroupKFold theo người / StratifiedKFold)<br>- Xử lý mất cân bằng lớp (Class weights, balanced accuracy, PR-AUC, ROC-AUC) | `src/ml/train_baseline.py`<br>`notebooks/03_machine_learning.ipynb`<br>`results/tables/`<br>`results/figures/` | **Hoàn thành (Tuần 3)** |
 | **V6** | **Mô hình học sâu & Giải thích (Deep Learning & Interpretability)**<br>- Huấn luyện kiến trúc chuyên dụng EEGNet (Braindecode / PyTorch)<br>- Saliency maps, Layer-wise Relevance Propagation giải thích mô hình | `src/dl/train_eegnet.py` | Kế hoạch Tuần 4 |
 
 ---
@@ -52,4 +52,31 @@ Dự án nghiên cứu và phân loại sóng P300 trên tín hiệu EEG (Oddbal
   6. **Chạy toàn bộ 39 người**: 21.878 trial × 402 đặc trưng, không có giá trị thiếu. Xếp hạng đặc trưng bằng `src/features/rank_features.py` → `results/tables/v4_feature_auc.csv`.
   7. **Viết phần 5 "Trích xuất đặc trưng"** trong `report/README.md`.
 - **Bàn giao cho V5**: `derivatives/v1/features/all_subjects_features.csv` (khoảng 150 MB, không commit). Tạo lại bằng `python src/features/extract_features.py --all` (khoảng 7 phút). Hàm `load_features()` trả về `X, y, groups, feature_names`.
+
+---
+
+## 4. Nhật ký công việc Tuần 3: Vai trò V5
+
+- **Nhiệm vụ theo kế hoạch**: *Xây dựng pipeline học máy truyền thống (Baseline) phân loại P300 đơn trial (single-trial), kiểm định Cross-Validation không rò rỉ dữ liệu, đánh giá và so sánh đa mô hình.*
+- **Chi tiết thực hiện**:
+  1. **Xây dựng module dòng lệnh `src/ml/train_baseline.py` và Notebook tương tác `notebooks/03_machine_learning.ipynb`**:
+     - Đồng bộ cả 2 hình thức: script thực thi tự động qua CLI có `argparse` và notebook trực quan hóa từng bước.
+  2. **Thiết lập Pipeline chống rò rỉ dữ liệu (No Data Leakage)**:
+     - Tích hợp `StandardScaler` bên trong `Pipeline` của `scikit-learn`, đảm bảo chỉ fit trên tập huấn luyện của từng fold.
+     - Hỗ trợ cơ chế phân chia linh hoạt: tự động chia `GroupKFold(n_splits=5)` theo `subject_id` khi có nhiều người và fallback an toàn sang `StratifiedKFold(n_splits=5)` khi chạy thử nghiệm trên 1 người (`sub-01`).
+  3. **Xử lý mất cân bằng lớp nghiêm trọng (Prevalence 11,3% - 13,5%)**:
+     - Cấu hình `class_weight="balanced"` cho Logistic Regression, SVM và `balanced_subsample` cho Random Forest.
+     - Đánh giá bằng bộ chỉ số đa chiều: Balanced Accuracy, ROC-AUC, PR-AUC, F1-macro, Sensitivity và Specificity (loại bỏ việc chỉ dựa vào raw accuracy dễ gây ngộ nhận).
+  4. **Triển khai và đánh giá 5 mô hình benchmark**:
+     - `DummyClassifier` (Stratified chance level).
+     - `LinearDiscriminantAnalysis` (Bộ giải `lsqr` kèm tự động điều chuẩn co rút shrinkage - Gold standard cho BCI).
+     - `LogisticRegression` (Điều chuẩn L2).
+     - `SVC` (RBF kernel, xác suất Platl).
+     - `RandomForestClassifier` (100 cây quyết định, tối ưu hóa đa luồng `n_jobs=-1`).
+  5. **Xuất bản kết quả thực nghiệm và biểu đồ khoa học**:
+     - Bảng số liệu chi tiết: `results/tables/baseline_metrics.csv`.
+     - Bộ 3 biểu đồ chuẩn học thuật tiếng Anh Sentence Case (300 DPI): `baseline_model_comparison.png`, `baseline_roc_curves.png`, `baseline_pr_curves.png` được lưu tại cả `results/figures/` và `report/figures/`.
+  6. **Viết phần 6 "Mô hình Học máy Truyền thống Baseline"** trong `report/README.md`.
+- **Bàn giao cho V6**: Bảng kết quả benchmark làm mốc so sánh (Baseline) cho mô hình học sâu chuyên dụng (EEGNet, DeepConvNet).
+
 
