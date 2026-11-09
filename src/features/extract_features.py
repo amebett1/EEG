@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import mne
 import numpy as np
 import pandas as pd
+import pywt
 from scipy.signal import welch
 from scipy.stats import entropy
 
@@ -23,9 +24,9 @@ KEY_CHANNELS = ["Fz", "Cz", "Pz", "Oz", "FCz", "CPz", "F3", "F4", "C3", "C4", "P
 WINDOWS = {
     "early": (0.1, 0.2),
     "p3a": (0.25, 0.4),
-    "p3b": (0.4, 0.5),
-    "p3_window": (0.3, 0.5),
-    "late": (0.5, 0.8)
+    "p3b": (0.4, 0.6),
+    "p3_window": (0.3, 0.6),  # theo paper dataset: P3 đạt đỉnh trong 300-600 ms
+    "late": (0.6, 0.8)
 }
 BANDS = {
     "delta": (0.5, 4.0),
@@ -33,6 +34,19 @@ BANDS = {
     "alpha": (8.0, 13.0),
     "beta": (13.0, 30.0)
 }
+# Wavelet db4 tách 4 mức ở 250 Hz. Thứ tự thành phần trả về từ pywt.mra:
+# A4 ≈ 0-7.8 Hz (delta + theta), D4 ≈ 7.8-15.6 Hz (alpha), D3 ≈ 15.6-31 Hz (beta).
+WAVELET = "db4"
+WAVELET_LEVEL = 4
+WAVELET_BANDS = {"delta_theta": 0, "alpha": 1, "beta": 2}
+# Các đỉnh ERP sớm theo Laton et al. (2014), Bảng 2 (oddball thị giác, target):
+# tên -> (cửa sổ tìm đỉnh, hướng: -1 = đỉnh âm, +1 = đỉnh dương). Đo ở Fz, Cz, Pz như paper.
+ERP_PEAKS = {
+    "n1": ((0.05, 0.2), -1),
+    "p2": ((0.15, 0.3), +1),
+    "n2": ((0.2, 0.4), -1),
+}
+PEAK_CHANNELS = ["Fz", "Cz", "Pz"]
 
 
 def hjorth_parameters(signal: np.ndarray) -> Tuple[float, float, float]:
@@ -73,6 +87,42 @@ def spectral_features(signal: np.ndarray, sfreq: float) -> Dict[str, float]:
     return feats
 
 
+def detect_peak(signal: np.ndarray, times: np.ndarray, window: Tuple[float, float],
+                direction: int) -> Tuple[float, float]:
+    """Tìm đỉnh theo cách của Laton et al. (2014). Trả về (biên độ µV, latency ms).
+
+    Đỉnh là điểm cao hơn (direction=+1) hoặc thấp hơn (direction=-1) hai điểm kề bên,
+    nên một điểm nằm trên sườn dốc ở mép cửa sổ không bị tính là đỉnh. Có nhiều đỉnh
+    thì lấy đỉnh cực trị nhất. Không có đỉnh nào (cửa sổ chỉ là một sườn dốc) thì lấy
+    điểm có đạo hàm gần 0 nhất, tương ứng tùy chọn "force" trong paper.
+    """
+    s = direction * signal
+    in_win = (times >= window[0]) & (times <= window[1])
+    is_peak = np.zeros(len(s), dtype=bool)
+    is_peak[1:-1] = (s[1:-1] > s[:-2]) & (s[1:-1] >= s[2:])
+    candidates = np.flatnonzero(is_peak & in_win)
+    if candidates.size:
+        idx = candidates[np.argmax(s[candidates])]
+    else:
+        win_idx = np.flatnonzero(in_win)
+        idx = win_idx[np.argmin(np.abs(np.gradient(signal)[win_idx]))]
+    return float(signal[idx]), float(times[idx] * 1000.0)
+
+
+def wavelet_features(signal: np.ndarray, p3_mask: np.ndarray) -> Dict[str, float]:
+    """Tách tín hiệu thành các dải tần bằng wavelet, rồi đo từng dải trong cửa sổ P3.
+
+    Khác band power (tính trên cả epoch), wavelet giữ được thông tin thời gian,
+    nên đo được năng lượng của từng dải đúng trong khoảng P300.
+    """
+    comps = pywt.mra(signal, WAVELET, level=WAVELET_LEVEL, transform="dwt")
+    feats: Dict[str, float] = {}
+    for band_name, idx in WAVELET_BANDS.items():
+        feats[f"wav_{band_name}_p3_energy"] = float(np.mean(comps[idx][p3_mask] ** 2))
+    feats["wav_delta_theta_p3_mean"] = float(np.mean(comps[WAVELET_BANDS["delta_theta"]][p3_mask]))
+    return feats
+
+
 def extract_epoch_features(epoch_data: np.ndarray, times: np.ndarray, ch_names: List[str]) -> Dict[str, float]:
     feats: Dict[str, float] = {}
     sfreq = float(1.0 / (times[1] - times[0]))
@@ -90,14 +140,21 @@ def extract_epoch_features(epoch_data: np.ndarray, times: np.ndarray, ch_names: 
                 feats[f"{ch}_{w_name}_mean"] = float(np.mean(w_sig))
                 feats[f"{ch}_{w_name}_std"] = float(np.std(w_sig))
 
-        p3_mask = (times >= 0.3) & (times <= 0.5)
+        p3_start, p3_end = WINDOWS["p3_window"]
+        p3_mask = (times >= p3_start) & (times <= p3_end)
         if np.any(p3_mask):
             p3_sig = sig[p3_mask]
             p3_times = times[p3_mask]
-            max_idx = int(np.argmax(p3_sig))
-            feats[f"{ch}_p3_peak_amp"] = float(p3_sig[max_idx])
-            feats[f"{ch}_p3_peak_lat"] = float(p3_times[max_idx] * 1000.0)
+            amp, lat = detect_peak(sig, times, (p3_start, p3_end), +1)
+            feats[f"{ch}_p3_peak_amp"] = amp
+            feats[f"{ch}_p3_peak_lat"] = lat
             feats[f"{ch}_p3_auc"] = float(np.trapezoid(p3_sig, p3_times) if hasattr(np, "trapezoid") else np.trapz(p3_sig, p3_times))
+
+        if ch in PEAK_CHANNELS:
+            for peak_name, (window, direction) in ERP_PEAKS.items():
+                amp, lat = detect_peak(sig, times, window, direction)
+                feats[f"{ch}_{peak_name}_amp"] = amp
+                feats[f"{ch}_{peak_name}_lat"] = lat
 
         resp_mask = (times >= 0.2) & (times <= 0.7)
         if np.any(resp_mask):
@@ -111,6 +168,9 @@ def extract_epoch_features(epoch_data: np.ndarray, times: np.ndarray, ch_names: 
 
         spec_f = spectral_features(sig, sfreq)
         for k, v in spec_f.items():
+            feats[f"{ch}_{k}"] = v
+
+        for k, v in wavelet_features(sig, p3_mask).items():
             feats[f"{ch}_{k}"] = v
 
     return feats

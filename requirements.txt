@@ -10,6 +10,7 @@ nbclient
 nbformat
 # V3-V6
 scipy
+PyWavelets
 seaborn
 torch
 braindecode

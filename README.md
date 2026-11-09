@@ -33,7 +33,8 @@ EEG/
 │   ├── erp/
 │   │   └── plot_erp.py               # V3: ERP Fz/Cz/Pz, difference waves, topomap, kiểm tra P300
 │   ├── features/
-│   │   └── extract_features.py       # Khung TODO (V4): biên độ đỉnh, latency, band power
+│   │   ├── extract_features.py       # V4: 402 đặc trưng/trial (đỉnh ERP, biên độ cửa sổ, band power, Hjorth, entropy, wavelet)
+│   │   └── rank_features.py          # V4: xếp hạng đặc trưng theo AUC -> results/tables/v4_feature_auc.csv
 │   ├── ml/
 │   │   └── train_baseline.py         # Khung TODO (V5): SVM, LDA, Random Forest
 │   └── dl/
