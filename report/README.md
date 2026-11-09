@@ -117,9 +117,9 @@ Tất cả hình ảnh chất lượng cao (300 DPI, tối ưu cho slide thuyế
 **Wavelet**: dùng phân tích đa phân giải (multiresolution analysis) với wavelet db4, 4 mức, để tách tín hiệu thành các dải tần mà vẫn giữ trục thời gian. Khác với band power (tính trên cả epoch), wavelet cho phép đo năng lượng từng dải **đúng trong cửa sổ P300**.
 
 ### 5.4 Mức phân biệt của đặc trưng
-Mỗi đặc trưng được đánh giá bằng AUC giữa target và standard. AUC tính riêng trong từng người rồi lấy trung bình trên 39 người: 0,5 là không phân biệt được, 1 là phân biệt hoàn toàn. Bảng đầy đủ nằm trong `results/tables/v4_feature_auc.csv` (tạo bằng `src/features/rank_features.py`).
+Mỗi đặc trưng được đánh giá bằng AUC giữa target và standard. AUC tính riêng trong từng người rồi lấy trung bình trên 39 người: 0,5 là không phân biệt được, 1 là phân biệt hoàn toàn. Với đặc trưng mà target **thấp hơn** standard (AUC < 0,5), mức phân biệt được quy đổi thành 1 − AUC. Bảng dưới ghi mức phân biệt này. Bảng đầy đủ nằm trong `results/tables/v4_feature_auc.csv` (tạo bằng `src/features/rank_features.py`; cột `auc` là AUC gốc, cột `strength` là mức phân biệt).
 
-| Nhóm đặc trưng | AUC tốt nhất | Đặc trưng tốt nhất |
+| Nhóm đặc trưng | Mức phân biệt tốt nhất | Đặc trưng tốt nhất |
 |---|---|---|
 | Biên độ theo cửa sổ | **0,836** | `Pz_p3b_mean` (Pz, 400–600 ms) |
 | Diện tích dưới đường cong | 0,802 | `Pz_p3_auc` |
@@ -127,17 +127,17 @@ Mỗi đặc trưng được đánh giá bằng AUC giữa target và standard. 
 | Hjorth | 0,780 | `Pz_hjorth_complexity` |
 | Band power | 0,741 | `CPz_bp_delta` |
 | Biên độ đỉnh P300 | 0,733 | `CPz_p3_peak_amp` |
-| Spectral entropy | 0,679 | `CPz_spectral_entropy` |
+| Spectral entropy | 0,679 | `CPz_spectral_entropy` (target thấp hơn, AUC 0,321) |
 | Latency đỉnh P300 | 0,624 | `CPz_p3_peak_lat` |
 | Đỉnh - đỉnh | 0,614 | `Cz_ptp` |
 | Đỉnh sớm N1/P2/N2 | 0,605 | `Fz_n2_lat` |
 
-Có 32/402 đặc trưng đạt AUC ≥ 0,7 và 156/402 đặc trưng đạt AUC ≥ 0,6.
+Có 32/402 đặc trưng đạt mức phân biệt ≥ 0,7 và 156/402 đặc trưng đạt mức phân biệt ≥ 0,6.
 
 **Nhận xét:**
 1. **Đặc trưng mạnh nhất là biên độ trung bình ở vùng đỉnh (Pz, CPz) trong 400–600 ms**, đúng phân bố không gian và thời gian của P3b theo Polich (2007). Biên độ trung bình ổn định hơn biên độ đỉnh (0,836 so với 0,733) vì trên một trial đơn lẻ, đỉnh dễ bị nhiễu làm lệch.
 2. **Thông tin thời gian giúp ích**: năng lượng 0–8 Hz đo bằng wavelet trong cửa sổ P300 (AUC 0,760 ở Pz) tốt hơn band power delta tính trên cả epoch (0,734). Năng lượng alpha (8–16 Hz) trong cửa sổ P300 **thấp hơn** ở target (AUC 0,352), phù hợp với hiện tượng giảm alpha khi tập trung chú ý.
-3. **Hjorth mobility thấp hơn ở target** (AUC 0,228 ở Pz, tức phân biệt tương đương 0,772): sóng P300 chậm, biên độ lớn làm giảm tần số trung bình của tín hiệu.
+3. **Hjorth mobility thấp hơn ở target** (AUC 0,228 ở Pz, tức mức phân biệt 0,772): sóng P300 chậm, biên độ lớn làm giảm tần số trung bình của tín hiệu. Tương tự, spectral entropy cũng thấp hơn ở target (AUC 0,321 ở CPz): năng lượng dồn về dải tần thấp nên phổ "có trật tự" hơn.
 4. **Latency và các đỉnh sớm phân biệt yếu** (AUC ≤ 0,62), vì hai lý do:
    - Latency trên từng trial đơn lẻ dao động nhiều (Laton et al. cũng lưu ý điều này khi lấy trung bình).
    - Các thành phần cảm giác sớm (N1, P2, N2) gần như giống nhau ở cả hai loại kích thích thị giác.
