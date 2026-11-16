@@ -79,4 +79,47 @@ Dự án nghiên cứu và phân loại sóng P300 trên tín hiệu EEG (Oddbal
   6. **Viết phần 6 "Mô hình Học máy Truyền thống Baseline"** trong `report/README.md`.
 - **Bàn giao cho V6**: Bảng kết quả benchmark làm mốc so sánh (Baseline) cho mô hình học sâu chuyên dụng (EEGNet, DeepConvNet).
 
+---
+
+## 5. Nhật ký công việc Tuần 1 (3–9/11): Vai trò V2
+
+- **Người phụ trách**: **Thái Nguyễn Hoàng Bách**
+- **Nhiệm vụ theo kế hoạch**: *Chạy tiền xử lý (lọc, ICA, epoch −200 đến +1000 ms) cho toàn bộ người tham gia, xuất dữ liệu sạch trước cuối tuần.*
+- **Chi tiết thực hiện**:
+  1. Viết pipeline `notebooks/01_preprocessing.ipynb` và chạy cho cả 42 người:
+     - tải dữ liệu;
+     - cắt đoạn làm nhiệm vụ;
+     - dò và nội suy kênh hỏng;
+     - Picard ICA + ICLabel;
+     - lọc 0,5–40 Hz;
+     - epoch −200..+1000 ms ở 250 Hz;
+     - gắn metadata hành vi (`condition`, `rt_ms`, `correct`).
+  2. Kiểm tra lại toàn bộ đầu ra:
+     - Cả 42 file cùng định dạng: 128 kênh × 301 mẫu, cùng thứ tự kênh.
+     - Số liệu hành vi khớp Bảng 5 của paper dataset (thời gian phản ứng 542,1 ± 65,5 ms).
+     - Tìm ra 3 người (sub-13, 14, 36) có thành phần chớp mắt bị ICLabel chấm dưới ngưỡng, loại bằng tay rồi chạy lại.
+  3. Xuất `qc/`, `qc_summary.csv` và `figures/`. Đưa 42 file epoch (4 file zip) lên GitHub Release `data-v1`.
+  4. Thử chạy phần V3/V4/V5 trên sub-12 để chắc dữ liệu dùng được ngay.
+- **Bàn giao cho V3–V6**: 42 file epoch sạch (`derivatives/v1/epochs/`, tải từ Release `data-v1`) kèm metadata hành vi, `qc_summary.csv` và hướng dẫn đọc dữ liệu ở mục 5 của notebook.
+
+---
+
+## 6. Nhật ký công việc Tuần 2 (10–16/11): Vai trò V2
+
+- **Người phụ trách**: **Thái Nguyễn Hoàng Bách**
+- **Nhiệm vụ theo kế hoạch**: *Hỗ trợ sửa lỗi dữ liệu, rồi viết phần Methods (tiền xử lý).*
+- **Chi tiết thực hiện**:
+  1. **Viết mục 7 "Dữ liệu và Tiền xử lý"** trong `report/README.md`, gồm:
+     - quy trình 7 bước;
+     - bảng QC;
+     - kiểm chứng hành vi và P300;
+     - danh sách người cần lưu ý;
+     - khác biệt so với paper;
+     - hạn chế.
+  2. **Kiểm tra dữ liệu của V4**: `all_subjects_features.csv` (Release `feature`) khớp từng dòng với epoch gốc của 39 người. Kiểm tra số trial, nhãn và RT; không có NaN hoặc giá trị vô hạn.
+  3. **Phát hiện lỗi bộ nhớ trong `src/utils/io.py` và báo lại nhóm**:
+     - `load_dataset` nạp dữ liệu ở float64, nên 39 người tốn khoảng 6,7 GB RAM. Khi V6 nhân thêm `1e6`, RAM đỉnh lên khoảng 13–17 GB.
+     - Đề xuất ép về float32 khi đọc: giá trị không đổi vì file đã lưu ở float32, còn RAM giảm còn khoảng 3,4 GB. Đã chạy thử trên 3 người, sai khác bằng 0.
+  4. Sửa đường dẫn trong notebook tiền xử lý để chạy được từ thư mục `notebooks/`.
+
 

@@ -210,4 +210,103 @@ Có 32/402 đặc trưng đạt mức phân biệt ≥ 0,7 và 156/402 đặc tr
 - Blankertz B, Lemm S, Treder M, Haufe S, Müller KR. Single-trial analysis and classification of ERP components -- a tutorial. *NeuroImage* 2011;56(2):814–825.
 - Lotte F, Bougrain L, Cichocki A, Clerc M, Congedo M, Chouvellon A, Yger F. A review of classification algorithms for EEG-based brain-computer interfaces: a 10 year update. *J Neural Eng* 2018;15(3):031005.
 
+---
 
+## 7. Dữ liệu và Tiền xử lý (Vai trò V2 - Thái Nguyễn Hoàng Bách)
+
+### 7.1 Dữ liệu
+- Bộ dữ liệu Nencki-Symfonia (Dzianok et al., 2022; GigaDB 100990), phần **visual oddball** của **42 người**.
+- EEG ghi bằng hệ BrainVision với 127 điện cực, điện cực tham chiếu lúc ghi là FCz, tần số lấy mẫu 1000 Hz.
+- Mỗi buổi đo thường có 660 kích thích: khoảng 75% standard (mã S5), 12% target (S6) và 12% distractor (S7). Người tham gia chỉ bấm nút khi gặp target (mã S1).
+- Bốn bản ghi có số kích thích khác 660: sub-23 (692), sub-38 (775), sub-24 và sub-37 (659). Năm bản ghi gồm nhiều đoạn ghi nối lại: sub-15, 23, 24, 37 và 38.
+
+### 7.2 Quy trình
+Pipeline viết bằng MNE-Python 1.13.2 và chạy giống hệt nhau cho cả 42 người. Mã nguồn nằm trong `notebooks/01_preprocessing.ipynb`.
+
+1. **Đọc dữ liệu và chuẩn hóa kênh.**
+   - Thêm lại kênh tham chiếu FCz, nên mỗi người có 128 kênh.
+   - Sắp xếp kênh theo cùng một thứ tự cho cả 42 người, vì file của sub-13, sub-41 và sub-42 lưu kênh theo thứ tự khác.
+   - Gán vị trí điện cực theo montage `colin27_1005`. Hai kênh O9 và O10 lấy vị trí của I1 và I2.
+2. **Chỉ giữ đoạn làm nhiệm vụ.**
+   - Cắt bản ghi từ 5 s trước kích thích đầu tiên đến 5 s sau epoch cuối cùng.
+   - Một số bản ghi còn chạy tiếp sau khi hết nhiệm vụ, với nhiễu lên tới khoảng 3000 µV (tháo mũ, cử động). Đoạn này làm hỏng cả bước dò kênh hỏng lẫn ICA.
+   - Trung bình mỗi người bị cắt 73 s (từ 29 đến 412 s).
+   - Điểm nối giữa các đoạn ghi được đánh dấu `BAD_boundary`, để bộ lọc không lọc vắt qua điểm nối và không có epoch nào chứa nó.
+3. **Phát hiện và nội suy kênh hỏng.** Kiểm tra trên một bản sao đã hạ xuống 200 Hz, lọc 1–40 Hz và trừ trung vị của các kênh. Một kênh bị đánh dấu hỏng khi rơi vào ít nhất một trong ba tiêu chí:
+   - **Nhiễu hoặc phẳng:** z-score bền vững (dùng trung vị và MAD) của log khoảng tứ phân vị (IQR) có trị tuyệt đối lớn hơn 4. Mình dùng IQR thay cho độ lệch chuẩn vì IQR ít bị ảnh hưởng bởi chớp mắt, nhờ đó Fp1/Fp2 không bị loại oan trước khi ICA kịp xử lý chớp mắt.
+   - **Không tương quan:** trung vị tương quan với 6 kênh gần nhất nhỏ hơn 0,4.
+   - **Đối xứng ngược:** tương quan với một kênh lân cận nhỏ hơn −0,8. Dấu hiệu này thường do điện cực tiếp xúc kém.
+
+   Kênh hỏng được nội suy bằng spherical spline. Sau đó toàn bộ dữ liệu được đổi sang **average reference**.
+4. **ICA và ICLabel.**
+   - Fit ICA trên một bản sao lọc 1–100 Hz, hạ xuống 250 Hz. Đây là dải tần ICLabel được huấn luyện.
+   - Thuật toán Picard (extended, `ortho=False`), 40 thành phần, `random_state=97`.
+   - ICLabel (Pion-Tonachini et al., 2019; bản Python mne-icalabel 0.10.0) gán nhãn cho từng thành phần. Thành phần có nhãn **eye blink**, **heart beat** hoặc **muscle artifact** với xác suất ≥ 0,8 bị loại. Đây cũng là ba nhóm nhiễu (mắt, tim, cơ) mà paper dataset loại.
+   - Không loại nhóm *line noise* và *channel noise*: nhiễu điện lưới đã bị bộ lọc 40 Hz loại, kênh hỏng đã được nội suy, và ở một số người (ví dụ sub-30) các thành phần này còn chứa một phần P3.
+   - **Ba ngoại lệ chỉnh bằng tay:** ở sub-13, sub-14 và sub-36, thành phần chớp mắt chỉ được ICLabel chấm 0,78, 0,70 và 0,59, tức dưới ngưỡng. Mình đã kiểm tra bản đồ da đầu và tương quan với Fp1, xác nhận đây là chớp mắt, rồi loại thêm mỗi người 1 thành phần. Biên độ Fp1 trong epoch giảm từ 215, 171 và 131 µV xuống còn 22, 69 và 31 µV.
+5. **Lọc 0,5–40 Hz** trên dữ liệu gốc 1000 Hz, cùng dải tần với paper dataset.
+   - Bộ lọc FIR thông dải, zero-phase, cửa sổ Hamming, dài 6601 mẫu.
+   - Dải chuyển tiếp 0,5 Hz ở cận dưới (−6 dB tại 0,25 Hz) và 10 Hz ở cận trên (−6 dB tại 45 Hz).
+   - Sau khi lọc mới áp ICA đã fit ở bước 4 lên dữ liệu.
+6. **Cắt epoch.**
+   - Cắt từ −200 đến +1000 ms quanh mỗi kích thích và trừ baseline (−200 đến 0 ms).
+   - Lấy 1 mẫu trong mỗi 4 mẫu (1000 → 250 Hz). Làm vậy an toàn vì đã lọc thông thấp ở 40 Hz.
+   - Loại epoch có biên độ đỉnh-đỉnh trên **150 µV** ở bất kỳ kênh nào, hoặc chạm điểm nối bản ghi.
+   - Mỗi epoch gồm 128 kênh × 301 mẫu, lưu dạng float32 trong `derivatives/v1/epochs/`.
+7. **Gắn nhãn và hành vi.** Mỗi epoch có một dòng metadata gồm `condition` (standard/target/distractor), `responded`, `rt_ms` và `correct`:
+   - **Target trả lời đúng:** có bấm nút trong khoảng 100–1400 ms. Bấm sớm hơn 100 ms được coi là đoán trước, còn khoảng 1400 ms là thời lượng kích thích cộng khoảng cách ngắn nhất giữa hai kích thích, theo paper dataset.
+   - **Standard và distractor trả lời đúng:** không bấm nút.
+
+### 7.3 Kiểm soát chất lượng
+Pipeline xuất file QC cho từng người (`derivatives/v1/qc/sub-XX.json`) và một bảng tổng hợp (`derivatives/v1/qc_summary.csv`). Số liệu trên 42 người:
+
+| Chỉ số | Trung bình ± SD | Khoảng |
+|---|---|---|
+| Số kênh hỏng được nội suy | 2,9 ± 3,4 | 0–14 (30/42 người có ít nhất 1 kênh) |
+| Số thành phần ICA bị loại (trên 40) | 15,0 ± 4,7 | 6–25 |
+| Fp1 trước ICA (phân vị 99 của \|biên độ\|, µV) | 214 ± 91 | 78–505 |
+| Fp1 sau ICA (µV) | 39 ± 49 | 12–322 |
+| Tỉ lệ epoch bị loại (%) | 3,0 ± 7,8 | 0–49,5 |
+
+- **Kênh hỏng:** tổng cộng 122 kênh hỏng. Tiêu chí "không tương quan" bắt được nhiều nhất (100 lần), tiếp theo là "nhiễu hoặc phẳng" (26 lần) và "đối xứng ngược" (7 lần). Một kênh có thể rơi vào nhiều tiêu chí cùng lúc.
+- **Thành phần ICA bị loại:** trung bình mỗi người có 12,0 thành phần cơ, 2,8 thành phần mắt và 0,2 thành phần tim.
+- **Số epoch:** giữ được **27.034/27.865 epoch (97,0%)**, gồm 20.375 standard, 3.326 target và 3.333 distractor.
+  - Bộ dữ liệu cho bài toán phân loại có 21.878 trial, gồm 18.927 standard và 2.951 target (13,5% target). Bộ này chỉ gồm 39 người (đã loại 3 người hiểu sai nhiệm vụ, xem mục 7.4), và chỉ lấy trial standard và target trả lời đúng.
+
+**Kiểm chứng việc đọc sự kiện.** Số liệu hành vi tính lại từ marker trong dữ liệu khớp với Bảng 5 của paper dataset (cùng 39 người):
+
+| Chỉ số | Nhóm tính lại | Paper |
+|---|---|---|
+| Thời gian phản ứng với target (ms) | 542,1 ± 65,5 | 542,1 ± 65,5 |
+| Bỏ sót target (%) | 5,60 ± 8,48 | 5,60 ± 8,33 |
+| Bấm nhầm với distractor (%) | 9,63 ± 9,28 | 9,52 ± 8,90 |
+| Bấm nhầm với standard (%) | 0,27 ± 0,53 | 0,24 ± 0,46 |
+
+**Kiểm chứng tín hiệu P300.** Biên độ trung bình ở Pz trong cửa sổ 300–600 ms (39 người, tất cả epoch giữ lại) là: target **7,1 ± 2,5 µV**, distractor 5,8 ± 2,3 µV, standard 1,5 ± 1,3 µV. Thứ tự target > distractor > standard đúng như kỳ vọng của mô hình oddball.
+
+### 7.4 Những người cần lưu ý
+- **Loại khỏi phân tích nhóm:** sub-02, sub-14 và sub-17 hiểu sai nhiệm vụ (bấm nút với 77–99% distractor), giống như paper dataset đã loại. Epoch của ba người này vẫn được xuất, có đánh dấu `task_misunderstood` trong QC.
+- **Còn sót nhiễu mắt:** Fp1 sau ICA vẫn cao ở sub-40 (322 µV) và sub-30 (112 µV). P300 ở Pz ít bị ảnh hưởng, nhưng các phân tích dùng kênh trán của hai người này cần thận trọng.
+- **Bị loại nhiều epoch:** sub-07 mất 49,5% epoch vì vượt ngưỡng 150 µV, nhưng vẫn còn 37 target trả lời đúng. sub-14 mất 12,6%.
+- **Bản ghi bất thường hoặc trở kháng cao:** QC đánh dấu `irregular_recording` cho sub-13, 15, 23, 24, 37 và 38. Paper dataset ghi nhận trở kháng cao ở sub-23, 24 và 32.
+
+### 7.5 Khác biệt so với quy trình của paper dataset
+Các bước sau được nhóm thêm vào hoặc làm khác, để cùng một quy trình tự động chạy được cho cả 42 người và tái lập được:
+1. Cắt bỏ phần ghi ngoài thời gian làm nhiệm vụ trước khi xử lý.
+2. Tự động phát hiện và nội suy kênh hỏng.
+3. Loại thành phần ICA theo ngưỡng ICLabel, cộng thêm 3 thành phần chớp mắt loại bằng tay đã nêu ở bước 4.
+4. Loại epoch tự động theo ngưỡng biên độ đỉnh-đỉnh 150 µV.
+5. Hạ tần số lấy mẫu xuống 250 Hz để giảm dung lượng (khoảng 3,6 GB cho 42 người). Vì đã lọc 40 Hz nên việc này không làm mất thông tin.
+
+### 7.6 Hạn chế
+- **Nhiễu bấm nút và chớp mắt.** Người tham gia bấm nút khoảng 540 ms sau target, và nhiều người chớp mắt ngay sau khi bấm. Hoạt động vận động và phần nhiễu mắt còn sót có thể "đi kèm" với target. Kiểm tra trên toàn bộ người: phân loại distractor với standard (cả hai đều không bấm nút) vẫn đạt AUC 0,90, so với 0,95 khi phân loại target với standard. Như vậy P300 vẫn là nguồn thông tin chính.
+- **Loại nhiều thành phần cơ.** Trung bình mỗi người bị loại 12 thành phần cơ. Một phần hoạt động não ở tần số cao có thể bị loại theo, nhưng điều này ít ảnh hưởng tới P300 vì P300 nằm chủ yếu dưới 8 Hz.
+- **Không có thông tin trên 40 Hz** (không phân tích được gamma). Mỗi epoch dài 1,2 s, nên độ phân giải tần số khi tính phổ trên cả epoch chỉ khoảng 1 Hz.
+- **Chỉ số ICA chỉ đúng với lần fit này.** Danh sách thành phần loại bằng tay chỉ đúng khi giữ nguyên tham số ICA. Mô hình ICA của từng người được lưu trong `derivatives/v1/ica/` để kiểm tra lại.
+
+### Tài liệu tham khảo (mục 7)
+- Dzianok P, Antonova I, Wojciechowski J, Dreszer J, Kublik E. The Nencki-Symfonia electroencephalography/event-related potential dataset: Multiple cognitive tasks and resting-state data collected in a sample of healthy adults. *GigaScience* 2022;11:giac015. doi:10.1093/gigascience/giac015
+- Gramfort A, Luessi M, Larson E, et al. MEG and EEG data analysis with MNE-Python. *Front Neurosci* 2013;7:267.
+- Ablin P, Cardoso JF, Gramfort A. Faster independent component analysis by preconditioning with Hessian approximations. *IEEE Trans Signal Process* 2018;66(15):4040–4049.
+- Pion-Tonachini L, Kreutz-Delgado K, Makeig S. ICLabel: An automated electroencephalographic independent component classifier, dataset, and website. *NeuroImage* 2019;198:181–197.
+- Li A, Feitelberg J, Saini AP, Höchenberger R, Scheltienne M. MNE-ICALabel: Automatically annotating ICA components with ICLabel in Python. *J Open Source Softw* 2022;7(76):4484.
