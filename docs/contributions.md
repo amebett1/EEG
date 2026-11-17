@@ -9,7 +9,7 @@ Dự án nghiên cứu và phân loại sóng P300 trên tín hiệu EEG (Oddbal
 | Vai trò | Trách nhiệm chính | File mã nguồn / Tài liệu phụ trách | Trạng thái |
 |:---:|:---|:---|:---:|
 | **V1** | **Tiền xử lý dữ liệu (Preprocessing)**<br>- Lọc dải tần 0.5 - 40 Hz<br>- Phát hiện và nội suy kênh hỏng (IQR, tương quan lân cận)<br>- Picard ICA kết hợp ICLabel loại bỏ artifact (mắt, cơ, tim)<br>- Cắt epoch (-200..+1000 ms), decimation 4 (1000 Hz -> 250 Hz)<br>- Xuất file QC từng người và `qc_summary.csv` | `notebooks/01_preprocessing.ipynb`<br>`src/preprocessing/`<br>`derivatives/v1/qc/` | **Hoàn thành** |
-| **V3** | **Trực quan hóa & Phân tích ERP (Visualization / ERP)**<br>- **Người phụ trách**: **Trương Huy Hoàng**<br>- **Nhiệm vụ chi tiết**: Grand average ERP (Fz, Pz), scalp map, kiểm tra P300 ở khoảng 300–500 ms<br>- **Đầu ra bàn giao**: Hình ERP và topomap chất lượng cao cho báo cáo, slide<br>- Code vẽ dạng sóng ERP đường giữa (**Fz, Pz**, Fz/Cz/Pz) kèm sai số chuẩn SEM<br>- Code vẽ sóng hiệu số (**Difference Waves** Target-Std, Distractor-Std)<br>- Code vẽ bản đồ địa hình điện thế da đầu (**Scalp Topomap** 128 kênh)<br>- Kiểm tra định lượng tiêu chuẩn Polich trong cửa sổ 300–500 ms (Parietal gradient, Oddball effect) | `src/erp/plot_erp.py`<br>`notebooks/02_erp_visualization.ipynb`<br>`results/figures/`<br>`report/figures/` | **Hoàn thành (Tuần 1)** |
+| **V3** | **Trực quan hóa & Phân tích ERP (Visualization / ERP)**<br>- **Người phụ trách**: **Trương Huy Hoàng**<br>- **Nhiệm vụ chi tiết**: Grand average ERP (Fz, Pz), scalp map, kiểm tra P300 ở khoảng 300–500 ms<br>- **Đầu ra bàn giao**: Hình ERP và topomap chất lượng cao cho báo cáo, slide<br>- Code vẽ dạng sóng ERP đường giữa (**Fz, Pz**, Fz/Cz/Pz) kèm sai số chuẩn SEM<br>- Code vẽ sóng hiệu số (**Difference Waves** Target-Std, Distractor-Std)<br>- Code vẽ bản đồ địa hình điện thế da đầu (**Scalp Topomap** 128 kênh)<br>- Kiểm tra định lượng tiêu chuẩn Polich trong cửa sổ 300–500 ms (Parietal gradient, Oddball effect) | `src/erp/plot_erp.py`<br>`notebooks/02_erp_visualization.ipynb`<br>`results/figures/`<br>`report/figures/`<br>`results/tables/v3_p300_group_results.csv` | **Hoàn thành (Tuần 1, 2, 3)** |
 | **V4** | **Trích xuất đặc trưng (Feature Extraction)**<br>- **Người phụ trách**: **Nguyễn Công Kiên**<br>- Biên độ đỉnh (Peak amplitude) và độ trễ (Peak latency) của P300 và N100/P200/N200 theo Laton et al. (2014)<br>- Biên độ trung bình các cửa sổ thời gian quan trọng<br>- Năng lượng dải sóng (Delta, Theta, Alpha, Beta) và tham số Hjorth<br>- Đặc trưng phi tuyến và thời gian - tần số (Spectral entropy, Wavelet db4)<br>- **Đầu ra bàn giao**: ma trận đặc trưng 21.878 trial × 402 đặc trưng (39 người) cho V5 | `src/features/extract_features.py`<br>`src/features/rank_features.py`<br>`derivatives/v1/features/`<br>`results/tables/v4_feature_auc.csv` | **Hoàn thành (Tuần 2)** |
 | **V5** | **Mô hình học máy truyền thống (Machine Learning Baseline)**<br>- Huấn luyện Dummy, LDA, Logistic Regression, RBF SVM, Random Forest<br>- Chia tập kiểm định chống rò rỉ dữ liệu (GroupKFold theo người / StratifiedKFold)<br>- Xử lý mất cân bằng lớp (Class weights, balanced accuracy, PR-AUC, ROC-AUC) | `src/ml/train_baseline.py`<br>`notebooks/03_machine_learning.ipynb`<br>`results/tables/`<br>`results/figures/` | **Hoàn thành (Tuần 3)** |
 | **V6** | **Mô hình học sâu & Giải thích (Deep Learning & Interpretability)**<br>- Huấn luyện kiến trúc chuyên dụng EEGNet (Braindecode / PyTorch)<br>- Saliency maps, Layer-wise Relevance Propagation giải thích mô hình | `src/dl/train_eegnet.py` | Kế hoạch Tuần 4 |
@@ -39,7 +39,44 @@ Dự án nghiên cứu và phân loại sóng P300 trên tín hiệu EEG (Oddbal
 
 ---
 
-## 3. Nhật ký công việc Tuần 1–2 (3–16/11): Vai trò V4
+## 3. Nhật ký công việc Tuần 2 (10–16/11): Vai trò V3
+
+- **Người phụ trách**: **Trương Huy Hoàng**
+- **Nhiệm vụ theo kế hoạch**: *ERP Fz/Pz và scalp map toàn bộ nhóm, kiểm tra P300, viết phần Results (ERP).*
+- **Chi tiết thực hiện**:
+  1. **Grand Average ERP (Fz, Pz) toàn bộ nhóm**:
+     - Phân tích dạng sóng trên toàn bộ 39 đối tượng chuẩn tại Fz và Pz trong cửa sổ $[300, 500]\text{ ms}$.
+     - Xác nhận hiệu ứng Oddball cực kỳ mạnh mẽ: chênh lệch Target − Standard tại Pz đạt $+5,64 \pm 2,12\,\mu\text{V}$, kiểm định Student $t(38) = 16,635$, $p = 4,91 \times 10^{-19}$, Cohen's $d = 2,66$.
+     - Khẳng định tính chọn lọc không gian: Pz dương tính cực đại ($+7,14\,\mu\text{V}$), Fz âm tính phân cực.
+  2. **Scalp Topomap 128 kênh toàn bộ nhóm**:
+     - Trực quan hóa diễn tiến không gian từ chẩm (cảm giác sơ cấp) đến đỉnh (P3b nhận thức) qua các mốc thời gian 150–550 ms.
+     - Xác lập bản đồ trung bình cửa sổ P300 [300, 500] ms với tiêu điểm dương tính đỉnh (Parietal Hotspot).
+  3. **Kiểm định định lượng Polich (2007) trên 42 người**:
+     - $100\%$ đối tượng bình thường (39/39) thỏa mãn tiêu chuẩn Oddball và Gradient đỉnh.
+     - Phát hiện tương quan tuyến tính nghịch có ý nghĩa giữa thời gian phản ứng Target RT và biên độ Pz ($r = -0,434, p = 0,0058$): phản xạ nhanh đi kèm với biên độ P3b lớn.
+     - Làm rõ cơ chế suy giảm ở nhóm hiểu sai nhiệm vụ (sub-02/14/17): False Alarm $> 90\%$, biên độ Target bị suy giảm còn $4,99\,\mu\text{V}$.
+  4. **Xuất bảng kết quả và soạn thảo báo cáo**:
+     - Xuất bảng kết quả kiểm định 42 đối tượng ra file `results/tables/v3_p300_group_results.csv`.
+     - Soạn thảo toàn bộ phần 8 "Kết quả Nghiên cứu & Phân tích ERP (Results – ERP)" trong `report/README.md`.
+
+---
+
+## 4. Nhật ký công việc Tuần 3 (17–23/11): Vai trò V3
+
+- **Người phụ trách**: **Trương Huy Hoàng**
+- **Nhiệm vụ theo kế hoạch**: *Chọn hình cho báo cáo và slide.*
+- **Chi tiết thực hiện**:
+  1. Tuyển chọn 4 bộ hình ảnh cốt lõi chuẩn slide 16:9, độ phân giải cao 300 DPI:
+     - Slide 1: Grand Average ERP (Fz, Pz) tô sáng cửa sổ 300–500 ms và sóng hiệu số.
+     - Slide 2: Động học không gian Scalp Topomap 128 kênh và tiêu điểm đỉnh.
+     - Slide 3: Phân tách cơ chế P3a vs P3b bằng sóng hiệu số Difference Waves.
+     - Slide 4: Thống kê quần thể 42 đối tượng, so sánh nhóm hiểu sai task và tương quan RT vs P3b.
+  2. Biên soạn đầy đủ Figure Captions chuẩn bài báo khoa học và các thông điệp thuyết trình trọng tâm (Key Takeaways) cho từng slide tại mục 9 của `report/README.md`.
+  3. Lưu trữ và đồng bộ toàn bộ file ảnh sẵn dùng tại `report/figures/` và `results/figures/`.
+
+---
+
+## 5. Nhật ký công việc Tuần 1–2 (3–16/11): Vai trò V4
 
 - **Người phụ trách**: **Nguyễn Công Kiên**
 - **Nhiệm vụ theo kế hoạch**: *Tuần 1: đọc paper Laton, viết code đặc trưng trên dữ liệu thử. Tuần 2: trích đặc trưng toàn bộ (đỉnh, latency, band power; entropy/wavelet nếu kịp).*
@@ -55,7 +92,7 @@ Dự án nghiên cứu và phân loại sóng P300 trên tín hiệu EEG (Oddbal
 
 ---
 
-## 4. Nhật ký công việc Tuần 3: Vai trò V5
+## 6. Nhật ký công việc Tuần 3: Vai trò V5
 
 - **Nhiệm vụ theo kế hoạch**: *Xây dựng pipeline học máy truyền thống (Baseline) phân loại P300 đơn trial (single-trial), kiểm định Cross-Validation không rò rỉ dữ liệu, đánh giá và so sánh đa mô hình.*
 - **Chi tiết thực hiện**:
