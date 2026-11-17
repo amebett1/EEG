@@ -18,7 +18,7 @@ if str(ROOT) not in sys.path:
 
 from config import (BINARY_CONDITIONS, EPOCH_DIR, EPOCH_FILE, EVENT_ID,
                     FIG_DIR, N_CHANNELS, QC_SUMMARY, SUBJECTS,
-                    TASK_MISUNDERSTOOD)
+                    TABLE_DIR, TASK_MISUNDERSTOOD)
 from src.utils.io import epoch_path
 
 COLOR_MAP = {
@@ -740,7 +740,36 @@ def plot_population_summary(
 
     return fig
 
-    return fig
+
+def export_group_p300_table(
+    qc_csv_path: Optional[Path] = None,
+    save_path: Optional[Path] = None
+) -> pd.DataFrame:
+    if qc_csv_path is None:
+        qc_csv_path = QC_SUMMARY
+    qc_csv_path = Path(qc_csv_path)
+    df = pd.read_csv(qc_csv_path)
+
+    table_df = pd.DataFrame()
+    table_df["subject"] = df["subject"]
+    table_df["group"] = df["task_misunderstood"].apply(lambda x: "Task-Misunderstood" if x else "Normal")
+    table_df["pz_target_uv"] = df["pz_p3_target_uv"]
+    table_df["pz_standard_uv"] = df["pz_p3_standard_uv"]
+    table_df["pz_distractor_uv"] = df["pz_p3_distractor_uv"]
+    table_df["oddball_diff_uv"] = (df["pz_p3_target_uv"] - df["pz_p3_standard_uv"]).round(2)
+    table_df["oddball_pass"] = table_df["oddball_diff_uv"] >= 1.5
+    table_df["target_rt_ms"] = df["target_rt_ms"]
+    table_df["false_alarm_distractor_pct"] = df["false_alarm_distractor_pct"]
+    table_df["target_omission_pct"] = df["target_omission_pct"]
+    table_df["p300_verified"] = (~df["task_misunderstood"]) & table_df["oddball_pass"]
+
+    if save_path:
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        table_df.to_csv(save_path, index=False)
+        print(f"  -> Đã lưu bảng thống kê nhóm P300: {save_path}")
+
+    return table_df
 
 
 if __name__ == "__main__":
@@ -749,6 +778,7 @@ if __name__ == "__main__":
     parser.add_argument("--out-dir", type=str, default=str(FIG_DIR), help="Thư mục xuất ảnh kết quả")
     parser.add_argument("--population", action="store_true", help="Vẽ thống kê quần thể 42 người từ qc_summary.csv")
     parser.add_argument("--grand-average", action="store_true", help="Vẽ Grand Average ERP (Fz, Pz)")
+    parser.add_argument("--table", action="store_true", help="Xuất bảng số liệu kiểm định P300 nhóm 42 người")
     parser.add_argument("--show", action="store_true", help="Hiển thị đồ họa tương tác")
     args = parser.parse_args()
 
@@ -756,5 +786,7 @@ if __name__ == "__main__":
         plot_population_summary(save_path=Path(args.out_dir) / "population_p300_summary.png")
     elif args.grand_average:
         plot_grand_average_erp(save_path=Path(args.out_dir) / "grand_average_fz_pz.png")
+    elif args.table:
+        export_group_p300_table(save_path=TABLE_DIR / "v3_p300_group_results.csv")
     else:
         run_subject_erp_analysis(sub=args.sub, save_dir=Path(args.out_dir), show_plots=args.show)
