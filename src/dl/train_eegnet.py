@@ -19,21 +19,40 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from sklearn.metrics import (average_precision_score, balanced_accuracy_score,
-                             confusion_matrix, f1_score, roc_auc_score)
-from sklearn.model_selection import (GroupKFold, StratifiedKFold,
-                                     train_test_split)
+from sklearn.metrics import (
+    average_precision_score,
+    balanced_accuracy_score,
+    confusion_matrix,
+    f1_score,
+    precision_recall_curve,
+    roc_auc_score,
+    roc_curve,
+)
+from sklearn.model_selection import (
+    GroupKFold,
+    StratifiedKFold,
+    train_test_split,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from config import (MODEL_DIR, N_CHANNELS, RANDOM_SEED, SFREQ, TABLE_DIR, TMAX,
-                    TMIN)
+from config import (
+    FIG_DIR,
+    MODEL_DIR,
+    N_CHANNELS,
+    RANDOM_SEED,
+    SFREQ,
+    TABLE_DIR,
+    TMAX,
+    TMIN,
+)
 
 N_TIMES = int(round((TMAX - TMIN) * SFREQ)) + 1  # 301
 
@@ -190,7 +209,10 @@ def get_device() -> torch.device:
 def set_seed(seed: int = RANDOM_SEED) -> None:
     np.random.seed(seed)
     torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    else:
+        torch.set_num_threads(8)
 
 
 def _batches(n: int, batch_size: int, shuffle: bool, rng: np.random.Generator):
@@ -350,7 +372,6 @@ def summarize(name: str, fold_df: pd.DataFrame, y: np.ndarray, oof_probs: np.nda
 # ---------------------------------------------------------------------------
 def saliency_map(model: nn.Module, X: np.ndarray, scale: float = 1.0, target_class: int = 1,
                  batch_size: int = 128) -> np.ndarray:
-    """Gradient |d logit_target / d input| trung bình trên các trial -> (kênh, thời gian)."""
     device = next(model.parameters()).device
     model.eval()
     acc = np.zeros(X.shape[1:], dtype=np.float64)
@@ -361,16 +382,120 @@ def saliency_map(model: nn.Module, X: np.ndarray, scale: float = 1.0, target_cla
     return acc / len(X)
 
 
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
+def plot_roc_pr_curves(y_true: np.ndarray, oof_probs: np.ndarray, save_path: Path) -> None:
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    fpr, tpr, _ = roc_curve(y_true, oof_probs)
+    score_roc = roc_auc_score(y_true, oof_probs)
+    axes[0].plot(fpr, tpr, color="#d62728", lw=1.8, label=f"EEGNet (AUC = {score_roc:.3f})")
+    axes[0].plot([0, 1], [0, 1], "--", color="#999999", label="Chance (AUC = 0.500)")
+    axes[0].set_xlabel("False positive rate (1 - specificity)", fontsize=10.5)
+    axes[0].set_ylabel("True positive rate (sensitivity)", fontsize=10.5)
+    axes[0].set_title("Receiver operating characteristic (ROC) curve", fontsize=12, fontweight="bold")
+    axes[0].legend(loc="lower right")
+    axes[0].grid(True, ls=":", alpha=0.6)
+
+    prec, rec, _ = precision_recall_curve(y_true, oof_probs)
+    score_pr = average_precision_score(y_true, oof_probs)
+    prevalence = float(y_true.mean())
+    axes[1].plot(rec, prec, color="#d62728", lw=1.8, label=f"EEGNet (AP = {score_pr:.3f})")
+    axes[1].axhline(prevalence, ls="--", color="#999999", label=f"Prevalence ({prevalence:.1%})")
+    axes[1].set_xlabel("Recall (sensitivity)", fontsize=10.5)
+    axes[1].set_ylabel("Precision", fontsize=10.5)
+    axes[1].set_title("Precision-recall curve", fontsize=12, fontweight="bold")
+    axes[1].legend(loc="upper right")
+    axes[1].grid(True, ls=":", alpha=0.6)
+
+    fig.tight_layout()
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(save_path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_saliency_analysis(sal: np.ndarray, times: np.ndarray, diff: np.ndarray, save_path: Path) -> None:
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.5), gridspec_kw={"width_ratios": [2, 1.2, 1.2]})
+    im = axes[0].imshow(sal, aspect="auto", cmap="magma", origin="lower",
+                        extent=[times[0] * 1000, times[-1] * 1000, 0, sal.shape[0]])
+    axes[0].set_xlabel("Time (ms)", fontsize=10)
+    axes[0].set_ylabel("Channel index", fontsize=10)
+    axes[0].set_title("Saliency map (target trials)", fontsize=11, fontweight="bold")
+    fig.colorbar(im, ax=axes[0], fraction=0.04)
+
+    axes[1].plot(times * 1000, sal.mean(0), color="#d62728", lw=1.8)
+    axes[1].axvspan(300, 600, color="0.9", zorder=0, label="P300 window (300-600 ms)")
+    axes[1].set_xlabel("Time (ms)", fontsize=10)
+    axes[1].set_ylabel("Mean saliency", fontsize=10)
+    axes[1].set_title("Temporal saliency profile", fontsize=11, fontweight="bold")
+    axes[1].legend(loc="upper right", fontsize=8.5)
+    axes[1].grid(True, ls=":", alpha=0.5)
+
+    axes[2].plot(sal.mean(1), color="#333333", lw=1.5, label="Saliency")
+    ax2 = axes[2].twinx()
+    ax2.plot(diff, color="#1f77b4", alpha=0.6, lw=1.5, label="P300 effect (Target - Std)")
+    axes[2].set_xlabel("Channel index", fontsize=10)
+    axes[2].set_ylabel("Mean saliency", fontsize=10)
+    ax2.set_ylabel("Amplitude difference (µV)", fontsize=10)
+    axes[2].set_title("Spatial profile vs ERP effect", fontsize=11, fontweight="bold")
+    axes[2].grid(True, ls=":", alpha=0.5)
+
+    fig.tight_layout()
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(save_path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+def compare_ml_vs_dl(eegnet_row: Dict[str, float]) -> pd.DataFrame:
+    baseline_csv = TABLE_DIR / "baseline_metrics.csv"
+    if not baseline_csv.exists():
+        return pd.DataFrame([eegnet_row])
+
+    df_base = pd.read_csv(baseline_csv)
+    df_eegnet = pd.DataFrame([eegnet_row])
+    merged = pd.concat([df_base, df_eegnet], ignore_index=True)
+
+    out_csv = TABLE_DIR / "ml_vs_dl_comparison.csv"
+    merged.to_csv(out_csv, index=False)
+
+    fig, ax = plt.subplots(figsize=(9.5, 5))
+    models_list = merged["model"].tolist()
+    x = np.arange(len(models_list))
+    width = 0.26
+
+    ax.bar(x - width, merged["balanced_accuracy_mean"], width, yerr=merged.get("balanced_accuracy_std", 0),
+           label="Balanced accuracy", color="#4c72b0", capsize=3)
+    ax.bar(x, merged["roc_auc_mean"], width, yerr=merged.get("roc_auc_std", 0),
+           label="ROC-AUC", color="#55a868", capsize=3)
+    ax.bar(x + width, merged["pr_auc_mean"], width, yerr=merged.get("pr_auc_std", 0),
+           label="PR-AUC", color="#c44e52", capsize=3)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(models_list, fontsize=9.5)
+    ax.set_ylabel("Score", fontsize=10.5)
+    ax.set_title("Performance comparison: standard ML baselines vs deep learning (EEGNet)", fontsize=12, fontweight="bold")
+    ax.set_ylim([0, 1.05])
+    ax.axhline(0.5, linestyle="--", color="#999999", lw=1, label="Chance level (0.50)")
+    ax.grid(True, linestyle=":", alpha=0.5, axis="y")
+    ax.legend(loc="lower right", fontsize=9)
+    fig.tight_layout()
+
+    comp_plot = FIG_DIR / "ml_vs_dl_comparison.png"
+    fig.savefig(comp_plot, dpi=200, bbox_inches="tight")
+
+    report_fig_dir = ROOT / "report" / "figures"
+    if report_fig_dir.exists():
+        fig.savefig(report_fig_dir / "ml_vs_dl_comparison.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+    return merged
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="V6: Huấn luyện và đánh giá EEGNet.")
     parser.add_argument("--synthetic", action="store_true", help="Dùng dữ liệu mô phỏng")
     parser.add_argument("--subjects", nargs="*", default=None, help="Ví dụ: sub-01 sub-03")
     parser.add_argument("--splits", type=int, default=5)
-    parser.add_argument("--epochs", type=int, default=100)
-    parser.add_argument("--save", action="store_true", help="Lưu bảng kết quả vào results/tables")
+    parser.add_argument("--epochs", type=int, default=50)
+    parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--save", action="store_true", help="Lưu bảng kết quả và biểu đồ")
     args = parser.parse_args()
 
     if args.synthetic:
@@ -379,15 +504,63 @@ def main() -> None:
     else:
         X, y, groups = load_real_dataset(args.subjects)
         tag = "real"
-    print(f"Dữ liệu ({tag}): X {X.shape}, target {y.mean():.1%}, thiết bị {get_device()}")
+    print(f"Dataset ({tag}): X {X.shape}, target {y.mean():.1%}, device {get_device()}")
 
-    fold_df, oof_probs, _ = cross_validate(X, y, groups, n_splits=args.splits, epochs=args.epochs)
+    fold_df, oof_probs, _ = cross_validate(
+        X, y, groups, n_splits=args.splits, epochs=args.epochs, batch_size=args.batch_size
+    )
     row = summarize("EEGNet", fold_df, y, oof_probs)
+    print("\nEEGNet Cross-Validation Summary:")
     print(pd.Series(row).to_string())
+
+    times = TMIN + np.arange(N_TIMES) / SFREQ
+    win = (times >= 0.3) & (times <= 0.6)
+    diff = X[y == 1][:, :, win].mean((0, 2)) - X[y == 0][:, :, win].mean((0, 2))
+
+    final_tr, final_va = train_test_split(
+        np.arange(len(y)), test_size=0.15, stratify=y, random_state=RANDOM_SEED
+    )
+    ref_model, _, scale = train_eegnet(
+        X[final_tr], y[final_tr], X[final_va], y[final_va], epochs=args.epochs, batch_size=args.batch_size
+    )
+    sal = saliency_map(ref_model, X[y == 1], scale=scale)
+
+    peak_ms = times[np.argmax(sal.mean(0))] * 1000
+    r = np.corrcoef(sal.mean(1), diff)[0, 1]
+    print(f"\nSaliency Analysis:")
+    print(f"Peak saliency latency: {peak_ms:.1f} ms")
+    print(f"Spatial saliency correlation with ERP P300 effect: r = {r:.3f}")
 
     if args.save:
         TABLE_DIR.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame([row]).to_csv(TABLE_DIR / f"eegnet_metrics_{tag}.csv", index=False)
+        FIG_DIR.mkdir(parents=True, exist_ok=True)
+        MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
+        metrics_csv = TABLE_DIR / f"eegnet_metrics_{tag}.csv"
+        pd.DataFrame([row]).to_csv(metrics_csv, index=False)
+        print(f"Saved metrics table: {metrics_csv}")
+
+        roc_pr_plot = FIG_DIR / f"eegnet_roc_pr_{tag}.png"
+        plot_roc_pr_curves(y, oof_probs, roc_pr_plot)
+        print(f"Saved ROC/PR curve: {roc_pr_plot}")
+
+        sal_plot = FIG_DIR / f"eegnet_saliency_{tag}.png"
+        plot_saliency_analysis(sal, times, diff, sal_plot)
+        print(f"Saved saliency analysis: {sal_plot}")
+
+        torch.save(ref_model.state_dict(), MODEL_DIR / f"eegnet_{tag}.pt")
+        print(f"Saved model checkpoint: {MODEL_DIR / f'eegnet_{tag}.pt'}")
+
+        report_fig_dir = ROOT / "report" / "figures"
+        if report_fig_dir.exists():
+            plot_roc_pr_curves(y, oof_probs, report_fig_dir / f"eegnet_roc_pr_{tag}.png")
+            plot_saliency_analysis(sal, times, diff, report_fig_dir / f"eegnet_saliency_{tag}.png")
+
+        comp_df = compare_ml_vs_dl(row)
+        print("\nML vs DL Comparison:")
+        comp_cols = ["model", "balanced_accuracy_mean", "roc_auc_mean", "pr_auc_mean", "sensitivity_mean", "specificity_mean"]
+        valid_cols = [c for c in comp_cols if c in comp_df.columns]
+        print(comp_df[valid_cols].to_string(index=False, float_format=lambda x: f"{x:.3f}"))
 
 
 if __name__ == "__main__":

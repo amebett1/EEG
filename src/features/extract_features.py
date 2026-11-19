@@ -5,12 +5,20 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import mne
 import numpy as np
 import pandas as pd
-import pywt
 from scipy.signal import welch
 from scipy.stats import entropy
+
+try:
+    import mne
+except ImportError:
+    mne = None
+
+try:
+    import pywt
+except ImportError:
+    pywt = None
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:

@@ -24,7 +24,7 @@ def load_dataset(subjects=None, conditions=BINARY_CONDITIONS, correct_only=True,
     X, y, groups = [], [], []
     for i, sub in enumerate(subjects):
         ep = load_epochs(sub, conditions, correct_only)
-        X.append(ep.get_data())
-        y.append((ep.events[:, 2] == EVENT_ID["target"]).astype(int))
-        groups.append(np.full(len(ep), i))
+        X.append(ep.get_data(copy=False).astype(np.float32))
+        y.append((ep.events[:, 2] == EVENT_ID["target"]).astype(np.int64))
+        groups.append(np.full(len(ep), i, dtype=np.int64))
     return np.concatenate(X), np.concatenate(y), np.concatenate(groups)

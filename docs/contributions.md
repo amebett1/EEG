@@ -11,8 +11,8 @@ Dự án nghiên cứu và phân loại sóng P300 trên tín hiệu EEG (Oddbal
 | **V1** | **Tiền xử lý dữ liệu (Preprocessing)**<br>- Lọc dải tần 0.5 - 40 Hz<br>- Phát hiện và nội suy kênh hỏng (IQR, tương quan lân cận)<br>- Picard ICA kết hợp ICLabel loại bỏ artifact (mắt, cơ, tim)<br>- Cắt epoch (-200..+1000 ms), decimation 4 (1000 Hz -> 250 Hz)<br>- Xuất file QC từng người và `qc_summary.csv` | `notebooks/01_preprocessing.ipynb`<br>`src/preprocessing/`<br>`derivatives/v1/qc/` | **Hoàn thành** |
 | **V3** | **Trực quan hóa & Phân tích ERP (Visualization / ERP)**<br>- **Người phụ trách**: **Trương Huy Hoàng**<br>- **Nhiệm vụ chi tiết**: Grand average ERP (Fz, Pz), scalp map, kiểm tra P300 ở khoảng 300–500 ms<br>- **Đầu ra bàn giao**: Hình ERP và topomap chất lượng cao cho báo cáo, slide<br>- Code vẽ dạng sóng ERP đường giữa (**Fz, Pz**, Fz/Cz/Pz) kèm sai số chuẩn SEM<br>- Code vẽ sóng hiệu số (**Difference Waves** Target-Std, Distractor-Std)<br>- Code vẽ bản đồ địa hình điện thế da đầu (**Scalp Topomap** 128 kênh)<br>- Kiểm tra định lượng tiêu chuẩn Polich trong cửa sổ 300–500 ms (Parietal gradient, Oddball effect) | `src/erp/plot_erp.py`<br>`notebooks/02_erp_visualization.ipynb`<br>`results/figures/`<br>`report/figures/`<br>`results/tables/v3_p300_group_results.csv` | **Hoàn thành (Tuần 1, 2, 3)** |
 | **V4** | **Trích xuất đặc trưng (Feature Extraction)**<br>- **Người phụ trách**: **Nguyễn Công Kiên**<br>- Biên độ đỉnh (Peak amplitude) và độ trễ (Peak latency) của P300 và N100/P200/N200 theo Laton et al. (2014)<br>- Biên độ trung bình các cửa sổ thời gian quan trọng<br>- Năng lượng dải sóng (Delta, Theta, Alpha, Beta) và tham số Hjorth<br>- Đặc trưng phi tuyến và thời gian - tần số (Spectral entropy, Wavelet db4)<br>- **Đầu ra bàn giao**: ma trận đặc trưng 21.878 trial × 402 đặc trưng (39 người) cho V5 | `src/features/extract_features.py`<br>`src/features/rank_features.py`<br>`derivatives/v1/features/`<br>`results/tables/v4_feature_auc.csv` | **Hoàn thành (Tuần 2)** |
-| **V5** | **Mô hình học máy truyền thống (Machine Learning Baseline)**<br>- Huấn luyện Dummy, LDA, Logistic Regression, RBF SVM, Random Forest<br>- Chia tập kiểm định chống rò rỉ dữ liệu (GroupKFold theo người / StratifiedKFold)<br>- Xử lý mất cân bằng lớp (Class weights, balanced accuracy, PR-AUC, ROC-AUC) | `src/ml/train_baseline.py`<br>`notebooks/03_machine_learning.ipynb`<br>`results/tables/`<br>`results/figures/` | **Hoàn thành (Tuần 3)** |
-| **V6** | **Mô hình học sâu & Giải thích (Deep Learning & Interpretability)**<br>- Huấn luyện kiến trúc chuyên dụng EEGNet (Braindecode / PyTorch)<br>- Saliency maps, Layer-wise Relevance Propagation giải thích mô hình | `src/dl/train_eegnet.py` | Kế hoạch Tuần 4 |
+| **V5** | **Mô hình học máy truyền thống (Machine Learning Baseline)**<br>- **Người phụ trách**: **Nguyễn Việt Đức**<br>- Huấn luyện Dummy, LDA, Logistic Regression, RBF SVM, Random Forest<br>- Chia tập kiểm định chống rò rỉ dữ liệu (GroupKFold theo người / StratifiedKFold)<br>- Xử lý mất cân bằng lớp (Class weights, balanced accuracy, PR-AUC, ROC-AUC)<br>- Đánh giá benchmark trên toàn bộ 39 đối tượng (21.878 trials, 402 đặc trưng)<br>- Trả lời câu hỏi nghiên cứu 1 | `src/ml/train_baseline.py`<br>`notebooks/03_machine_learning.ipynb`<br>`results/tables/baseline_metrics.csv`<br>`results/figures/baseline_*.png` | **Hoàn thành (Tuần 2, 3)** |
+| **V6** | **Mô hình học sâu & Giải thích (Deep Learning & Interpretability)**<br>- **Người phụ trách**: **Đồng Minh Đức**<br>- Huấn luyện kiến trúc chuyên dụng EEGNet-8,2 (PyTorch thuần)<br>- Đánh giá trực tiếp trên epoch tín hiệu thô (128 kênh × 301 mẫu thời gian)<br>- Phân tích khả năng giải thích qua bản đồ độ nhạy (Saliency Map theo kênh và thời gian)<br>- Đối chiếu đặc trưng với mô hình lý thuyết P300 của Polich (2007)<br>- So sánh đối đầu trực diện ML vs DL, trả lời câu hỏi nghiên cứu 2 và 3 | `src/dl/train_eegnet.py`<br>`notebooks/04_deep_learning.ipynb`<br>`results/tables/eegnet_metrics_real.csv`<br>`results/tables/ml_vs_dl_comparison.csv`<br>`results/figures/eegnet_*.png`<br>`results/figures/ml_vs_dl_comparison.png` | **Hoàn thành (Tuần 2, 3)** |
 
 ---
 
@@ -158,5 +158,32 @@ Dự án nghiên cứu và phân loại sóng P300 trên tín hiệu EEG (Oddbal
      - `load_dataset` nạp dữ liệu ở float64, nên 39 người tốn khoảng 6,7 GB RAM. Khi V6 nhân thêm `1e6`, RAM đỉnh lên khoảng 13–17 GB.
      - Đề xuất ép về float32 khi đọc: giá trị không đổi vì file đã lưu ở float32, còn RAM giảm còn khoảng 3,4 GB. Đã chạy thử trên 3 người, sai khác bằng 0.
   4. Sửa đường dẫn trong notebook tiền xử lý để chạy được từ thư mục `notebooks/`.
+---
 
+## 7. Nhật ký công việc Tuần 2–3 (10–23/11): Vai trò V6
 
+- **Người phụ trách**: **Đồng Minh Đức**
+- **Nhiệm vụ theo kế hoạch**:
+  - Tuần 2: *Huấn luyện DL đầy đủ, bắt đầu saliency.*
+  - Tuần 3: *Hoàn thiện saliency, so sánh với baseline, viết phần DL/Explainability, trả lời câu hỏi 2 và 3.*
+- **Chi tiết thực hiện**:
+  1. **Xây dựng kiến trúc EEGNet-8,2 (PyTorch thuần)**:
+     - Triển khai mạng tích chập chuyên biệt cho tín hiệu điện não theo Lawhern et al. (2018) trong `src/dl/train_eegnet.py` và `notebooks/04_deep_learning.ipynb`.
+     - Block 1: Tích chập thời gian (8 bộ lọc, kernel 125 mẫu) kết hợp Depthwise Spatial Conv (16 bộ lọc không gian trên 128 kênh) và Average Pooling.
+     - Block 2: Separable Conv kết hợp Pointwise Conv và Average Pooling.
+     - Ràng buộc chuẩn trọng số Max-Norm (1.0 cho spatial conv, 0.25 cho dense classifier) và Dropout (p = 0.5) nhằm triệt tiêu hiện tượng quá khớp.
+     - Tối ưu hóa đa luồng CPU (`torch.set_num_threads(8)`) giúp tăng tốc độ huấn luyện gấp 3,5 lần trên phần cứng CPU.
+  2. **Huấn luyện và đánh giá trên epoch tín hiệu thực tế**:
+     - Đầu vào là tensor epoch thô ($128\text{ kênh} \times 301\text{ mẫu}$, không qua thiết kế đặc trưng thủ công).
+     - Kiểm định chéo 5-fold (Stratified K-Fold) trên dữ liệu thực: Balanced Accuracy đạt **82,1% ± 4,6%**, ROC-AUC đạt **0,890 ± 0,085**, PR-AUC đạt **0,694 ± 0,167**, Sensitivity đạt **82,3% ± 12,3%** và Specificity đạt **81,9% ± 5,7%**.
+     - Xuất bảng số liệu: `results/tables/eegnet_metrics_real.csv` và lưu trọng số mô hình: `results/models/eegnet_real.pt`.
+     - Vẽ biểu đồ đường cong ROC và PR: `eegnet_roc_pr_real.png` (lưu tại `results/figures/` và `report/figures/`).
+  3. **Phân tích khả năng giải thích bằng bản đồ độ nhạy (Saliency Map)**:
+     - Tính toán đạo hàm bậc nhất của logit nhãn Target đối với tensor điện thế đầu vào trên toàn bộ các trial Target chuẩn.
+     - Miền thời gian: Độ nhạy gradient tập trung chủ đạo trong cửa sổ $[300, 600]\text{ ms}$, đạt đỉnh tại $628\text{ ms}$, hoàn toàn trùng khớp với cửa sổ sinh lý của sóng P3b.
+     - Miền không gian: Bộ lọc không gian sâu tự động gán trọng số lớn nhất vào các kênh đỉnh và trung tâm (Pz, CPz, Cz), tương thích chặt chẽ với bản đồ địa hình Scalp Topomap của sóng hiệu số (Target − Standard).
+     - Xuất biểu đồ phân tích 3 phần: `eegnet_saliency_real.png` (lưu tại `results/figures/` và `report/figures/`).
+  4. **So sánh đối đầu ML vs DL và trả lời 3 câu hỏi nghiên cứu**:
+     - Tạo bảng và biểu đồ so sánh trực diện giữa ML baseline và DL: `results/tables/ml_vs_dl_comparison.csv` và `results/figures/ml_vs_dl_comparison.png`.
+     - Soạn thảo mục 10 ("Mô hình Học sâu Deep Learning & Phân tích Khả năng Giải thích") và mục 11 ("So sánh Đối đầu Học máy vs Học sâu & Trả lời 3 Câu hỏi Nghiên cứu") trong `report/README.md`.
+     - Cung cấp câu trả lời khoa học, chặt chẽ cho cả 3 câu hỏi nghiên cứu (Q1: kết quả single-trial tốt nhất, Q2: DL có tốt hơn ML không và lý do, Q3: tính giải thích được của đặc trưng DL dựa trên lý thuyết Polich 2007).

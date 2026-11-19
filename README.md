@@ -48,6 +48,26 @@ EEG/
 └── report/
     ├── README.md                     # Báo cáo phương pháp luận Polich và tiêu chuẩn P300
     └── figures/                      # Nơi lưu hình dùng trong báo cáo
-```
+## Hướng dẫn thực thi
+
+1. **Phân tích ERP và bản đồ địa hình da đầu (V3)**:
+   ```bash
+   python src/erp/plot_erp.py --population --grand-average --table
+   ```
+
+2. **Xếp hạng 402 đặc trưng theo mức phân biệt AUC (V4)**:
+   ```bash
+   python src/features/rank_features.py
+   ```
+
+3. **Huấn luyện và đánh giá benchmark Machine Learning baseline trên 39 đối tượng (V5)**:
+   ```bash
+   python src/ml/train_baseline.py --save
+   ```
+
+4. **Huấn luyện mô hình Deep Learning EEGNet và phân tích Saliency map (V6)**:
+   ```bash
+   python src/dl/train_eegnet.py --subjects sub-01 --epochs 15 --batch-size 32 --save
+   ```
 
 

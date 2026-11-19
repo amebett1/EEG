@@ -58,7 +58,7 @@ def get_models() -> Dict[str, Pipeline]:
         ]),
         "RBF SVM": Pipeline([
             ("scaler", StandardScaler()),
-            ("clf", SVC(kernel="rbf", class_weight="balanced", probability=True, random_state=RANDOM_SEED))
+            ("clf", SVC(kernel="rbf", class_weight="balanced", probability=True, cache_size=1000, random_state=RANDOM_SEED))
         ]),
         "Random Forest": Pipeline([
             ("clf", RandomForestClassifier(n_estimators=100, class_weight="balanced_subsample", random_state=RANDOM_SEED, n_jobs=-1))
@@ -212,6 +212,46 @@ def plot_pr_curves(
     plt.close(fig)
 
 
+def plot_model_comparison(summary_df: pd.DataFrame, save_path: Path) -> None:
+    fig, ax = plt.subplots(figsize=(8.5, 4.5))
+    models_list = summary_df["model"].tolist()
+    x = np.arange(len(models_list))
+    width = 0.35
+
+    ax.bar(
+        x - width / 2,
+        summary_df["balanced_accuracy_mean"],
+        width,
+        yerr=summary_df["balanced_accuracy_std"],
+        label="Balanced accuracy",
+        color="#4c72b0",
+        capsize=3,
+    )
+    ax.bar(
+        x + width / 2,
+        summary_df["roc_auc_mean"],
+        width,
+        yerr=summary_df["roc_auc_std"],
+        label="ROC-AUC",
+        color="#55a868",
+        capsize=3,
+    )
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(models_list, fontsize=10)
+    ax.set_ylabel("Score", fontsize=10.5)
+    ax.set_title("Baseline model comparison (mean ± std across folds)", fontsize=12, fontweight="bold")
+    ax.set_ylim([0, 1.05])
+    ax.axhline(0.5, linestyle="--", color="#999999", lw=1, label="Chance level (0.50)")
+    ax.grid(True, linestyle=":", alpha=0.5, axis="y")
+    ax.legend(loc="lower right", fontsize=9)
+    fig.tight_layout()
+
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(save_path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def resolve_data_path(custom_path: str | None = None) -> Path:
     if custom_path:
         p = Path(custom_path)
@@ -268,15 +308,19 @@ def run_pipeline(
 
     roc_path = FIG_DIR / "baseline_roc_curves.png"
     pr_path = FIG_DIR / "baseline_pr_curves.png"
+    comp_path = FIG_DIR / "baseline_model_comparison.png"
     plot_roc_curves(y, oof_probs_dict, roc_path)
     plot_pr_curves(y, oof_probs_dict, pr_path)
+    plot_model_comparison(summary_df, comp_path)
     print(f"Saved ROC curve: {roc_path}")
     print(f"Saved PR curve: {pr_path}")
+    print(f"Saved model comparison: {comp_path}")
 
     report_fig_dir = ROOT / "report" / "figures"
     if report_fig_dir.exists():
         plot_roc_curves(y, oof_probs_dict, report_fig_dir / "baseline_roc_curves.png")
         plot_pr_curves(y, oof_probs_dict, report_fig_dir / "baseline_pr_curves.png")
+        plot_model_comparison(summary_df, report_fig_dir / "baseline_model_comparison.png")
 
     display_cols = [
         "model",
