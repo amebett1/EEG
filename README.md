@@ -20,9 +20,10 @@ EEG/
 │       └── figures/                  # ERP từng người và grand_average.png từ tiền xử lý
 ├── docs/
 │   ├── dataset_cheatsheet.md         # Ghi chú và nguồn dataset
-│   └── contributions.md              # Phân công vai trò (V1-V6) và nhật ký đóng góp
+│   ├── contributions.md              # Tỷ lệ đóng góp, phân công vai trò (V1-V6) và nhật ký công việc
+│   └── presentation_slides.md        # Khung thuyết trình 10 phút (8 slide, người nói, kịch bản tiếng Anh)
 ├── notebooks/
-│   ├── 00_explore_dataset.ipynb       # Khảo sát ban đầu: liệt kê dữ liệu trong RAW_DIR
+│   ├── 00_explore_dataset.ipynb       # Khảo sát dữ liệu: 42 người, sfreq, montage Colin27, tỉ lệ kích thích, RT
 │   ├── 01_preprocessing.ipynb         # Tải dữ liệu, tiền xử lý, xuất epoch/ICA và QC
 │   ├── 02_erp_visualization.ipynb     # V3: Trực quan hóa ERP, Scalp Topomap & kiểm tra P300
 │   ├── 03_machine_learning.ipynb      # V5: Huấn luyện và đánh giá benchmark ML baseline
@@ -46,7 +47,8 @@ EEG/
 │   ├── tables/                       # Nơi lưu bảng kết quả
 │   └── models/                       # Nơi lưu mô hình đã huấn luyện; không commit
 └── report/
-    ├── README.md                     # Báo cáo phương pháp luận Polich và tiêu chuẩn P300
+    ├── README.md                     # Báo cáo tiếng Việt (11 mục)
+    ├── REPORT_EN.md                  # Báo cáo tiếng Anh chính thức để nộp
     └── figures/                      # Nơi lưu hình dùng trong báo cáo
 ## Hướng dẫn thực thi
 
@@ -67,7 +69,8 @@ EEG/
 
 4. **Huấn luyện mô hình Deep Learning EEGNet và phân tích Saliency map (V6)**:
    ```bash
-   python src/dl/train_eegnet.py --subjects sub-01 --epochs 15 --batch-size 32 --save
+   python src/dl/train_eegnet.py --save --batch-size 64 --epochs 50
    ```
+   Chạy trên toàn bộ 39 người với `GroupKFold(n_splits=5)` theo người (cùng tập và cùng cách chia với V5). Có GPU (CUDA) thì tự dùng GPU, khoảng 25–50 phút trên RTX 4060.
 
 

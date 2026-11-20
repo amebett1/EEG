@@ -257,8 +257,10 @@ def train_eegnet(X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_
 
     Xtr = torch.from_numpy(X_train / scale).float()
     ytr = torch.from_numpy(y_train).long()
-    Xva = torch.from_numpy(X_val / scale).float().to(device)
-    yva = torch.from_numpy(y_val).long().to(device)
+    # Val giữ ở CPU và đánh giá theo batch: forward cả tập val một lần trên GPU
+    # (vài nghìn trial × 128 × 301) có thể vượt VRAM khi chạy đủ 39 người.
+    Xva = torch.from_numpy(X_val / scale).float()
+    yva = torch.from_numpy(y_val).long()
 
     history = {"train_loss": [], "val_loss": [], "val_auc": [], "val_bacc": []}
     best_loss, best_state, wait = np.inf, None, 0
@@ -278,9 +280,10 @@ def train_eegnet(X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_
 
         model.eval()
         with torch.no_grad():
-            logits = model(Xva)
-            val_loss = criterion(logits, yva).item()
-            probs = torch.softmax(logits, 1)[:, 1].cpu().numpy()
+            logits = torch.cat([model(Xva[i:i + 256].to(device)).cpu()
+                                for i in range(0, len(Xva), 256)])
+            val_loss = criterion(logits.to(device), yva.to(device)).item()
+            probs = torch.softmax(logits, 1)[:, 1].numpy()
         history["val_loss"].append(val_loss)
         history["val_auc"].append(roc_auc_score(y_val, probs) if len(np.unique(y_val)) > 1 else np.nan)
         history["val_bacc"].append(balanced_accuracy_score(y_val, probs >= 0.5))
@@ -443,6 +446,37 @@ def plot_saliency_analysis(sal: np.ndarray, times: np.ndarray, diff: np.ndarray,
     plt.close(fig)
 
 
+def plot_saliency_topomaps(sal: np.ndarray, times: np.ndarray, diff: np.ndarray, info,
+                           save_path: Path) -> None:
+    """Topomap saliency (300-600 ms) cạnh topomap hiệu ứng Target - Standard, kèm hồ sơ thời gian theo vùng."""
+    import mne
+
+    win = (times >= 0.3) & (times <= 0.6)
+    regions = {"Left central (C3, C1, CCP3h, FCC3h)": ["C3", "C1", "CCP3h", "FCC3h"],
+               "Right central (C4, C2, CCP4h, FCC4h)": ["C4", "C2", "CCP4h", "FCC4h"],
+               "Parietal (Pz, CPz, P1, P2)": ["Pz", "CPz", "P1", "P2"]}
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.6), gridspec_kw={"width_ratios": [1, 1, 1.6]})
+    im, _ = mne.viz.plot_topomap(sal[:, win].mean(1), info, axes=axes[0], show=False, cmap="magma")
+    fig.colorbar(im, ax=axes[0], fraction=0.046, label="Mean saliency")
+    axes[0].set_title("EEGNet saliency, 300-600 ms", fontsize=11, fontweight="bold")
+    im, _ = mne.viz.plot_topomap(diff, info, axes=axes[1], show=False, cmap="RdBu_r")
+    fig.colorbar(im, ax=axes[1], fraction=0.046, label="µV")
+    axes[1].set_title("P300 effect (target - standard), 300-600 ms", fontsize=11, fontweight="bold")
+    idx = {n: i for i, n in enumerate(info.ch_names)}
+    for (name, chs), color in zip(regions.items(), ["#d62728", "#ff9896", "#1f77b4"]):
+        axes[2].plot(times * 1000, sal[[idx[c] for c in chs]].mean(0), color=color, lw=1.8, label=name)
+    axes[2].axvspan(300, 600, color="0.92", zorder=0)
+    axes[2].set_xlabel("Time (ms)", fontsize=10)
+    axes[2].set_ylabel("Mean saliency", fontsize=10)
+    axes[2].set_title("Saliency time course by region", fontsize=11, fontweight="bold")
+    axes[2].legend(fontsize=8.5, loc="upper right")
+    axes[2].grid(True, ls=":", alpha=0.5)
+    fig.tight_layout()
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(save_path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def compare_ml_vs_dl(eegnet_row: Dict[str, float]) -> pd.DataFrame:
     baseline_csv = TABLE_DIR / "baseline_metrics.csv"
     if not baseline_csv.exists():
@@ -471,10 +505,10 @@ def compare_ml_vs_dl(eegnet_row: Dict[str, float]) -> pd.DataFrame:
     ax.set_xticklabels(models_list, fontsize=9.5)
     ax.set_ylabel("Score", fontsize=10.5)
     ax.set_title("Performance comparison: standard ML baselines vs deep learning (EEGNet)", fontsize=12, fontweight="bold")
-    ax.set_ylim([0, 1.05])
+    ax.set_ylim([0, 1.15])
     ax.axhline(0.5, linestyle="--", color="#999999", lw=1, label="Chance level (0.50)")
     ax.grid(True, linestyle=":", alpha=0.5, axis="y")
-    ax.legend(loc="lower right", fontsize=9)
+    ax.legend(loc="upper center", ncol=4, fontsize=9, frameon=False)
     fig.tight_layout()
 
     comp_plot = FIG_DIR / "ml_vs_dl_comparison.png"
@@ -530,6 +564,18 @@ def main() -> None:
     print(f"\nSaliency Analysis:")
     print(f"Peak saliency latency: {peak_ms:.1f} ms")
     print(f"Spatial saliency correlation with ERP P300 effect: r = {r:.3f}")
+    print(f"Saliency mass in 300-600 ms window: {sal[:, win].sum() / sal.sum():.1%} "
+          f"(window covers {win.mean():.1%} of the epoch)")
+
+    ch_names = None
+    if not args.synthetic:
+        from src.utils.io import epoch_path
+        import mne
+        ch_names = mne.read_epochs(epoch_path("sub-01"), preload=False, verbose="error").ch_names
+        top = np.argsort(sal.mean(1))[::-1][:10]
+        print("Top-10 channels by saliency: " + ", ".join(ch_names[i] for i in top))
+        top_diff = np.argsort(diff)[::-1][:10]
+        print("Top-10 channels by P300 effect: " + ", ".join(ch_names[i] for i in top_diff))
 
     if args.save:
         TABLE_DIR.mkdir(parents=True, exist_ok=True)
@@ -548,6 +594,11 @@ def main() -> None:
         plot_saliency_analysis(sal, times, diff, sal_plot)
         print(f"Saved saliency analysis: {sal_plot}")
 
+        np.savez_compressed(TABLE_DIR / f"eegnet_saliency_{tag}.npz", saliency=sal, times=times,
+                            p300_effect=diff, ch_names=np.array(ch_names or []))
+        fold_df.to_csv(TABLE_DIR / f"eegnet_folds_{tag}.csv", index=False)
+        np.savez_compressed(TABLE_DIR / f"eegnet_oof_{tag}.npz", y=y, oof_probs=oof_probs, groups=groups)
+
         torch.save(ref_model.state_dict(), MODEL_DIR / f"eegnet_{tag}.pt")
         print(f"Saved model checkpoint: {MODEL_DIR / f'eegnet_{tag}.pt'}")
 
@@ -555,6 +606,14 @@ def main() -> None:
         if report_fig_dir.exists():
             plot_roc_pr_curves(y, oof_probs, report_fig_dir / f"eegnet_roc_pr_{tag}.png")
             plot_saliency_analysis(sal, times, diff, report_fig_dir / f"eegnet_saliency_{tag}.png")
+
+        if ch_names:
+            import mne
+            from src.utils.io import epoch_path
+            info = mne.read_epochs(epoch_path("sub-01"), preload=False, verbose="error").info
+            for d in (FIG_DIR, report_fig_dir):
+                if d.exists():
+                    plot_saliency_topomaps(sal, times, diff, info, d / f"eegnet_saliency_topomap_{tag}.png")
 
         comp_df = compare_ml_vs_dl(row)
         print("\nML vs DL Comparison:")

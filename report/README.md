@@ -2,6 +2,8 @@
 
 Dự án Oddball Paradigm (GigaDB Dataset 100990) – Nhóm Nghiên cứu EEG.
 
+Bản tiếng Anh chính thức để nộp: [`REPORT_EN.md`](REPORT_EN.md). Phân công và tỷ lệ đóng góp: [`docs/contributions.md`](../docs/contributions.md).
+
 ---
 
 ## 1. Tổng quan & Mục tiêu Nghiên cứu
@@ -70,6 +72,7 @@ Tất cả hình ảnh chất lượng cao (300 DPI, tối ưu cho slide thuyế
 6. `{sub}_scalp_topomap.png`: Bản đồ địa hình da đầu 128 kênh (Scalp map) diễn tiến từ 150 ms đến 550 ms.
 7. `{sub}_p300_summary_topomap.png`: Scalp map trung bình toàn cửa sổ P300 (300–500 ms) chỉ rõ tiêu điểm dương tính vùng đỉnh (Parietal Positivity).
 8. `population_p300_summary.png`: Phân tích thống kê quần thể 42 đối tượng kiểm chứng ảnh hưởng của nhóm hiểu sai nhiệm vụ.
+9. `eegnet_roc_pr_real.png`, `eegnet_saliency_real.png`, `eegnet_saliency_topomap_real.png`, `ml_vs_dl_comparison.png`: Kết quả EEGNet trên 39 đối tượng và so sánh ML vs DL (V6).
 
 ---
 
@@ -412,7 +415,7 @@ Nhằm phục vụ báo cáo bài tập lớn và thuyết trình slide trước
 ## 10. Mô hình Học sâu Deep Learning & Phân tích Khả năng Giải thích (Vai trò V6 – Đồng Minh Đức)
 
 ### 10.1 Kiến trúc mạng tích chập chuyên biệt EEGNet-8,2
-Nhằm đánh giá tiềm năng phân loại đầu-cuối (end-to-end) không cần thiết kế đặc trưng thủ công, mô hình học sâu **EEGNet-8,2** (Lawhern et al., 2018) được triển khai trên nền tảng PyTorch:
+Nhằm đánh giá khả năng phân loại đầu-cuối (end-to-end) không cần thiết kế đặc trưng thủ công, mô hình học sâu **EEGNet-8,2** (Lawhern et al., 2018) được triển khai bằng PyTorch (`src/dl/train_eegnet.py`):
 
 ```
 Đầu vào: Epoch thô (B, 1, 128 kênh, 301 mẫu thời gian @ 250 Hz)
@@ -430,84 +433,110 @@ Nhằm đánh giá tiềm năng phân loại đầu-cuối (end-to-end) không c
 ```
 
 - **Đặc tính kiến trúc**:
-  - Tầng tích chập thời gian 1D đóng vai trò như các bộ lọc dải tần số thích ứng (Bandpass filter) học từ dữ liệu, tập trung vào dải tần delta/theta (< 8 Hz).
-  - Tầng tích chập không gian sâu (Depthwise Spatial Conv) học các mẫu hình kết hợp không gian xuyên 128 kênh điện cực, tương đương với thuật toán lọc không gian CSP (Common Spatial Patterns) nhưng được tối ưu hóa đồng thời với bộ lọc thời gian.
-  - Tổng số lượng tham số chỉ khoảng 2.100 tham số, giảm thiểu đáng kể nguy cơ quá khớp (overfitting) trên dữ liệu EEG có tỷ lệ tín hiệu trên nhiễu (SNR) thấp.
+  - Tầng tích chập thời gian đóng vai trò như các bộ lọc dải tần thích ứng học từ dữ liệu.
+  - Tầng tích chập không gian sâu (depthwise) học các tổ hợp tuyến tính của 128 kênh cho từng bộ lọc thời gian, tương tự bộ lọc không gian kiểu xDAWN/CSP nhưng được tối ưu đồng thời với bộ lọc thời gian.
+  - Tổng cộng **3.930 tham số** huấn luyện (với 128 kênh × 301 mẫu), ít hơn khoảng 5,6 lần số trial huấn luyện mỗi fold, giúp hạn chế quá khớp trên dữ liệu EEG có SNR thấp.
+- **Huấn luyện**: Adam (lr = 10⁻³), batch 64, tối đa 50 epoch, early stopping theo val loss (patience 15) trên 15% tập train của từng fold; cross-entropy có trọng số lớp (tương đương `class_weight="balanced"` của V5); chuẩn hóa bằng độ lệch chuẩn toàn cục của tập train (không rò rỉ sang test). Chạy trên GPU NVIDIA RTX 4060, khoảng 8 phút/fold.
 
-### 10.2 Kết quả thực nghiệm trên tín hiệu EEG thô (Raw Epochs)
-Mô hình EEGNet được huấn luyện và đánh giá trên epoch tín hiệu thực tế (128 kênh × 301 mẫu, biên độ $\mu\text{V}$, nhãn 0: Standard, 1: Target) với cơ chế kiểm định chéo 5-fold:
+### 10.2 Kết quả thực nghiệm trên toàn bộ 39 đối tượng (21.878 trial, epoch thô)
+EEGNet được đánh giá trên **đúng tập dữ liệu và đúng 5 fold** mà V5 dùng cho baseline: 39 đối tượng, 21.878 trial trả lời đúng (13,5% target), `GroupKFold(n_splits=5)` theo `subject_id`. Đã kiểm tra số trial của từng người khớp từng dòng với ma trận đặc trưng của V4, nên các fold test chứa cùng một nhóm người ở cả hai phương pháp. Ngưỡng quyết định 0,5 giống V5.
 
-| Chỉ số đánh giá | Giá trị trung bình ± Độ lệch chuẩn (Mean ± Std) | Kết quả toàn cục OOF (Out-of-fold) |
+| Chỉ số đánh giá | Trung bình ± độ lệch chuẩn (5 fold) | Toàn cục OOF (out-of-fold) |
 |---|:---:|:---:|
-| **Balanced Accuracy** | **0,821 ± 0,046** | **0,819** |
-| **ROC-AUC** | **0,890 ± 0,085** | **0,883** |
-| **PR-AUC (Average Precision)** | **0,694 ± 0,167** | **0,645** |
-| **F1-Macro** | **0,699 ± 0,038** | **0,697** |
-| **Sensitivity (Độ nhạy Target)** | **0,823 ± 0,123** | **0,820** |
-| **Specificity (Độ đặc hiệu)** | **0,819 ± 0,057** | **0,818** |
+| **Balanced Accuracy** | **0,907 ± 0,021** | 0,907 |
+| **ROC-AUC** | **0,970 ± 0,010** | 0,968 |
+| **PR-AUC (Average Precision)** | **0,873 ± 0,042** | 0,863 |
+| **F1-Macro** | **0,857 ± 0,028** | 0,856 |
+| **Sensitivity (Độ nhạy Target)** | **0,884 ± 0,060** | 0,886 |
+| **Specificity (Độ đặc hiệu)** | **0,930 ± 0,030** | 0,929 |
+
+Kết quả từng fold (`results/tables/eegnet_folds_real.csv`): ROC-AUC 0,968 / 0,974 / 0,974 / 0,980 / 0,954; balanced accuracy 0,884 / 0,922 / 0,915 / 0,928 / 0,886. Bốn trên năm fold chạy hết 50 epoch mà early stopping chưa kích hoạt, nên mô hình có thể còn cải thiện thêm nếu huấn luyện lâu hơn.
+
+*Ghi chú:* kết quả EEGNet trước đây (balanced accuracy 0,821, ROC-AUC 0,890) là thử nghiệm sơ bộ trên **1 người** (sub-01, 540 trial, `StratifiedKFold`), không so sánh được với baseline 39 người và đã được thay thế.
 
 ![EEGNet ROC and PR curves](figures/eegnet_roc_pr_real.png)
 
-### 10.3 Phân tích khả năng giải thích bằng bản đồ độ nhạy (Saliency Map Analysis)
-Để tránh hiện tượng mô hình hoạt động như một "hộp đen" (black-box), phương pháp phân tích bản đồ độ nhạy (Saliency Map via Input Gradients) được triển khai trên tập các trial Target chuẩn:
+### 10.3 Phân tích khả năng giải thích bằng bản đồ độ nhạy (Saliency Map)
+Saliency được tính bằng gradient đầu vào trên một mô hình tham chiếu (huấn luyện trên 85% toàn bộ trial), lấy trung bình trên toàn bộ 2.951 trial Target:
 $$S_{c, t} = \frac{1}{N_{\text{target}}} \sum_{i=1}^{N_{\text{target}}} \left| \frac{\partial \hat{y}_i^{(\text{target})}}{\partial X_{i, c, t}} \right|$$
 
-Trong đó $\hat{y}_i^{(\text{target})}$ là logit đầu ra dự đoán nhãn Target và $X_{i, c, t}$ là điện thế tại kênh $c$, thời điểm $t$ của trial thứ $i$.
+Trong đó $\hat{y}_i^{(\text{target})}$ là logit lớp Target và $X_{i, c, t}$ là điện thế tại kênh $c$, thời điểm $t$ của trial $i$.
 
 ![EEGNet Saliency Map Analysis](figures/eegnet_saliency_real.png)
+![EEGNet saliency topography](figures/eegnet_saliency_topomap_real.png)
 
-- **Động học theo miền thời gian (Temporal Saliency Profile)**:
-  - Bản đồ độ nhạy chỉ ra rằng trọng số gradient của mô hình tập trung gần như hoàn toàn vào cửa sổ thời gian [300, 600] ms sau kích thích, với điểm cực đại đạt tại **628 ms**.
-  - Kết quả này trùng khớp tuyệt đối với lý thuyết điện sinh lý P3b (Polich, 2007), chứng minh rằng mạng nơ-ron thực sự trích xuất thông tin nhận thức từ phức hợp sóng P300 chứ không dựa vào các thành phần cảm giác sớm (P1, N1 trước 200 ms).
-- **Phân bố theo miền không gian (Spatial Saliency Profile)**:
-  - Các kênh điện cực có độ nhạy đóng góp cao nhất tập trung tại khu vực đỉnh (Parietal: Pz, P3, P4) và trung tâm (Centroparietal: CPz, Cz).
-  - Phân bố không gian này tương thích với bản đồ địa hình Scalp Topomap của sóng hiệu số (Target − Standard), khẳng định mạng tích chập tự học được hình thái không gian sinh học mà không cần gán nhãn vị trí tọa độ điện cực trước.
+- **Miền thời gian — khớp với P300**:
+  - Đỉnh saliency trung bình ở **504 ms**, nằm trong cửa sổ P3b.
+  - **40,2%** tổng saliency rơi vào 300–600 ms, trong khi cửa sổ này chỉ chiếm 24,9% thời lượng epoch (gấp khoảng 1,6 lần mức phân bố đều). Khoảng −200–0 ms chỉ chiếm 3,8% và 0–200 ms chiếm 10,7%.
+  - Tuy vậy, 21,5% saliency nằm ở 600–800 ms, tức mô hình cũng dùng phần đuôi muộn của đáp ứng (trùng thời điểm bấm nút, RT khoảng 542 ms).
+- **Miền không gian — chỉ khớp một phần**:
+  - Hiệu ứng P300 (Target − Standard, 300–600 ms) lớn nhất ở **Pz, PPO1h, P1, CPP1h, CPz**, phân bố đối xứng quanh đường giữa vùng đỉnh, đúng P3b theo Polich (2007).
+  - Saliency lại cao nhất ở **C1, FCC3h, CCP3h, FCC4h, FFC2h, FCz, C3**, tức vùng **trung tâm – trán trung tâm, lệch trái**. Pz chỉ xếp hạng 37/128. Tương quan giữa hồ sơ saliency theo kênh và hiệu ứng P300 chỉ ở mức **r = 0,32**.
+  - Saliency vùng trung tâm trái (C3, C1, CCP3h, FCC3h) gấp khoảng 1,75 lần vùng trung tâm phải, với hai đỉnh khoảng 180 ms và 460 ms. Saliency vùng đỉnh (Pz, CPz, P1, P2) đạt đỉnh sớm hơn, khoảng 340 ms.
+  - Trong khi đó, ERP trung bình **không** lệch trái: Target − Standard (400–700 ms) ở C3 là 1,81 µV, ở C4 là 2,04 µV (kiểm định cặp trên 39 người: p = 0,50), so với 6,96 µV ở Pz.
+- **Cách hiểu đúng về saliency**: gradient đầu vào mô tả **bộ lọc** của mô hình (mô hình "backward"), không phải bản đồ nơi tín hiệu xuất hiện (mô hình "forward"). Trọng số bộ lọc có thể lớn ở những kênh dùng để **khử nhiễu** chung, chứ không nhất thiết ở nơi có tín hiệu (Haufe et al., 2014). Vì vậy điểm nóng trung tâm trái có hai cách giải thích chưa tách được: (1) mô hình dùng hoạt động **chuẩn bị vận động** của việc bấm nút (chỉ xảy ra ở trial Target); (2) mô hình dùng các kênh này như tham chiếu để triệt nhiễu cho tín hiệu P3b. Kiểm soát cần làm thêm: huấn luyện EEGNet cho bài toán **distractor vs standard** (cả hai đều không bấm nút), và tính "activation pattern" theo Haufe et al. (2014) thay cho gradient.
 
 ---
 
 ## 11. So sánh Đối đầu Học máy vs Học sâu & Trả lời 3 Câu hỏi Nghiên cứu (Research Questions)
 
 ### 11.1 Bảng so sánh hiệu năng trực diện (Head-to-Head Comparison)
-Bảng tổng hợp kết quả đối đầu trực tiếp giữa các mô hình học máy truyền thống baseline (V5) và mô hình học sâu EEGNet (V6):
+Cùng 39 đối tượng, 21.878 trial, cùng 5 fold `GroupKFold` theo người, cùng ngưỡng 0,5 (trung bình ± độ lệch chuẩn qua 5 fold):
 
 | Mô hình | Loại mô hình | Đầu vào dữ liệu | Balanced Accuracy | ROC-AUC | PR-AUC (AP) | Sensitivity | Specificity |
 |---|---|---|:---:|:---:|:---:|:---:|:---:|
 | Dummy | Cơ sở ngẫu nhiên | Nhãn tần suất | 0,497 ± 0,005 | 0,497 ± 0,005 | 0,134 ± 0,004 | 0,127 ± 0,009 | 0,867 ± 0,002 |
 | Random Forest | Cây quyết định ensemble | 402 đặc trưng | 0,638 ± 0,041 | 0,907 ± 0,025 | 0,652 ± 0,046 | 0,289 ± 0,087 | **0,988 ± 0,005** |
-| RBF SVM | Nhân phi tuyến | 402 đặc trưng | 0,799 ± 0,056 | 0,946 ± 0,016 | **0,791 ± 0,045** | 0,625 ± 0,120 | 0,973 ± 0,011 |
-| LDA | Chiếu tuyến tính điều chuẩn | 402 đặc trưng | 0,815 ± 0,060 | **0,947 ± 0,022** | **0,791 ± 0,075** | 0,659 ± 0,126 | 0,971 ± 0,013 |
-| **EEGNet** | Mạng tích chập chuyên biệt | **Epoch thô (128×301)** | 0,821 ± 0,046 | 0,890 ± 0,085 | 0,694 ± 0,167 | 0,823 ± 0,123 | 0,819 ± 0,057 |
-| **Logistic Regression** | Tuyến tính cân bằng lớp | 402 đặc trưng | **0,874 ± 0,037** | 0,946 ± 0,021 | **0,791 ± 0,073** | **0,841 ± 0,087** | 0,908 ± 0,027 |
+| RBF SVM | Nhân phi tuyến | 402 đặc trưng | 0,799 ± 0,056 | 0,946 ± 0,016 | 0,791 ± 0,045 | 0,625 ± 0,120 | 0,973 ± 0,011 |
+| LDA | Chiếu tuyến tính điều chuẩn | 402 đặc trưng | 0,815 ± 0,060 | 0,947 ± 0,022 | 0,791 ± 0,075 | 0,659 ± 0,126 | 0,971 ± 0,013 |
+| Logistic Regression | Tuyến tính cân bằng lớp | 402 đặc trưng | 0,874 ± 0,037 | 0,946 ± 0,021 | 0,791 ± 0,073 | 0,841 ± 0,087 | 0,908 ± 0,027 |
+| **EEGNet** | Mạng tích chập chuyên biệt | **Epoch thô (128 × 301)** | **0,907 ± 0,021** | **0,970 ± 0,010** | **0,873 ± 0,042** | **0,884 ± 0,060** | 0,930 ± 0,030 |
 
 ![ML vs DL Comparison](figures/ml_vs_dl_comparison.png)
+
+**So sánh theo từng người.** Vì hai phương pháp dùng chung các fold, mỗi người có một dự đoán out-of-fold từ cả hai. So sánh cặp trên 39 người (kiểm định Wilcoxon, `results/tables/ml_vs_dl_per_subject.csv`):
+
+| So sánh | Chỉ số | Chênh lệch trung vị | Số người EEGNet tốt hơn | p (Wilcoxon) |
+|---|---|:---:|:---:|:---:|
+| EEGNet vs LDA | ROC-AUC | +0,023 | 35/39 | 1,9 × 10⁻⁹ |
+| EEGNet vs LDA | Balanced accuracy | +0,075 | 37/39 | 1,6 × 10⁻⁹ |
+| EEGNet vs Logistic Regression | ROC-AUC | +0,023 | 34/39 | 3,3 × 10⁻⁹ |
+| EEGNet vs Logistic Regression | Balanced accuracy | +0,036 | 31/39 | 2,5 × 10⁻⁴ |
+
+ROC-AUC theo từng người: EEGNet 0,972 ± 0,035 (trung vị 0,986), LDA 0,948 ± 0,048, Logistic Regression 0,948 ± 0,048.
 
 ### 11.2 Trả lời Câu hỏi Nghiên cứu 1 (Research Question 1)
 > **Câu hỏi 1**: *Kết quả phân loại single-trial tốt nhất cho frequent (standard) vs target là bao nhiêu?*
 
-- **Kết quả phân loại tốt nhất**:
-  - Mô hình đạt **Balanced Accuracy cao nhất** là **Logistic Regression (với trọng số lớp cân bằng)** với mức **87,4% ± 3,7%** (Out-of-fold Balanced Accuracy: **87,5%**), đi kèm độ nhạy Sensitivity đạt **84,1% ± 8,7%** và độ đặc hiệu Specificity đạt **90,8% ± 2,7%**.
-  - Mô hình đạt **ROC-AUC cao nhất** là **Linear Discriminant Analysis (LDA)** với mức **0,947 ± 0,022** (PR-AUC đạt **0,791 ± 0,075**, F1-macro **0,835 ± 0,045**).
-- **Ý nghĩa khoa học và thực tiễn**:
-  - Kết quả Balanced Accuracy 87,4% và ROC-AUC 0,947 vượt xa mức ngẫu nhiên (50% / AUC 0,497) và vượt trội so với ngưỡng hiệu năng chuẩn thường thấy trong các nghiên cứu BCI single-trial kinh điển (thường dao động khoảng 70% – 80%).
-  - Mức độ đặc hiệu 90,8% – 97,1% đảm bảo rằng hệ thống nhận diện kích thích đích với độ tin cậy cao, hạn chế tối đa việc phát tín hiệu sai khi người dùng đang tiếp nhận kích thích thường (Standard).
+- **Kết quả tốt nhất (đánh giá liên người, người ở tập test chưa từng xuất hiện khi huấn luyện)**: **EEGNet** trên epoch thô đạt balanced accuracy **90,7% ± 2,1%**, ROC-AUC **0,970 ± 0,010**, PR-AUC **0,873 ± 0,042** (gấp khoảng 6,5 lần tỉ lệ target 13,5%), với sensitivity **88,4%** và specificity **93,0%**.
+- **Tốt nhất trong nhóm học máy truyền thống**: Logistic Regression (balanced accuracy 87,4% ± 3,7%) và LDA (ROC-AUC 0,947 ± 0,022).
+- **Ý nghĩa**: hiệu năng này đạt được **không cần hiệu chỉnh theo từng người** (không có dữ liệu của người test trong tập huấn luyện), vượt xa mức ngẫu nhiên (50% / AUC 0,50). Kết quả trên một trial đơn lẻ đủ cao cho ứng dụng BCI, với lưu ý ở mục 11.4 về hoạt động bấm nút.
 
 ### 11.3 Trả lời Câu hỏi Nghiên cứu 2 (Research Question 2)
 > **Câu hỏi 2**: *Deep learning có tốt hơn các kỹ thuật machine learning chuẩn trong phân loại single-trial không?*
 
-- **Kết luận thực nghiệm**:
-  - **Không**. Trong bài toán phân loại đơn trial trên bộ dữ liệu này, mô hình Deep Learning (EEGNet) **không vượt trội hơn** các mô hình Machine Learning chuẩn tuyến tính có điều chuẩn (Logistic Regression và LDA) kết hợp với 402 đặc trưng miền thời gian - tần số được thiết kế chuyên sâu (Balanced Accuracy 82,1% vs 87,4%; ROC-AUC 0,890 vs 0,947).
-- **Giải thích nguyên nhân chuyên môn (Neuroscientific & Machine Learning Rationale)**:
-  1. **Tỷ lệ tín hiệu trên nhiễu (SNR) và đóng góp của miền đặc trưng**: Tín hiệu điện não EEG ở mức từng trial đơn lẻ có tỷ lệ nhiễu rất cao do ảnh hưởng từ hoạt động nền của vỏ não và nhiễu điện cực. Bộ 402 đặc trưng miền thời gian - tần số của V4 (đặc biệt là điện thế trung bình P3b tại Pz và năng lượng sóng con wavelet delta/theta) đã tích phân thông tin và lọc bỏ nhiễu hiệu quả dựa trên kiến thức tiên nghiệm sinh lý học (neurophysiological domain prior).
-  2. **Độ ổn định xuyên đối tượng (Generalization vs Parameter Complexity)**: Các mô hình tuyến tính với chính quy hóa L2 hoặc co rút ma trận hiệp phương sai Ledoit-Wolf có không gian tham số chặt chẽ, ít bị quá khớp trước các biến thiên hình thái sóng giữa các đối tượng. Ngược lại, mạng nơ-ron học trực tiếp từ tín hiệu thô có xu hướng nhạy cảm hơn với sự sai khác về trở kháng điện cực và biên độ sóng giữa các cá nhân.
-  3. **Giá trị thực tiễn của Deep Learning**: Mặc dù độ chính xác tối đa thấp hơn một khoảng nhỏ, EEGNet sở hữu ưu điểm vượt trội về khả năng **học biểu diễn đầu-cuối (end-to-end learning)**: mô hình không đòi hỏi quy trình trích xuất đặc trưng tính toán phức tạp, có thể xử lý trực tiếp epoch thô chỉ với ~2.100 tham số và thời gian suy luận dưới 5 ms, vô cùng phù hợp cho các thiết bị BCI nhúng biên (Edge BCI).
+- **Kết luận thực nghiệm**: **Có**, trên bộ dữ liệu này và với cùng sơ đồ đánh giá. EEGNet vượt mọi mô hình baseline ở balanced accuracy (+3,3 điểm so với Logistic Regression), ROC-AUC (+0,023 so với LDA), PR-AUC (+0,082) và có độ lệch chuẩn giữa các fold nhỏ hơn. Chênh lệch có ý nghĩa thống kê ở cấp từng người (ROC-AUC tốt hơn ở 34–35/39 người, p < 10⁻⁸).
+- **Mức chênh lệch về ROC-AUC là vừa phải** (0,947 → 0,970): ở cả hai phương pháp, phần lớn thông tin phân biệt đã nằm trong P3b vùng đỉnh mà bộ đặc trưng của V4 mô tả tốt. Lợi thế của EEGNet thể hiện rõ hơn ở PR-AUC và balanced accuracy, tức ở vùng khó (các trial target biên độ thấp).
+- **Giải thích nguyên nhân**:
+  1. **Thông tin không gian đầy đủ**: bộ đặc trưng thủ công chỉ dùng 12 kênh. EEGNet dùng cả 128 kênh và tự học tổ hợp không gian (lọc không gian) có thể triệt nhiễu chung giữa các kênh, điều mà đặc trưng theo từng kênh không làm được.
+  2. **Thông tin thời gian chi tiết**: đặc trưng thủ công tóm tắt tín hiệu thành trung bình trong 5 cửa sổ cố định. EEGNet học bộ lọc thời gian trên toàn epoch và tận dụng được cả các đáp ứng sớm (~180–340 ms) lẫn phần đuôi muộn (600–800 ms).
+  3. **Đủ dữ liệu cho mô hình nhỏ**: với khoảng 14.900 trial huấn luyện mỗi fold và chỉ 3.930 tham số, EEGNet không bị quá khớp. Khi chỉ có 1 người (khoảng 430 trial huấn luyện), EEGNet chỉ đạt ROC-AUC 0,890, thấp hơn rõ. Lợi thế của deep learning phụ thuộc nhiều vào lượng dữ liệu.
+  4. **Đổi lại**: EEGNet cần GPU (khoảng 8 phút/fold so với vài giây cho LDA) và khó giải thích hơn (mục 11.4). Trong khi đó LDA và Logistic Regression trên đặc trưng sinh lý học vẫn đạt ROC-AUC 0,947 và giải thích trực tiếp được bằng các đặc trưng như `Pz_p3b_mean`.
 
 ### 11.4 Trả lời Câu hỏi Nghiên cứu 3 (Research Question 3)
-> **Câu hỏi 3**: *Các đặc trưng mà mô hình deep learning khám phá có giải thích được không (tránh “hộp đen”)? Nếu DL không tốt hơn, cần giải thích lý do.*
+> **Câu hỏi 3**: *Các đặc trưng mà mô hình deep learning khám phá có giải thích được không (tránh "hộp đen")? Nếu DL không tốt hơn, cần giải thích lý do.*
 
-- **Khẳng định tính giải thích được**:
-  - Các đặc trưng do mô hình học sâu EEGNet khám phá **hoàn toàn giải thích được** về mặt điện sinh lý học thần kinh và phù hợp chặt chẽ với mô hình lý thuyết tích hợp P300 của Polich (2007).
-- **Bằng chứng điện sinh lý thông qua bản đồ độ nhạy (Saliency Map)**:
-  1. **Khớp nối về miền thời gian**: Phân tích gradient đầu vào chỉ ra vùng chú ý quan trọng nhất của mạng nằm tập trung trong khoảng thời gian [300, 600] ms sau kích thích (đạt đỉnh tại 628 ms). Đây chính là cửa sổ trễ của sóng P3b kinh điển, phản ánh tiến trình nhận thức cập nhật bộ nhớ làm việc (working memory update) khi não bộ phân loại kích thích đích. Mạng không hề dựa vào các biến dạng sớm trước 200 ms hay các thành phần cảm giác sơ cấp.
-  2. **Khớp nối về miền không gian**: Bộ lọc tích chập không gian sâu tự động dồn trọng số lớn nhất vào các điện cực khu vực đỉnh (Pz, P3, P4) và trung tâm (CPz, Cz). Điều này phản ánh hoàn hảo nguồn phát sinh P3b tại vỏ não đỉnh - trán (Temporo-parietal junction & Prefrontal cortex) đã được chỉ ra trong lý thuyết của Polich.
-- **Tổng kết**:
-  - Mô hình Deep Learning hoàn toàn thoát khỏi trạng thái "hộp đen". Các bộ lọc không gian và thời gian của EEGNet đã tái hiện lại một cách tự động các quy luật sinh lý học thần kinh cốt lõi của sóng P300, cung cấp bằng chứng vững chắc về tính hợp lệ sinh học của mô hình.
+- **Trả lời: giải thích được một phần.**
+- **Phần phù hợp với P300 (Polich, 2007)**:
+  1. **Miền thời gian**: saliency tập trung trong cửa sổ P3b (40,2% saliency trong 300–600 ms, gấp khoảng 1,6 lần mức phân bố đều, đỉnh ở 504 ms) và rất thấp trong khoảng trước kích thích (3,8%). Mô hình không dựa vào nhiễu ngẫu nhiên hay giai đoạn baseline.
+  2. **Có đóng góp của vùng đỉnh**: saliency vùng đỉnh (Pz, CPz, P1, P2) đạt đỉnh khoảng 340 ms, nằm trong cửa sổ P3; tương quan dương (r = 0,32) giữa saliency và hiệu ứng P300 theo kênh.
+- **Phần chưa khớp và chưa giải thích được hoàn toàn**:
+  1. Điểm nóng saliency nằm ở vùng **trung tâm – trán trung tâm bên trái** (C1, FCC3h, CCP3h, C3), không phải ở Pz nơi hiệu ứng P300 lớn nhất. Đỉnh ở khoảng 460 ms, ngay trước thời điểm bấm nút (RT khoảng 542 ms). Đây là vị trí của vỏ não vận động, nên **giả thuyết mô hình dùng tín hiệu chuẩn bị vận động** (chỉ có ở trial Target, vì chỉ target mới bấm nút) cần được xem xét nghiêm túc.
+  2. Mặt khác, ERP trung bình không cho thấy lệch trái ở C3 so với C4 (p = 0,50), và gradient chỉ phản ánh trọng số bộ lọc chứ không phải vị trí nguồn tín hiệu (Haufe et al., 2014). Do đó điểm nóng này cũng có thể là kênh tham chiếu dùng để khử nhiễu.
+  3. Mục 7.6 (V2) đã cho thấy phân loại distractor vs standard (không bấm nút) bằng đặc trưng vẫn đạt AUC 0,90, so với 0,95 cho target vs standard. Như vậy P300 vẫn là nguồn thông tin chính cho baseline, nhưng phần chênh còn lại có thể đến từ hoạt động vận động, và điều này có thể đúng hơn với EEGNet.
+- **Tổng kết**: EEGNet **không phải hoàn toàn "hộp đen"**: hồ sơ thời gian của nó khớp với cửa sổ P3b. Nhưng hồ sơ không gian **không tái hiện đơn thuần** phân bố P3b vùng đỉnh, và phần lợi thế so với ML có thể một phần đến từ thông tin không phải P300 (vận động). Để kết luận chắc chắn, cần: (1) huấn luyện EEGNet cho distractor vs standard (cùng P3 nhưng không bấm nút); (2) tính activation pattern theo Haufe et al. (2014); (3) phân tích saliency theo từng trial đã căn theo thời điểm bấm nút (response-locked).
+
+### Tài liệu tham khảo bổ sung (mục 10–11)
+- Lawhern VJ, Solon AJ, Waytowich NR, Gordon SM, Hung CP, Lance BJ. EEGNet: a compact convolutional neural network for EEG-based brain–computer interfaces. *J Neural Eng* 2018;15(5):056013.
+- Simonyan K, Vedaldi A, Zisserman A. Deep inside convolutional networks: Visualising image classification models and saliency maps. *arXiv* 1312.6034, 2013.
+- Haufe S, Meinecke F, Görgen K, Dähne S, Haynes JD, Blankertz B, Bießmann F. On the interpretation of weight vectors of linear models in multivariate neuroimaging. *NeuroImage* 2014;87:96–110.

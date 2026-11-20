@@ -212,7 +212,7 @@ def plot_difference_waves(
 
         ax.axvline(0, color="k", lw=0.7, ls=":")
         ax.axhline(0, color="k", lw=0.7, ls=":")
-        ax.set_title(f"Difference Wave – {ch}", fontsize=11.5, fontweight="bold")
+        ax.set_title(f"Difference wave – {ch}", fontsize=11.5, fontweight="bold")
         ax.set_xlabel("Time (ms)", fontsize=10.5)
         ax.grid(True, linestyle=":", alpha=0.5)
         ax.set_xlim(-100, 850)
