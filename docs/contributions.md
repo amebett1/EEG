@@ -112,6 +112,13 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 
 ---
 
+### Rà soát bàn giao V2/V3
+
+- V2: `src/preprocessing/audit_epochs.py` đọc lần lượt 42 file (27.034 epoch), đối chiếu metadata, kênh, lọc, baseline metadata, average reference, ngưỡng loại epoch và QC; đối chiếu trial/nhãn/RT và `Pz_p3b_mean` với CSV của 39 người. Tất cả kiểm tra đã triển khai đạt; chi tiết `results/tables/v2_epoch_audit.json`.
+- Không chạy lại tiền xử lý từ dữ liệu thô hoặc xác minh lại các quyết định ICA vì dữ liệu và mô hình ICA tương ứng chưa có trong bản làm việc.
+- V3: sửa kiểm tra latency vòng tròn; thống nhất bảng/ERP trên trial đúng và 300–500 ms; giữ QC 300–600 ms trên toàn bộ trial riêng biệt. Không chọn lại người cho ML/DL theo kiểm tra ERP.
+- Xuất lại bảng 42 người, thống kê tái lập và 5 hình nhóm với trọng số bằng nhau cho 39 người; đồng bộ báo cáo Việt/Anh và nội dung V2/V3 trong khung slide. Có kiểm thử hồi quy bằng `python -m unittest discover -s tests -v`.
+
 ## 4. Nhật ký công việc: Vai trò V3
 
 - **Người phụ trách**: **Trương Huy Hoàng**
@@ -129,7 +136,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
      - `plot_difference_waves`: Trực quan hóa sóng hiệu số so sánh trực diện P3a và P3b.
      - `plot_erp_topomap`: Vẽ bản đồ địa hình da đầu 128 kênh (montage Colin27) qua các mốc thời gian từ 150 ms đến 550 ms.
      - `plot_p300_summary_topomap`: Scalp map trung bình toàn cửa sổ P300 [300, 500] ms chỉ ra tiêu điểm dương tính vùng đỉnh.
-     - `verify_p300`: Kiểm chứng tự động 4 quy tắc Polich trong khoảng 300–500 ms và xuất báo cáo logic.
+     - `verify_p300`: ba tiêu chí lõi P3b và xu hướng P3a mô tả, do dự án định nghĩa; tìm đỉnh 200–800 ms độc lập với cửa sổ chấp nhận 300–500 ms.
   3. **Tạo Notebook tương tác `notebooks/02_erp_visualization.ipynb`**:
      - Cho phép chạy trực quan từng phần, lưu toàn bộ hình ảnh độ phân giải cao vào `results/figures/` và `report/figures/`.
   4. **Thử nghiệm & Bàn giao**:
@@ -141,15 +148,15 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 - **Chi tiết thực hiện**:
   1. **Grand Average ERP (Fz, Pz) toàn bộ nhóm**:
      - Phân tích dạng sóng trên toàn bộ 39 đối tượng chuẩn tại Fz và Pz trong cửa sổ $[300, 500]\text{ ms}$.
-     - Xác nhận hiệu ứng Oddball cực kỳ mạnh mẽ: chênh lệch Target − Standard tại Pz đạt $+5,64 \pm 2,12\,\mu\text{V}$, kiểm định Student $t(38) = 16,635$, $p = 4,91 \times 10^{-19}$, Cohen's $d = 2,66$.
-     - Khẳng định tính chọn lọc không gian: Pz dương tính cực đại ($+7,14\,\mu\text{V}$), Fz âm tính phân cực.
+     - Số liệu tính lại từ trial đúng, 300–500 ms: Target − Standard tại Pz **5,05 ± 2,28 µV**, **t(38) = 13,82**, **p = 2,14 × 10⁻¹⁶**, **dz = 2,21**. Giá trị này thay cho số liệu trộn cửa sổ trước đây.
+     - Target Pz trung bình 300–500 ms **6,97 ± 2,74 µV**, Standard **1,92 ± 1,49 µV**; 39/39 người có Target Pz > Fz.
   2. **Scalp Topomap 128 kênh toàn bộ nhóm**:
      - Trực quan hóa diễn tiến không gian từ chẩm (cảm giác sơ cấp) đến đỉnh (P3b nhận thức) qua các mốc thời gian 150–550 ms.
      - Xác lập bản đồ trung bình cửa sổ P300 [300, 500] ms với tiêu điểm dương tính đỉnh (Parietal Hotspot).
   3. **Kiểm định định lượng Polich (2007) trên 42 người**:
-     - $100\%$ đối tượng bình thường (39/39) thỏa mãn tiêu chuẩn Oddball và Gradient đỉnh.
-     - Phát hiện tương quan tuyến tính nghịch có ý nghĩa giữa thời gian phản ứng Target RT và biên độ Pz ($r = -0,434, p = 0,0058$): phản xạ nhanh đi kèm với biên độ P3b lớn.
-     - Làm rõ cơ chế suy giảm ở nhóm hiểu sai nhiệm vụ (sub-02/14/17): False Alarm $> 90\%$, biên độ Target bị suy giảm còn $4,99\,\mu\text{V}$.
+     - Kiểm tra tính lại: gradient 39/39, oddball 37/39, latency 22/39, xu hướng trán Distractor 26/39. Đồng thời ba tiêu chí lõi: 22/39; phân tích bổ sung 300–600 ms: 32/39.
+     - Tương quan RT theo QC với Target Pz 300–500 ms trên trial đúng: **r = −0,493, p = 0,00144**, không suy diễn nhân quả.
+     - Nhóm sub-02/14/17 bị loại theo hành vi (false alarm Distractor trung bình 90,95%); không khẳng định không có ERP. Target Pz trên trial đúng **5,29 ± 2,58 µV**; chỉ còn 1/1/19 Distractor đúng nên các trung bình này không ổn định.
   4. **Xuất bảng kết quả và soạn thảo báo cáo**:
      - Xuất bảng kết quả kiểm định 42 đối tượng ra file `results/tables/v3_p300_group_results.csv`.
      - Soạn thảo toàn bộ phần 8 "Kết quả Nghiên cứu & Phân tích ERP (Results – ERP)" trong `report/README.md`.

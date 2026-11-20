@@ -39,25 +39,31 @@ KÍCH THÍCH XAO NHÃNG (Distractor)                 KÍCH THÍCH ĐÍCH (Target
 
 ### Phương pháp Sóng Hiệu số (Difference Waves)
 Để bộc lộ chính xác thành phần nội sinh P300 mà không bị chồng lấn bởi các sóng cảm giác sớm (P1 ~100 ms, N1 ~150 ms, P2 ~200 ms), ta thực hiện phép trừ đại số giữa các điều kiện:
-- $\Delta_{\text{Target}} = \text{Target} - \text{Standard}$: Cô lập hoàn toàn thành phần **P3b**.
-- $\Delta_{\text{Distractor}} = \text{Distractor} - \text{Standard}$: Cô lập thành phần **P3a**.
+- $\Delta_{\text{Target}} = \text{Target} - \text{Standard}$: Làm nổi bật đáp ứng liên quan Target/P3b, không cô lập hoàn toàn nguồn thần kinh.
+- $\Delta_{\text{Distractor}} = \text{Distractor} - \text{Standard}$: Làm nổi bật đáp ứng liên quan Distractor/P3a.
 
 ---
 
-## 3. Hệ thống Tiêu chuẩn Kiểm chứng P300 (Verification Rules)
+## 3. Tiêu chí kiểm chứng P300 của dự án
 
-Áp dụng cho từng đối tượng trong cửa sổ phân tích trọng tâm $[300, 500]\text{ ms}$ (mở rộng kiểm tra đến $600\text{ ms}$):
-1. **Parietal Gradient (Gradient vùng đỉnh)**:
-   $$\text{Amplitude}(Pz) > \text{Amplitude}(Fz)$$
-   Đối với Target, điện thế tại Pz phải vượt trội so với Fz, khẳng định đặc tính P3b.
-2. **Oddball Effect (Hiệu ứng chênh lệch kích thích)**:
-   $$\text{Amplitude}(Pz, \text{Target}) - \text{Amplitude}(Pz, \text{Standard}) \ge 1.5\,\mu\text{V}$$
-   Khẳng định có sự phân biệt nhận thức rõ ràng giữa kích thích đích và kích thích nền.
-3. **Physiological Latency Window (Cửa sổ độ trễ sinh lý)**:
-   $$300\text{ ms} \le \text{Peak Latency}(Pz) \le 500\text{ ms}$$
-   Đỉnh cực đại của P3b xuất hiện chuẩn xác trong cửa sổ kích hoạt nhận thức chuẩn 300–500 ms.
-4. **Fronto-Central Tendency của P3a (Xu hướng vùng trán của Distractor)**:
-   Phân bố năng lượng của Distractor dịch chuyển rõ rệt về phía trước (Fz/Cz) so với Target.
+Các tiêu chí dưới đây do dự án định nghĩa dựa trên khung P3a/P3b; không phải chuẩn chẩn
+đoán hay ngưỡng số do Polich quy định. Chỉ dùng trial trả lời đúng, tính ERP từng người,
+rồi lấy trung bình với trọng số bằng nhau cho 39 người không hiểu sai nhiệm vụ.
+
+1. Target Pz > Fz, tính biên độ trung bình trong **300–500 ms**.
+2. Target − Standard tại Pz ≥ **1,5 µV** trong cùng cửa sổ.
+3. Tìm cực đại dương Target Pz trong **200–800 ms**, sau đó kiểm tra latency thuộc
+   **300–500 ms**. Không tìm đỉnh ngay trong cửa sổ chấp nhận vì sẽ tạo kiểm tra vòng tròn.
+4. Xu hướng trán tương đối của Distractor: (Fz − Pz) của Distractor lớn hơn Target.
+   Đây là chỉ số mô tả P3a riêng, không thuộc ba tiêu chí lõi P3b.
+
+`p300_detected` yêu cầu đồng thời tiêu chí 1–3; `p300_verified` còn yêu cầu không thuộc
+nhóm hiểu sai nhiệm vụ. Tính bằng số đầy đủ, chỉ làm tròn khi trình bày. Phân tích bổ sung
+**300–600 ms** thay cả cửa sổ trung bình và cửa sổ chấp nhận latency, giữ nguyên tìm đỉnh
+200–800 ms. Không loại thêm người khỏi ML/DL theo kết quả kiểm chứng ERP.
+
+QC V2 dùng 300–600 ms trên **tất cả epoch giữ lại**, kể cả trial sai; không dùng trực tiếp
+các biên độ này thay cho ERP 300–500 ms trên trial đúng.
 
 ---
 
@@ -307,7 +313,7 @@ Các bước sau được nhóm thêm vào hoặc làm khác, để cùng một 
 - **Nhiễu bấm nút và chớp mắt.** Người tham gia bấm nút khoảng 540 ms sau target, và nhiều người chớp mắt ngay sau khi bấm. Hoạt động vận động và phần nhiễu mắt còn sót có thể "đi kèm" với target. Kiểm tra trên toàn bộ người: phân loại distractor với standard (cả hai đều không bấm nút) vẫn đạt AUC 0,90, so với 0,95 khi phân loại target với standard. Như vậy P300 vẫn là nguồn thông tin chính.
 - **Loại nhiều thành phần cơ.** Trung bình mỗi người bị loại 12 thành phần cơ. Một phần hoạt động não ở tần số cao có thể bị loại theo, nhưng điều này ít ảnh hưởng tới P300 vì P300 nằm chủ yếu dưới 8 Hz.
 - **Không có thông tin trên 40 Hz** (không phân tích được gamma). Mỗi epoch dài 1,2 s, nên độ phân giải tần số khi tính phổ trên cả epoch chỉ khoảng 1 Hz.
-- **Chỉ số ICA chỉ đúng với lần fit này.** Danh sách thành phần loại bằng tay chỉ đúng khi giữ nguyên tham số ICA. Mô hình ICA của từng người được lưu trong `derivatives/v1/ica/` để kiểm tra lại.
+- **Chỉ số ICA chỉ đúng với lần fit này.** Danh sách thành phần loại bằng tay chỉ đúng khi giữ nguyên tham số ICA. Cần tải thêm mô hình ICA vào `derivatives/v1/ica/` và dữ liệu thô để kiểm tra lại; chúng chưa có trong bản làm việc này.
 
 ### Tài liệu tham khảo (mục 7)
 - Dzianok P, Antonova I, Wojciechowski J, Dreszer J, Kublik E. The Nencki-Symfonia electroencephalography/event-related potential dataset: Multiple cognitive tasks and resting-state data collected in a sample of healthy adults. *GigaScience* 2022;11:giac015. doi:10.1093/gigascience/giac015
@@ -318,97 +324,97 @@ Các bước sau được nhóm thêm vào hoặc làm khác, để cùng một 
 
 ---
 
-## 8. Kết quả Nghiên cứu & Phân tích ERP (Results – ERP) (Vai trò V3: Trương Huy Hoàng – Tuần 2)
+### 7.7 Kiểm tra bộ epoch và đặc trưng bàn giao (V2)
 
-### 8.1 Dạng sóng Grand Average ERP (Fz, Pz) và Sóng Hiệu số
-Dạng sóng Grand Average ERP trên toàn bộ **39 đối tượng chuẩn** (sau khi loại 3 đối tượng hiểu sai nhiệm vụ) được phân tích tại hai điện cực chuẩn mốc **Fz** (đại diện vùng trán) và **Pz** (đại diện vùng đỉnh) trong cửa sổ kích hoạt nhận thức chuẩn $[300, 500]\text{ ms}$:
+Chạy `python -m src.preprocessing.audit_epochs`: đủ **42 file, 27.034 epoch**; tất cả
+kiểm tra đã triển khai đều đạt. Bao gồm thứ tự 128 kênh, montage, 301 mẫu/250 Hz,
+metadata lọc/baseline, dữ liệu hữu hạn, average reference, ngưỡng peak-to-peak 150 µV,
+nhãn và hành vi, số trial cùng biên độ QC 300–600 ms. Với 39 người phân loại, thứ tự
+trial, nhãn, RT và `Pz_p3b_mean` tính lại khớp CSV **21.878 trial**.
 
-1. **Hiệu ứng Oddball rõ nét và có ý nghĩa thống kê vượt trội**:
-   - Tại điện cực **Pz**, biên độ trung bình trong cửa sổ $300–500\text{ ms}$ của kích thích Đích (Target) đạt **$7,14 \pm 2,47\,\mu\text{V}$**, vượt trội hoàn toàn so với kích thích Thường (Standard) đạt **$1,51 \pm 1,29\,\mu\text{V}$**.
-   - Mức chênh lệch biên độ hiệu ứng Oddball đạt **$+5,64 \pm 2,12\,\mu\text{V}$**.
-   - Kiểm định bắt cặp Student ($t$-test for paired samples): $t(38) = 16,635$, $p = 4,91 \times 10^{-19}$. Kích thước hiệu ứng đạt mức khổng lồ: **Cohen's $d = 2,66$**, khẳng định phản ứng chú ý và cập nhật bộ nhớ làm việc (context updating) diễn ra vô cùng mạnh mẽ và đồng nhất trên toàn bộ nhóm người tham gia.
-2. **Gradient cực đại vùng đỉnh (Parietal Positivity Gradient)**:
-   - Tại điện cực **Fz**, biên độ kích thích Target bị phân cực âm hoặc duy trì ở mức thấp ($-5,97\,\mu\text{V}$ trên đối tượng thử nghiệm), trong khi tại **Pz** đạt giá trị dương cực đại ($+7,14\,\mu\text{V}$).
-   - Tỷ lệ đối tượng thỏa mãn điều kiện $Pz > Fz$ đạt **100% (39/39 đối tượng)** trong nhóm chuẩn, phù hợp tuyệt đối với lý thuyết phát sinh sóng P3b từ vỏ não đỉnh - thái dương (Polich, 2007).
-3. **Phân tách phân nhánh P3a và P3b thông qua sóng hiệu số (Difference Waves)**:
-   - Sóng hiệu số $\Delta_{\text{Target}} = \text{Target} - \text{Standard}$ (đại diện cho **P3b**) đạt đỉnh trễ hơn (~450–550 ms) với biên độ cực đại tập trung ở Pz.
-   - Sóng hiệu số $\Delta_{\text{Distractor}} = \text{Distractor} - \text{Standard}$ (đại diện cho **P3a**) đạt đỉnh sớm hơn (~320–400 ms) và có xu hướng dịch chuyển năng lượng điện thế rõ rệt về phía các kênh trán và trung tâm (Fz/Cz), phản ánh đáp ứng phản xạ định hướng tự động (orienting reflex) trước kích thích xao nhãng không mong đợi.
+Baseline được hiệu chỉnh ở 1000 Hz trước decimation; trung bình mẫu ở 250 Hz không
+nhất thiết bằng 0. Phần dư baseline lớn nhất theo người nằm trong **0,193–1,006 µV**,
+được ghi nhận chứ không tự sửa dữ liệu. Kết quả ở `results/tables/v2_epoch_audit.json`.
+Chưa kiểm chứng độc lập mọi đặc trưng trong 402 cột và chưa chạy lại ICA vì bản làm việc
+không có dữ liệu thô hay mô hình ICA. Các biên độ QC cũ được giữ nguyên đúng phạm vi của chúng.
 
-![Grand Average Fz Pz ERP](figures/grand_average_fz_pz.png)
+## 8. Kết quả ERP tính lại từ epoch (V3)
 
----
+### 8.1 Grand average và sóng hiệu số
 
-### 8.2 Bản đồ Địa hình Điện thế Da đầu 128 kênh (Scalp Topomap)
-Bản đồ địa hình không gian 128 kênh (montage Colin27 10-05) làm sáng tỏ động học lan truyền điện thế trên vỏ não:
-1. **Chuỗi thời gian từ 150 ms đến 550 ms**:
-   - Giai đoạn sớm (150–250 ms): Phổ điện thế chủ yếu là các thành phần cảm giác thị giác sơ cấp (P1, N1, P2) tập trung ở vùng chẩm (Occipital).
-   - Giai đoạn trung gian (250–350 ms): Sự xuất hiện của sóng P3a với cực dương phân bố ở vùng trán - trung tâm (Fronto-central positivity).
-   - Giai đoạn muộn (350–550 ms): Điện thế dương tính lan truyền mạnh mẽ và khu trú tại toàn bộ vùng đỉnh - chẩm (Centroparietal & Parieto-occipital), hình thành đỉnh sóng P3b kinh điển.
-2. **Bản đồ Topomap trung bình cửa sổ P300 [300, 500] ms**:
-   - Thể hiện tiêu điểm dương tính đỉnh (Parietal Hotspot) cực kỳ rõ rệt với gradient điện thế giảm dần khi đi về hai bán cầu thái dương và vùng trán trước.
+Trên **39 người**, chỉ giữ trial đúng và cho mỗi người trọng số bằng nhau. Biên độ Pz
+trung bình **300–500 ms**: Target **6,97 ± 2,74 µV**, Standard **1,92 ± 1,49 µV**;
+hiệu bắt cặp **5,05 ± 2,28 µV**. Kiểm định t bắt cặp: **t(38) = 13,82**,
+**p = 2,14 × 10⁻¹⁶**, **Cohen’s dz = 2,21** (trung bình hiệu chia SD mẫu của hiệu).
+SD tính qua người, không xem các trial của cùng người là quan sát độc lập.
 
-![Scalp Topomap Progression](figures/sub-01_scalp_topomap.png)
-![Summary P300 Topomap](figures/sub-01_p300_summary_topomap.png)
+![Grand average Fz/Pz](figures/grand_average_fz_pz.png)
 
----
+*Trung bình 39 người; dải màu là SEM qua người; vùng xám là 300–500 ms. Điểm đánh dấu
+trên Pz là cực đại của grand average trong cửa sổ tô xám; kiểm tra latency từng người
+lại tìm trong 200–800 ms.*
 
-### 8.3 Kiểm định Định lượng Tiêu chuẩn Polich (2007) trên 42 Đối tượng
-Toàn bộ dữ liệu kiểm định định lượng của 42 đối tượng được trích xuất và lưu trữ tại bảng [`results/tables/v3_p300_group_results.csv`](../results/tables/v3_p300_group_results.csv):
+![Sóng hiệu số toàn nhóm](figures/grand_average_difference_waves.png)
 
-| Tiêu chuẩn Polich (2007) | Tỷ lệ đạt ở nhóm Chuẩn (N=39) | Tỷ lệ đạt ở nhóm Hiểu sai task (N=3) | Nhận xét chuyên môn |
-|---|:---:|:---:|---|
-| **1. Gradient vùng đỉnh ($Pz > Fz$)** | **100%** (39/39) | 66,7% (2/3) | Điện thế Target Pz luôn chiếm ưu thế vượt trội ở người bình thường. |
-| **2. Hiệu ứng Oddball ($Target - Std \ge 1,5\,\mu\text{V}$)** | **100%** (39/39) | 33,3% (1/3) | $100\%$ người bình thường có P300 rõ nét, khác biệt có ý nghĩa với Standard. |
-| **3. Độ trễ sinh lý P3b ($300–500\text{ ms}$)** | **94,9%** (37/39) | 33,3% (1/3) | Đa số đạt đỉnh trong cửa sổ chuẩn; 2 đối tượng đạt đỉnh trễ ở 520–540 ms. |
-| **4. Xu hướng vùng trán của Distractor (P3a)** | **89,7%** (35/39) | 0% (0/3) | Phân tách không gian rõ giữa đáp ứng vô thức (P3a) và có chủ đích (P3b). |
-| **KẾT LUẬN CHUNG (P300 Verified)** | **100%** (39/39) | **0%** (0/3) | Nhóm chuẩn hoàn toàn đạt yêu cầu để đưa vào bài toán phân loại ML/DL. |
+*Sóng Target − Standard và Distractor − Standard tại Fz/Cz/Pz. Phép trừ giảm thành phần
+chung, không cô lập hoàn toàn nguồn thần kinh.*
 
-#### Tương quan giữa Điện sinh lý và Hành vi (Neuro-Behavioral Correlation)
-- **Thời gian phản xạ (Target Reaction Time - RT)** trung bình của nhóm chuẩn là **$542,1 \pm 65,5\text{ ms}$**, tỷ lệ bỏ sót kích thích đích cực thấp ($5,60 \pm 8,48\%$).
-- **Tương quan tuyến tính âm có ý nghĩa thống kê** giữa Target RT và biên độ Pz Target:
-  $$r = -0,434,\quad p = 0,0058\quad (p < 0,01)$$
-- **Ý nghĩa sinh lý học**: Đối tượng có biên độ sóng P3b càng cao thì thời gian xử lý thông tin và phản xạ bấm nút càng nhanh (RT càng ngắn). Điều này chứng minh sóng P300 phản ánh trực tiếp nguồn tài nguyên nhận thức và hiệu quả xử lý kích thích của não bộ.
+### 8.2 Topomap toàn nhóm
 
-#### Phân tích Nhóm Hiểu sai Nhiệm vụ (Task-Misunderstood Subgroup: sub-02, sub-14, sub-17)
-- **Hành vi bất thường**: Tỷ lệ bấm nhầm (False Alarm) trước kích thích xao nhãng Distractor tăng vọt lên **$90,95 \pm 12,49\%$** (so với chỉ $9,63 \pm 9,28\%$ ở nhóm người bình thường). Người tham gia bấm nút cho cả Target lẫn Distractor.
-- **Biến dạng sóng não**: Biên độ Pz Target suy giảm rõ rệt còn **$4,99 \pm 1,84\,\mu\text{V}$** (so với $7,14\,\mu\text{V}$ ở nhóm chuẩn), đồng thời biên độ Distractor tăng cao tương đương Target ($3,85 \pm 2,37\,\mu\text{V}$). Việc hiểu sai nhiệm vụ làm xóa nhòa ranh giới ức chế nhận thức giữa kích thích cần phản hồi và kích thích cần phớt lờ, giải thích tại sao paper gốc (Dzianok et al., 2022) và pipeline tiền xử lý V2 đã loại bỏ 3 đối tượng này khỏi tập dữ liệu phân loại.
+![Topomap 39 người theo thời gian](figures/grand_average_scalp_topomap.png)
+![Topomap trung bình P300 39 người](figures/grand_average_p300_summary_topomap.png)
 
-![Population P300 Summary](figures/population_p300_summary.png)
+*39 người, chỉ trial đúng, mỗi người trọng số bằng nhau. Hình lần lượt biểu diễn 150,
+250, 350, 450, 550 ms và trung bình 300–500 ms; gồm ba điều kiện và hai sóng hiệu số.
+Mỗi hình dùng chung một thang màu đối xứng. Đây là hình nhóm, không phải sub-01.*
 
----
+Target − Standard thể hiện điện thế dương vùng đỉnh. Xu hướng trán tương đối của
+Distractor chỉ đạt ở 26/39 người; không khẳng định P3a vùng trán đồng nhất ở toàn nhóm.
+Topomap điện thế da đầu không xác định trực tiếp vị trí nguồn hoạt động não.
 
-## 9. Tuyển tập Hình ảnh Trực quan hóa cho Báo cáo & Slide Thuyết trình (Vai trò V3 – Tuần 3)
+### 8.3 Kết quả các tiêu chí định nghĩa trong dự án
 
-Nhằm phục vụ báo cáo bài tập lớn và thuyết trình slide trước hội đồng, 4 biểu đồ trực quan hóa xuất sắc nhất đã được tuyển chọn và định dạng chuẩn (lưu tại `report/figures/` và `results/figures/`):
+| Tiêu chí | Nhóm được giữ (N=39) | Nhóm hiểu sai nhiệm vụ (N=3) |
+|---|:---:|:---:|
+| Target Pz > Fz, 300–500 ms | 39/39 (100,0%) | 3/3 (100,0%) |
+| Target − Standard ≥ 1,5 µV, 300–500 ms | 37/39 (94,9%) | 3/3 (100,0%) |
+| Đỉnh dương 300–500 ms, tìm trong 200–800 ms | 22/39 (56,4%) | 2/3 (66,7%) |
+| Xu hướng trán tương đối của Distractor, mô tả | 26/39 (66,7%) | 2/3 (66,7%) |
+| Đồng thời ba tiêu chí lõi (`p300_detected`) | 22/39 (56,4%) | 2/3 (66,7%) |
+| Ba tiêu chí và không hiểu sai nhiệm vụ (`p300_verified`) | 22/39 (56,4%) | 0/3 (0,0%) |
+| Phân tích bổ sung ba tiêu chí 300–600 ms | 32/39 (82,1%) | 3/3 (100,0%) |
 
-### Slide 1: Phân tích Dạng sóng Grand Average ERP (Fz, Pz)
-- **File ảnh**: [`report/figures/grand_average_fz_pz.png`](figures/grand_average_fz_pz.png)
-- **Figure Caption**: *Hình 1. Dạng sóng Grand Average ERP tại điện cực trán Fz và điện cực đỉnh Pz trên 39 đối tượng chuẩn trong mô hình Oddball thị giác 3 kích thích (Standard, Target, Distractor). Vùng bóng mờ xám thể hiện cửa sổ nhận thức P300 [300, 500] ms. Đường nét đứt màu tím biểu diễn sóng hiệu số (Target − Standard).*
-- **Nội dung trình bày (Key Takeaways for Slide)**:
-  - Khẳng định sự xuất hiện rõ rệt của sóng P3b tại Pz với biên độ vượt trội $+7,14\,\mu\text{V}$ so với Standard $+1,51\,\mu\text{V}$ ($p < 10^{-18}$).
-  - Thể hiện sự đảo chiều cực tính giữa Fz (âm tính) và Pz (dương tính cực đại), chứng minh tính chọn lọc không gian của P300.
+Có 17/39 người đạt cực đại sau 500 ms (508–748 ms trong khoảng tìm 200–800 ms).
+Không đạt cửa sổ hẹp không có nghĩa không có P300. Không dùng các tiêu chí ERP để
+chọn lại nhóm phân loại hoặc nâng chỉ số ML/DL.
 
-### Slide 2: Động học Không gian Thời gian 128 Kênh (Scalp Topomap)
-- **File ảnh**: [`report/figures/sub-01_scalp_topomap.png`](figures/sub-01_scalp_topomap.png) và [`report/figures/sub-01_p300_summary_topomap.png`](figures/sub-01_p300_summary_topomap.png)
-- **Figure Caption**: *Hình 2. (A) Diễn tiến bản đồ địa hình điện thế da đầu 128 kênh (montage Colin27 10-05) qua các mốc thời gian 150, 250, 350, 450, 550 ms cho 3 điều kiện và sóng hiệu số. (B) Bản đồ điện thế trung bình toàn cửa sổ P300 [300, 500] ms làm nổi bật tiêu điểm dương tính đỉnh-chẩm (Parieto-occipital hotspot).*
-- **Nội dung trình bày (Key Takeaways for Slide)**:
-  - Trực quan hóa tiến trình lan truyền từ vùng cảm giác thị giác phía sau (chẩm) đến vùng tích hợp thông tin nhận thức cấp cao (đỉnh).
-  - Bản đồ trung bình cửa sổ 300–500 ms cung cấp bằng chứng trực quan xác nhận tiêu điểm dương tính khu trú tại vùng đỉnh, làm cơ sở khoa học chọn kênh cho trích xuất đặc trưng V4.
+RT Target theo QC nhiệm vụ là **542,1 ± 65,5 ms**. Tương quan với biên độ Target Pz
+300–500 ms trên trial đúng: **r = −0,493, p = 0,00144**; không suy diễn quan hệ nhân quả.
 
-### Slide 3: Phân tách Cơ chế Sinh lý P3a vs P3b bằng Sóng Hiệu số
-- **File ảnh**: [`report/figures/sub-01_difference_waves.png`](figures/sub-01_difference_waves.png)
-- **Figure Caption**: *Hình 3. So sánh trực diện hai sóng hiệu số: Target − Standard (cô lập P3b) và Distractor − Standard (cô lập P3a) tại các điện cực Fz, Cz, Pz.*
-- **Nội dung trình bày (Key Takeaways for Slide)**:
-  - Phân định rõ hai tiến trình nhận thức: P3a (phản xạ chú ý vô thức trước kích thích xao nhãng) đạt đỉnh sớm hơn và dịch về trán-trung tâm; P3b (cập nhật biểu tượng bộ nhớ có chủ đích) đạt đỉnh muộn hơn và tập trung tại Pz.
-  - Khẳng định mô hình tích hợp P300 của Polich (2007) được tái lập hoàn hảo trên tập dữ liệu này.
+Nhóm hiểu sai nhiệm vụ có false alarm Distractor **90,95 ± 12,49%**, so với
+**9,63 ± 9,28%** ở nhóm được giữ; Target Pz trên trial đúng là **5,29 ± 2,58 µV**.
+Chỉ còn **1, 1 và 19 trial Distractor đúng** ở sub-02/14/17 nên ERP Distractor của nhóm
+này không ổn định. Lý do loại nhóm là hành vi hiểu sai nhiệm vụ, không phải không có ERP.
 
-### Slide 4: Thống kê Quần thể 42 Đối tượng & Mối liên hệ Hành vi
-- **File ảnh**: [`report/figures/population_p300_summary.png`](figures/population_p300_summary.png)
-- **Figure Caption**: *Hình 4. Phân tích thống kê toàn bộ 42 đối tượng: (A) Phân bố biên độ P300 tại Pz giữa 3 điều kiện. (B) So sánh tỷ lệ bấm nhầm Distractor và biên độ Pz giữa nhóm chuẩn (N=39) và nhóm hiểu sai nhiệm vụ (N=3). (C) Đường hồi quy tuyến tính nghịch biến giữa thời gian phản ứng Target RT và biên độ Pz Target.*
-- **Nội dung trình bày (Key Takeaways for Slide)**:
-  - 100% đối tượng bình thường vượt qua tiêu chuẩn kiểm định Oddball effect với kích thước hiệu ứng cực lớn (Cohen's $d = 2,66$).
-  - Nhóm hiểu sai nhiệm vụ bị loại bỏ có cơ sở sinh lý rõ ràng (bấm nhầm >90%, biên độ Target bị suy giảm).
-  - Tương quan nghịch có ý nghĩa ($r = -0,434, p = 0,0058$) khẳng định tín hiệu điện não P3b tương thích chặt chẽ với tốc độ xử lý nhận thức trong hành vi thực tế.
+![Thống kê quần thể](figures/population_p300_summary.png)
+
+*(A) Pz 300–500 ms trên trial đúng của 42 người; (B) false alarm trước loại epoch theo
+QC; (C) RT và biên độ Target Pz của 39 người. Biên độ và tỷ lệ phần trăm ở các trục riêng.*
+
+Lệnh tái lập: `python src/erp/plot_erp.py --group`. Chi tiết ở
+`results/tables/v3_p300_group_results.csv` và `v3_p300_summary.json`. Kết quả này thay
+cho số liệu trộn cửa sổ trước đây và kết luận 39/39 đạt toàn bộ tiêu chí.
+
+## 9. Hình dùng cho báo cáo và slide (V3)
+
+- `grand_average_fz_pz.png`: ERP toàn nhóm, SEM qua người và cửa sổ 300–500 ms.
+- `grand_average_difference_waves.png`: hai sóng hiệu số tại Fz/Cz/Pz.
+- `grand_average_scalp_topomap.png`: 128 kênh, 150–550 ms, 39 người.
+- `grand_average_p300_summary_topomap.png`: bản đồ trung bình 300–500 ms, 39 người.
+- `population_p300_summary.png`: phân bố biên độ, hành vi và tương quan RT.
+
+Các hình nhóm đã đồng bộ ở `results/figures/` và `report/figures/`. Hình có tiền tố
+`sub-01_` vẫn là ví dụ một người và phải được ghi đúng phạm vi nếu sử dụng.
 
 ---
 
