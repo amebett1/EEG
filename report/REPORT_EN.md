@@ -8,9 +8,9 @@
 
 ## Abstract
 
-We studied the P300 event-related potential (ERP) in a three-stimulus visual oddball task recorded with 128-channel EEG in 42 healthy adults. After a fully automated, reproducible preprocessing pipeline (bad-channel interpolation, Picard ICA with ICLabel, 0.5–40 Hz filtering, −200 to +1000 ms epochs at 250 Hz), we first verified the presence and topography of the P300 against the integrative P3a/P3b framework of Polich (2007). We then addressed single-trial classification of standard versus target stimuli in 39 subjects (21,878 correct trials, 13.5% targets) under a common subject-wise evaluation protocol (`GroupKFold`, 5 folds, no subject shared between training and test data). Feature-engineered machine-learning models built on 402 time–frequency features (following Laton et al., 2014) were compared with an end-to-end convolutional network (EEGNet-8,2; Lawhern et al., 2018) trained on raw epochs, and the network's decisions were examined with input-gradient saliency maps.
+We studied the P300 event-related potential (ERP) in a three-stimulus visual oddball task recorded with 128-channel EEG in 42 healthy adults. After a standardised preprocessing pipeline with three manual ICA exclusions (bad-channel interpolation, Picard ICA with ICLabel, 0.5–40 Hz filtering, −200 to +1000 ms epochs at 250 Hz), we first verified the presence and topography of the P300 against the integrative P3a/P3b framework of Polich (2007). We then addressed single-trial classification of standard versus target stimuli in 39 subjects (21,878 correct trials, 13.5% targets) under a common subject-wise evaluation protocol (`GroupKFold`, 5 folds, no subject shared between training and test data). Feature-engineered machine-learning models built on 402 time–frequency features (following Laton et al., 2014) were compared with an end-to-end convolutional network (EEGNet-8,2; Lawhern et al., 2018) trained on raw epochs, and the network's decisions were examined with input-gradient saliency maps.
 
-All 39 included subjects showed a P300 meeting the Polich criteria, with a large parietal oddball effect at Pz (target − standard +5.64 ± 2.12 µV, $t(38) = 16.64$, $p = 4.9 	imes 10^{-19}$, Cohen's $d = 2.66$). The best feature-based models were logistic regression (balanced accuracy 0.874 ± 0.037) and shrinkage LDA (ROC-AUC 0.947 ± 0.022). EEGNet outperformed all of them (balanced accuracy 0.907 ± 0.021, ROC-AUC 0.970 ± 0.010, PR-AUC 0.873 ± 0.042), with higher ROC-AUC in 34–35 of 39 subjects (Wilcoxon $p < 10^{-8}$). Saliency maps placed 40% of the model's sensitivity in the 300–600 ms P3b window (peak 504 ms), but emphasised left central rather than parietal electrodes, suggesting that the network may also exploit motor activity related to the button press. Deep learning is therefore more accurate on this dataset, but only partly interpretable in terms of the P300.
+The included group showed a large parietal oddball effect at Pz in 300–500 ms (target − standard +5.05 ± 2.28 µV, paired t(38) = 13.82, p = 2.14 × 10⁻¹⁶, Cohen’s dz = 2.21). Under the project's operational criteria, 22/39 subjects met all three core P3b checks; 32/39 did so in the secondary 300–600 ms analysis. The best feature-based models were logistic regression (balanced accuracy 0.874 ± 0.037) and shrinkage LDA (ROC-AUC 0.947 ± 0.022). EEGNet outperformed all of them (balanced accuracy 0.907 ± 0.021, ROC-AUC 0.970 ± 0.010, PR-AUC 0.873 ± 0.042), with higher ROC-AUC in 34–35 of 39 subjects (Wilcoxon $p < 10^{-8}$). Saliency maps placed 40% of the model's sensitivity in the 300–600 ms P3b window (peak 504 ms), but emphasised left central rather than parietal electrodes, suggesting that the network may also exploit motor activity related to the button press. Deep learning is therefore more accurate on this dataset, but only partly interpretable in terms of the P300.
 
 ---
 
@@ -44,10 +44,10 @@ Polich (2007), *"Updating P300: An integrative theory of P3a and P3b"*, distingu
 | Latency | Earlier (~300–450 ms) | Later (~300–600 ms) |
 | Other properties | Habituates quickly | Amplitude inversely related to target probability |
 
-**Difference waves.** To separate the endogenous P300 from overlapping early sensory components (P1 ~100 ms, N1 ~150 ms, P2 ~200 ms), condition averages were subtracted:
+**Difference waves.** To reduce shared responses and examine the P300 alongside overlapping early sensory components (P1 ~100 ms, N1 ~150 ms, P2 ~200 ms), condition averages were subtracted:
 
-- $\Delta_{\text{Target}} = \text{Target} - \text{Standard}$ isolates the **P3b**;
-- $\Delta_{\text{Distractor}} = \text{Distractor} - \text{Standard}$ isolates the **P3a**.
+- $\Delta_{\text{Target}} = \text{Target} - \text{Standard}$ highlights the target-related **P3b**;
+- $\Delta_{\text{Distractor}} = \text{Distractor} - \text{Standard}$ highlights the distractor-related **P3a**.
 
 ---
 
@@ -118,60 +118,123 @@ To run one automated, reproducible pipeline on all 42 subjects, we added or chan
 
 ---
 
+### 3.6 Audit of the supplied epoch/feature hand-off
+
+`python -m src.preprocessing.audit_epochs` checked all **42 files (27,034 epochs)**,
+including 128-channel order and montage, 301 samples at 250 Hz, filter and baseline
+metadata, finite samples, average reference, the 150 µV rejection threshold, event and
+behavioural labels, and agreement with QC counts and 300–600 ms amplitudes. For all
+39 classification subjects, feature trial order, labels, RT and recomputed `Pz_p3b_mean`
+matched the 21,878-row feature matrix. All implemented checks passed; this does not
+independently validate every one of the 402 features or the raw-data ICA decisions.
+
+Baseline correction precedes decimation in MNE: it was applied at 1000 Hz, whereas the
+stored epochs contain every fourth sample. The 250 Hz baseline sample mean need not be
+exactly zero; the audit records residuals rather than altering epochs or existing features.
+Maximum absolute baseline means per subject ranged from **0.193 to 1.006 µV**. The detailed
+checks and limits are stored in `results/tables/v2_epoch_audit.json`.
+
 ## 4. P300 verification criteria
 
-Each subject was tested against four criteria in the main analysis window of **300–500 ms** (peak search extended to 600 ms):
+ERP analyses use **correct retained trials**, averaged within each subject and then with
+**equal weights across the 39 included subjects**. The three task-misunderstood subjects
+are retained in the diagnostic table only. No additional participant is excluded from
+ML/DL on the basis of an ERP amplitude or latency check.
 
-1. **Parietal gradient:** $\text{Amplitude}(Pz) > \text{Amplitude}(Fz)$ for targets, as expected for a P3b.
-2. **Oddball effect:** $\text{Amplitude}(Pz, \text{Target}) - \text{Amplitude}(Pz, \text{Standard}) \ge 1.5\,\mu\text{V}$.
-3. **Physiological latency:** $300\text{ ms} \le \text{Peak latency}(Pz) \le 500\text{ ms}$.
-4. **Fronto-central tendency of the P3a:** the distractor response is shifted anteriorly (Fz/Cz) relative to the target response.
+The following are **project-defined operational checks inspired by the P3a/P3b framework**,
+not a diagnostic standard or numerical thresholds prescribed by Polich (2007):
 
-A subject is considered **P300-verified** when the core criteria are met and the behavioural pattern is consistent with the task (implementation: `verify_p300` in `src/erp/plot_erp.py`; per-subject table: `results/tables/v3_p300_group_results.csv`).
+1. **Parietal gradient:** mean target Pz > Fz in **300–500 ms**.
+2. **Oddball effect:** mean target − standard at Pz ≥ **1.5 µV** in the same window.
+3. **Latency:** the positive target Pz maximum is found over **200–800 ms**, independently
+   of the acceptance window; it must fall in **300–500 ms**. Searching only within the
+   acceptance window would make the check circular. This is an ERP-window maximum,
+   not the single-trial local-peak method used for feature extraction.
+4. **Relative frontal tendency (descriptive):** distractor (Fz − Pz) > target (Fz − Pz)
+   in 300–500 ms. This is separate from the three core P3b checks.
 
----
+`p300_detected` requires checks 1–3. `p300_verified` additionally requires that the subject
+is not in the predeclared task-misunderstood group. It is therefore important to distinguish
+a physiological check from eligibility for the classification task. Calculations use full
+precision; rounding is for display only.
+
+A **secondary 300–600 ms analysis** recomputes the mean-amplitude checks and widens latency
+acceptance to 300–600 ms, while keeping the same 200–800 ms peak search. The original V2
+QC amplitudes also cover 300–600 ms but include **all retained trials**, including incorrect
+ones; they must not be substituted for the correct-trial 300–500 ms ERP results.
 
 ## 5. ERP results
 
-### 5.1 Grand-average ERPs at Fz and Pz and difference waves
+### 5.1 Grand-average ERPs and difference waves
 
-Grand averages over the **39 included subjects** were analysed at **Fz** (frontal) and **Pz** (parietal) in the 300–500 ms window:
-
-1. **A strong and highly significant oddball effect.** At Pz, the mean target amplitude was **7.14 ± 2.47 µV** versus **1.51 ± 1.29 µV** for standards, a difference of **+5.64 ± 2.12 µV** (paired t-test: $t(38) = 16.64$, $p = 4.9 \times 10^{-19}$; **Cohen's $d = 2.66$**). Context updating in response to targets was thus large and consistent across the group.
-2. **A parietal maximum.** The target response was maximal at Pz and much smaller, or negative, at Fz; **all 39 subjects (100%)** satisfied $Pz > Fz$, in line with a temporo-parietal P3b generator (Polich, 2007).
-3. **Separation of P3a and P3b by difference waves.** $\Delta_{\text{Target}}$ (P3b) peaked later (~450–550 ms) with a parietal maximum; $\Delta_{\text{Distractor}}$ (P3a) peaked earlier (~320–400 ms) and shifted towards fronto-central sites (Fz/Cz), consistent with an automatic orienting response to unexpected distractors.
+For the 39 included subjects, correct-trial Pz mean amplitudes in **300–500 ms** were
+**6.97 ± 2.74 µV** for targets and **1.92 ± 1.49 µV** for standards. The paired difference was
+**+5.05 ± 2.28 µV**; paired **t(38) = 13.82**, **p = 2.14 × 10⁻¹⁶**, **Cohen’s dz = 2.21**.
+SD is the sample standard deviation across subjects; dz is the mean paired difference
+divided by the SD of paired differences. All 39 subjects had a positive target Pz > Fz gradient.
 
 ![Grand-average ERP at Fz and Pz](figures/grand_average_fz_pz.png)
 
-*Figure 1. Grand-average ERPs at Fz and Pz over 39 subjects for the three stimulus classes. The grey band marks the 300–500 ms P300 window; the dashed line is the Target − Standard difference wave.*
+*Figure 1. Equal-subject-weight grand averages of correct trials from 39 subjects. Shading
+around each waveform is the SEM across subjects, and the grey band marks 300–500 ms.
+The dashed curve is target − standard. The marked Pz point is the maximum of the grand
+average inside the shaded window; individual latency checks instead search 200–800 ms.*
+
+![Group difference waves](figures/grand_average_difference_waves.png)
+
+*Target − standard and distractor − standard at Fz, Cz and Pz, with the same subject weights.
+Difference waves reduce shared responses but do not uniquely isolate neural sources.*
 
 ### 5.2 128-channel scalp topography
 
-1. **Time course from 150 to 550 ms.** Early (150–250 ms): occipital sensory components (P1, N1, P2). Intermediate (250–350 ms): a fronto-central positivity (P3a). Late (350–550 ms): a positivity concentrated over centro-parietal and parieto-occipital sites, forming the classical P3b.
-2. **Mean topography of the 300–500 ms window:** a clear parietal hotspot, with potential decreasing towards the temporal and anterior frontal regions.
+![Group scalp topography over time](figures/grand_average_scalp_topomap.png)
+![Group mean P300 topography](figures/grand_average_p300_summary_topomap.png)
 
-![Scalp topography over time](figures/sub-01_scalp_topomap.png)
-![Mean P300 topography](figures/sub-01_p300_summary_topomap.png)
+*Figure 2. Correct-trial grand averages over the same 39 subjects, each weighted equally:
+(A) scalp potentials at 150, 250, 350, 450 and 550 ms; (B) mean potentials in 300–500 ms.
+Both plots include standard, target, distractor and their two difference waves on a common
+symmetric colour scale within each figure. These are group maps, not sub-01 examples.*
 
-*Figure 2. (A) Topographic maps (Colin27 10-05, 128 channels) at 150, 250, 350, 450 and 550 ms for each condition and the difference wave. (B) Mean topography of the 300–500 ms window, showing the parietal positivity.*
+The maps show a parietal positive target − standard effect. A relative frontal tendency
+for distractors was present in 26/39 subjects, so a uniform frontal P3a pattern across the
+whole sample should not be claimed. Scalp potentials do not establish source localisation.
 
-### 5.3 Quantitative verification of the Polich criteria in 42 subjects
+### 5.3 Operational verification in 42 subjects
 
-| Criterion (Polich, 2007) | Normal group (N = 39) | Task-misunderstood group (N = 3) | Comment |
-|---|:---:|:---:|---|
-| 1. Parietal gradient ($Pz > Fz$) | **100%** (39/39) | 66.7% (2/3) | The target response is always parietally dominant in normal subjects. |
-| 2. Oddball effect ($\ge 1.5\,\mu$V) | **100%** (39/39) | 33.3% (1/3) | Every normal subject shows a clear P300. |
-| 3. P3b latency (300–500 ms) | **94.9%** (37/39) | 33.3% (1/3) | Two subjects peak late, at 520–540 ms. |
-| 4. Fronto-central P3a tendency | **89.7%** (35/39) | 0% (0/3) | Clear spatial dissociation between P3a and P3b. |
-| **Overall: P300 verified** | **100%** (39/39) | **0%** (0/3) | The normal group is suitable for single-trial classification. |
+| Check | Included group (N = 39) | Task-misunderstood (N = 3) |
+|---|:---:|:---:|
+| Target Pz > Fz, 300–500 ms | 39/39 (100.0%) | 3/3 (100.0%) |
+| Pz target − standard ≥ 1.5 µV, 300–500 ms | 37/39 (94.9%) | 3/3 (100.0%) |
+| Positive Pz maximum in 300–500 ms, searched over 200–800 ms | 22/39 (56.4%) | 2/3 (66.7%) |
+| Relative frontal distractor tendency, descriptive | 26/39 (66.7%) | 2/3 (66.7%) |
+| All three core P3b checks (`p300_detected`) | 22/39 (56.4%) | 2/3 (66.7%) |
+| Core checks plus task eligibility (`p300_verified`) | 22/39 (56.4%) | 0/3 (0.0%) |
+| Secondary core checks, 300–600 ms | 32/39 (82.1%) | 3/3 (100.0%) |
 
-**Neuro-behavioural correlation.** Mean target RT in the normal group was **542.1 ± 65.5 ms**, with few omissions (5.60 ± 8.48%). Target RT correlated negatively with the target amplitude at Pz ($r = -0.434$, $p = 0.0058$): subjects with a larger P3b responded faster, consistent with the P300 indexing the cognitive resources allocated to stimulus evaluation.
+Seventeen included subjects had the largest positive response **after 500 ms**, with maxima
+between **508 and 748 ms** in the 200–800 ms search. Failure of the narrower operational
+window does not establish absence of a P300. ERP criteria were not used to reselect the
+classification cohort or to improve its reported performance.
 
-**Task-misunderstood subgroup (sub-02, sub-14, sub-17).** False alarms to distractors rose to **90.95 ± 12.49%** (versus 9.63 ± 9.28% in the normal group): these subjects responded to targets and distractors alike. Their target amplitude at Pz was reduced to **4.99 ± 1.84 µV** (versus 7.14 µV). Misunderstanding the task removes the distinction between stimuli to respond to and stimuli to ignore, which justifies their exclusion from the classification set, as in the dataset paper.
+Target RT from the original task QC was **542.1 ± 65.5 ms**, and correlated with the
+correct-trial target Pz mean in 300–500 ms: **r = −0.493, p = 0.00144** (39 subjects).
+This is an association, not evidence of a causal relation.
+
+The task-misunderstood group had **90.95 ± 12.49%** distractor false alarms, versus
+**9.63 ± 9.28%** in the included group. Its correct-trial target Pz mean was
+**5.29 ± 2.58 µV**. Only **1, 1 and 19 correct distractor trials** remained in sub-02,
+sub-14 and sub-17, so their distractor averages are especially unstable. Their exclusion
+is based on task behaviour, not an asserted absence of an ERP response.
 
 ![Population P300 summary](figures/population_p300_summary.png)
 
-*Figure 3. Population analysis of 42 subjects: (A) Pz amplitude by condition; (B) distractor false alarms and Pz amplitude in the normal (N = 39) versus task-misunderstood (N = 3) groups; (C) negative relationship between target RT and target Pz amplitude.*
+*Figure 3. (A) Correct-trial Pz means in 300–500 ms for all 42 subjects; (B) distractor
+false-alarm rates from task QC, before rejection; (C) target RT versus the correct-trial
+Pz mean in the 39 included subjects. Amplitudes and percentages have separate axes.*
+
+Reproduce with `python src/erp/plot_erp.py --group`. Per-subject values and settings are
+in `results/tables/v3_p300_group_results.csv`; statistics are in `v3_p300_summary.json`.
+These recomputed results supersede the earlier mixed-window values and 39/39 verification claim.
 
 ---
 
@@ -441,13 +504,13 @@ Per-subject ROC-AUC: EEGNet 0.972 ± 0.035 (median 0.986), LDA 0.948 ± 0.048, l
 - **Button-press and blink confound.** Participants pressed a button about 540 ms after targets, and many blinked right after the press. Motor activity and residual ocular artefacts may therefore co-vary with the target class. Distractor-versus-standard classification with features (no button press in either class) still reached AUC 0.90, against 0.95 for target versus standard, so the P300 remains the main source of information for the feature-based models; for EEGNet see §10.4.
 - **Extensive muscle-component removal.** On average 12 muscle components were removed per subject. Some high-frequency brain activity may have been removed as well, which matters little for the P300 (mainly below 8 Hz).
 - **No information above 40 Hz** (no gamma analysis). Epochs last 1.2 s, so whole-epoch spectra have a frequency resolution of about 1 Hz.
-- **Manual ICA decisions** are valid only for the fitted ICA solution; per-subject ICA models are stored in `derivatives/v1/ica/` for verification.
+- **Manual ICA decisions** are valid only for the fitted ICA solution. Raw recordings and per-subject ICA models are not available in this working copy, so the present V2 audit validates the epoch/feature hand-off rather than rerunning ICA.
 - **Training budget.** Four of five EEGNet folds reached the 50-epoch limit; no hyper-parameter search was performed for either approach, and both were evaluated at a fixed 0.5 threshold.
 - **Saliency is a backward-model explanation** and cannot by itself localise the signal (§9.4).
 
 ### 11.2 Conclusion
 
-The visual oddball data show a textbook P300: all 39 included subjects met the Polich criteria, with a large parietal target − standard effect (+5.6 µV, Cohen's d = 2.66) and a fronto-central shift of the distractor P3a. On single trials and across subjects, regularised linear models on 402 physiologically motivated features reached ROC-AUC 0.947, and a compact CNN on raw epochs reached ROC-AUC 0.970 and balanced accuracy 90.7%, a small but consistent and statistically significant improvement. The network's decisions are concentrated in the P3b time window, but its spatial emphasis on left central sites indicates that it may also exploit response-related activity; separating these contributions is the main open question.
+The visual oddball data show a large group-level parietal target − standard effect (+5.05 µV in 300–500 ms, Cohen’s dz = 2.21). All 39 included subjects had a Pz > Fz gradient; 22/39 met the strict project-defined core P3b checks, increasing to 32/39 in the secondary 300–600 ms analysis. On single trials and across subjects, regularised linear models on 402 physiologically motivated features reached ROC-AUC 0.947, and a compact CNN on raw epochs reached ROC-AUC 0.970 and balanced accuracy 90.7%, a small but consistent and statistically significant improvement. The network's decisions are concentrated in the P3b time window, but its spatial emphasis on left central sites indicates that it may also exploit response-related activity; separating these contributions is the main open question.
 
 ### 11.3 Author contributions
 

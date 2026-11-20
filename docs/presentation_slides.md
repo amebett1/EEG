@@ -31,38 +31,42 @@ Môn AIT3012 Neuroscience (GS. Guy Nagels, VUB). Thời lượng tối đa **10 
 - **Script**:
   > "Good morning. The P300 is one of the most robust brain responses we know, but in practice — in a brain–computer interface — we have to detect it on a single trial, not in an average of hundreds. We used the Nencki-Symfonia visual oddball dataset: forty-two healthy adults, 128-channel EEG, with frequent standards, rare targets that require a button press, and rare distractors. We asked three questions: how well can we classify single trials, does deep learning beat standard machine learning, and can we understand what the deep network learned. Bach will start with the data."
 
-## Slide 2 — One automated pipeline for 42 subjects
+## Slide 2 — One standardised pipeline for 42 subjects
 
 - **Người nói**: V2 – Thái Nguyễn Hoàng Bách (1:15)
 - **Hình**: `report/figures/grand_average_39subs.png` + sơ đồ 7 bước (crop task → bad channels → Picard ICA + ICLabel → 0.5–40 Hz → epochs −200..1000 ms @ 250 Hz → labels).
 - **Key takeaways**:
   - Same pipeline for all 42 subjects (MNE-Python), 97.0% of epochs kept.
   - ICA removed on average 15 components (mostly muscle, ~3 ocular); 3 blink components removed manually.
-  - Behaviour recomputed from the markers matches the dataset paper exactly (RT 542.1 ± 65.5 ms).
+  - Target RT from task QC agrees with the dataset paper (542.1 ± 65.5 ms); the supplied epoch/feature hand-off passed the implemented audit.
   - 3 subjects misunderstood the task (77–99% false alarms to distractors) → excluded. Classification set: **39 subjects, 21,878 correct trials, 13.5% targets**.
 - **Script**:
   > "We built one reproducible pipeline and ran it on all forty-two subjects: we cropped the recordings to the task, detected and interpolated bad channels, removed eye, heart and muscle components with ICA and ICLabel, filtered between 0.5 and 40 hertz and cut epochs from minus 200 to 1000 milliseconds. We kept 97 percent of the epochs. As a sanity check, the reaction times we recomputed from the markers match the dataset paper to the decimal. Three subjects pressed the button for almost every distractor — they misunderstood the task — so, like the original authors, we excluded them. That leaves 39 subjects and almost 22,000 trials, of which only 13.5 percent are targets."
 
-## Slide 3 — The P300 is there: grand-average ERPs at Fz and Pz
+## Slide 3 — Group-level P300: grand-average ERPs at Fz and Pz
 
 - **Người nói**: V3 – Trương Huy Hoàng (1:15)
 - **Hình**: `report/figures/grand_average_fz_pz.png`
 - **Key takeaways**:
-  - Pz, 300–500 ms: target 7.14 µV vs standard 1.51 µV → **+5.64 ± 2.12 µV**, t(38) = 16.6, p = 4.9 × 10⁻¹⁹, **Cohen's d = 2.66**.
-  - Parietal maximum (Pz > Fz) in **39/39** subjects.
-  - Larger P3b ↔ faster responses: r = −0.43, p = 0.006.
+  - Correct trials only, **equal subject weights**, 39 subjects; SEM across subjects.
+  - Pz, 300–500 ms: target **6.97 ± 2.74 µV**, standard **1.92 ± 1.49 µV**.
+  - Paired difference **5.05 ± 2.28 µV**; **t(38) = 13.82, p = 2.14 × 10⁻¹⁶, dz = 2.21**.
+  - Target Pz > Fz: **39/39**; RT–target-amplitude correlation: **r = −0.493, p = 0.00144**.
 - **Script**:
-  > "Before classifying anything, we checked that the P300 is really there. At Pz, targets produce a positivity of about seven microvolts between 300 and 500 milliseconds, against one and a half for standards. That is a difference of more than five microvolts, with an effect size of 2.7 — enormous for EEG — and it is maximal over the parietal cortex in every one of the 39 subjects. Subjects with a larger P300 also responded faster, which fits the idea that the P300 indexes the resources allocated to the stimulus."
+  > "We averaged correct trials within each person and then weighted all 39 people equally. Between 300 and 500 milliseconds, targets produce about seven microvolts at Pz, compared with about two for standards. The paired difference is five microvolts, with an effect size of 2.2. Every included subject has a larger target response at Pz than Fz. Larger Pz responses are associated with faster reaction times, although this correlation does not establish causation."
 
-## Slide 4 — P3a versus P3b, as predicted by Polich (2007)
+## Slide 4 — Group topography and individual variability
 
 - **Người nói**: V3 – Trương Huy Hoàng (0:45)
-- **Hình**: `report/figures/sub-01_difference_waves.png` và `report/figures/population_p300_summary.png` (lưu ý: hình topomap hiện là của sub-01, ghi rõ trên slide).
+- **Hình**: `report/figures/grand_average_p300_summary_topomap.png`; phụ: `grand_average_difference_waves.png`.
 - **Key takeaways**:
-  - Target − standard (P3b): later, parietal. Distractor − standard (P3a): earlier, fronto-central.
-  - All four Polich criteria → P300 verified in 39/39 normal subjects, 0/3 task-misunderstood subjects.
+  - Group maps are based on **39 people**, not a sub-01 example.
+  - Search target Pz maxima in **200–800 ms**; test acceptance **300–500 ms** independently.
+  - **22/39** meet all three project-defined core P3b checks; **32/39** in secondary 300–600 ms.
+  - Relative frontal distractor tendency: **26/39**; not uniform across subjects.
+  - Three exclusions are based on task behaviour; ERP checks do not reselect the ML/DL cohort.
 - **Script**:
-  > "Difference waves separate the two subcomponents described by Polich: the distractor produces an earlier, more frontal P3a — an orienting response — while the target produces the later, parietal P3b linked to updating working memory. Across all criteria, the P300 is verified in every normal subject and in none of the three who misunderstood the task. Kien will now show how we turned this into features."
+  > "The group maps show a parietal target effect, but individual timing varies. We searched for each person's peak over 200 to 800 milliseconds before testing the narrower window. Twenty-two of 39 subjects met all three operational P3b checks; widening the analysis to 600 milliseconds gave 32. These are descriptive project criteria, not diagnostic rules. Task behaviour determined the three exclusions; the classification cohort stays unchanged."
 
 ## Slide 5 — From signal to 402 features (Laton et al., 2014)
 
@@ -111,7 +115,7 @@ Môn AIT3012 Neuroscience (GS. Guy Nagels, VUB). Thời lượng tối đa **10 
 - **Script**:
   > "Is it a black box? We computed saliency maps — how much each channel and time point influences the target decision. In time, the answer is reassuring: the network looks mostly at the P3b window, peaking around 500 milliseconds, and ignores the baseline. In space, it is more surprising: the P300 is maximal at Pz, but the network's attention is strongest over left central electrodes — the motor cortex — just before the button press. Saliency shows the network's filters, not the source of the signal, so this could be noise cancellation; but it could also mean that part of the deep-learning advantage comes from motor preparation rather than the P300. The decisive test is to train EEGNet on distractors versus standards, where nobody presses a button. So our answer to RQ3 is: partly interpretable."
   >
-  > **V1 (kết bài):** "To conclude: the P300 is robust in all 39 subjects; single trials can be classified across subjects with up to 91 percent balanced accuracy; deep learning outperforms standard machine learning on this dataset, but understanding exactly what it uses requires more than a saliency map. Thank you."
+  > **V1 (kết bài):** "To conclude: the group-level parietal target effect is strong, with individual variability in timing; single trials can be classified across subjects with up to 91 percent balanced accuracy; deep learning outperforms standard machine learning on this dataset, but understanding exactly what it uses requires more than a saliency map. Thank you."
 
 ---
 
@@ -123,6 +127,6 @@ Môn AIT3012 Neuroscience (GS. Guy Nagels, VUB). Thời lượng tối đa **10 
 | Isn't the classifier just detecting the button press? | V6 / V2 | Possible, especially for EEGNet (left-central saliency). Feature-based distractor vs standard (no press) still gives AUC 0.90 vs 0.95. Planned control: EEGNet on distractor vs standard. |
 | Why balanced accuracy and not accuracy? | V5 | 13.5% targets: an all-standard classifier has 86.5% accuracy and detects nothing. |
 | Why do LDA and logistic regression differ in balanced accuracy but not AUC? | V5 | Same ranking quality (AUC 0.947 vs 0.946); different operating point at threshold 0.5 because of class weighting. |
-| Why 300–600 ms for features but 300–500 ms for ERP verification? | V4 / V3 | 300–500 ms follows the course criterion; for features, 5/10 subjects peaked after 500 ms, and 300–600 ms follows the dataset paper and Laton et al. |
+| Why 300–600 ms for features but 300–500 ms for ERP verification? | V4 / V3 | 300–500 ms is the project’s narrower operational window, not a mandatory course rule. Peaks are searched independently over 200–800 ms; a secondary 300–600 ms ERP analysis shows the effect of the window. No participant is reselected for ML/DL based on ERP checks. |
 | Would EEGNet be better with more training? | V6 | Possibly: 4/5 folds hit the 50-epoch limit; no hyper-parameter tuning for either approach. |
-| Why exclude three subjects? | V2 | Task misunderstood (77–99% false alarms to distractors), also excluded by the dataset authors; their P300 fails the verification. |
+| Why exclude three subjects? | V2 | Task misunderstood (77–99% false alarms to distractors), also excluded by the dataset authors. They can still have an ERP response; exclusion is behavioural, not proof of absent P300. Their correct distractor averages use only 1, 1 and 19 trials. |

@@ -1,0 +1,69 @@
+{
+  "mean_window_ms": [
+    300,
+    500
+  ],
+  "peak_search_window_ms": [
+    200,
+    800
+  ],
+  "latency_acceptance_ms": [
+    300,
+    500
+  ],
+  "trials": "correct retained trials only; equal weights per subject",
+  "n_included": 39,
+  "target_mean_uv": 6.968582066393042,
+  "target_sd_uv": 2.740011147808164,
+  "standard_mean_uv": 1.9201296486814539,
+  "standard_sd_uv": 1.4857329045014205,
+  "difference_mean_uv": 5.048452417711587,
+  "difference_sd_uv": 2.281940688374302,
+  "paired_t": 13.816123882728633,
+  "paired_t_p": 2.1361240882387926e-16,
+  "paired_t_df": 38,
+  "cohens_dz": 2.2123504100837086,
+  "rt_amplitude_r": -0.49259680366744174,
+  "rt_amplitude_p": 0.001444045964685355,
+  "late_or_early_subjects": [
+    "sub-01",
+    "sub-06",
+    "sub-07",
+    "sub-08",
+    "sub-10",
+    "sub-13",
+    "sub-19",
+    "sub-20",
+    "sub-21",
+    "sub-26",
+    "sub-27",
+    "sub-32",
+    "sub-34",
+    "sub-35",
+    "sub-38",
+    "sub-39",
+    "sub-41"
+  ],
+  "groups": {
+    "Normal": {
+      "n": 39,
+      "parietal_gradient_pass": 39,
+      "oddball_pass": 37,
+      "latency_pass": 22,
+      "p3a_frontal_pass": 26,
+      "p300_detected": 22,
+      "p300_verified": 22,
+      "p300_detected_300_600": 32
+    },
+    "Task-Misunderstood": {
+      "n": 3,
+      "parietal_gradient_pass": 3,
+      "oddball_pass": 3,
+      "latency_pass": 2,
+      "p3a_frontal_pass": 2,
+      "p300_detected": 2,
+      "p300_verified": 0,
+      "p300_detected_300_600": 3
+    }
+  }
+}
