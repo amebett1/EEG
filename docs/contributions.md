@@ -109,6 +109,13 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 
 ### Tuần 3 (17–23/11)
 - **Nhiệm vụ theo kế hoạch**: *Đọc soát phần Methods, hỗ trợ V1 ghép bài.*
+- **Chi tiết thực hiện**:
+  1. **Đọc soát mục 3 "Dataset and preprocessing" của `report/REPORT_EN.md`** so với mục 7 bản tiếng Việt và với QC: bản dịch đúng, mọi con số khớp. Đề xuất V1 sửa câu trong Abstract và câu về ICA trong mục 11.1 (dựa trên kết quả ở ý 2).
+  2. **Kiểm tra quyết định ICA từ dữ liệu thô** (phần script audit chưa làm):
+     - 42 mô hình ICA đều có 40 thành phần, số thành phần bị loại khớp QC.
+     - Với sub-13, 14, 36: dựng lại dữ liệu đầu vào ICA từ dữ liệu thô và chạy lại ICLabel, ra đúng xác suất chớp mắt 0,78 / 0,70 / 0,59 như đã báo cáo. Trọng số lớn nhất ở vùng trán cực.
+     - Đưa 42 mô hình ICA lên Release `data-v1` (`ica_v1_42subjects.zip`) để nhóm và người chấm kiểm tra lại. Cập nhật mục 7.6 và 7.7 trong `report/README.md`.
+  3. **Vẽ sơ đồ pipeline 7 bước cho slide 2**: `report/figures/v2_preprocessing_pipeline.png`, đồng thời chèn vào mục 7.2 của báo cáo.
 
 ---
 

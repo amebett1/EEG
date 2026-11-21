@@ -234,6 +234,8 @@ Có 32/402 đặc trưng đạt mức phân biệt ≥ 0,7 và 156/402 đặc tr
 ### 7.2 Quy trình
 Pipeline viết bằng MNE-Python 1.13.2 và chạy giống hệt nhau cho cả 42 người. Mã nguồn nằm trong `notebooks/01_preprocessing.ipynb`.
 
+![Pipeline tiền xử lý 7 bước](figures/v2_preprocessing_pipeline.png)
+
 1. **Đọc dữ liệu và chuẩn hóa kênh.**
    - Thêm lại kênh tham chiếu FCz, nên mỗi người có 128 kênh.
    - Sắp xếp kênh theo cùng một thứ tự cho cả 42 người, vì file của sub-13, sub-41 và sub-42 lưu kênh theo thứ tự khác.
@@ -313,7 +315,7 @@ Các bước sau được nhóm thêm vào hoặc làm khác, để cùng một 
 - **Nhiễu bấm nút và chớp mắt.** Người tham gia bấm nút khoảng 540 ms sau target, và nhiều người chớp mắt ngay sau khi bấm. Hoạt động vận động và phần nhiễu mắt còn sót có thể "đi kèm" với target. Kiểm tra trên toàn bộ người: phân loại distractor với standard (cả hai đều không bấm nút) vẫn đạt AUC 0,90, so với 0,95 khi phân loại target với standard. Như vậy P300 vẫn là nguồn thông tin chính.
 - **Loại nhiều thành phần cơ.** Trung bình mỗi người bị loại 12 thành phần cơ. Một phần hoạt động não ở tần số cao có thể bị loại theo, nhưng điều này ít ảnh hưởng tới P300 vì P300 nằm chủ yếu dưới 8 Hz.
 - **Không có thông tin trên 40 Hz** (không phân tích được gamma). Mỗi epoch dài 1,2 s, nên độ phân giải tần số khi tính phổ trên cả epoch chỉ khoảng 1 Hz.
-- **Chỉ số ICA chỉ đúng với lần fit này.** Danh sách thành phần loại bằng tay chỉ đúng khi giữ nguyên tham số ICA. Cần tải thêm mô hình ICA vào `derivatives/v1/ica/` và dữ liệu thô để kiểm tra lại; chúng chưa có trong bản làm việc này.
+- **Chỉ số ICA chỉ đúng với lần fit này.** Danh sách thành phần loại bằng tay chỉ đúng khi giữ nguyên tham số ICA. Mô hình ICA của cả 42 người được lưu kèm (Release `data-v1`, file `ica_v1_42subjects.zip`, giải nén vào `derivatives/v1/`) để kiểm tra lại; kết quả kiểm tra ở mục 7.7.
 
 ### Tài liệu tham khảo (mục 7)
 - Dzianok P, Antonova I, Wojciechowski J, Dreszer J, Kublik E. The Nencki-Symfonia electroencephalography/event-related potential dataset: Multiple cognitive tasks and resting-state data collected in a sample of healthy adults. *GigaScience* 2022;11:giac015. doi:10.1093/gigascience/giac015
@@ -335,8 +337,15 @@ trial, nhãn, RT và `Pz_p3b_mean` tính lại khớp CSV **21.878 trial**.
 Baseline được hiệu chỉnh ở 1000 Hz trước decimation; trung bình mẫu ở 250 Hz không
 nhất thiết bằng 0. Phần dư baseline lớn nhất theo người nằm trong **0,193–1,006 µV**,
 được ghi nhận chứ không tự sửa dữ liệu. Kết quả ở `results/tables/v2_epoch_audit.json`.
-Chưa kiểm chứng độc lập mọi đặc trưng trong 402 cột và chưa chạy lại ICA vì bản làm việc
-không có dữ liệu thô hay mô hình ICA. Các biên độ QC cũ được giữ nguyên đúng phạm vi của chúng.
+Chưa kiểm chứng độc lập mọi đặc trưng trong 402 cột. Các biên độ QC cũ được giữ nguyên đúng phạm vi của chúng.
+
+**Kiểm tra quyết định ICA từ dữ liệu thô.** Script audit ở trên không chạy lại ICA, nên V2 kiểm tra riêng
+42 mô hình ICA đã lưu (`ica_v1_42subjects.zip` trên Release `data-v1`):
+- Cả 42 mô hình có đúng 40 thành phần, và số thành phần bị loại khớp với `n_ic_excluded` trong QC.
+- Với sub-13, sub-14 và sub-36, dựng lại dữ liệu đầu vào của ICA từ dữ liệu thô bằng chính các hàm trong
+  notebook rồi chạy lại ICLabel. Thành phần loại bằng tay vẫn có nhãn *eye blink* với xác suất
+  **0,78, 0,70 và 0,59**, đúng như đã ghi ở bước 4. Trọng số lớn nhất của cả ba nằm ở vùng trán cực
+  (Fp1, Fp2, AFp1/AFp2, AF7), là phân bố điển hình của chớp mắt.
 
 ## 8. Kết quả ERP tính lại từ epoch (V3)
 
