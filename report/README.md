@@ -2,7 +2,7 @@
 
 Dự án Oddball Paradigm (GigaDB Dataset 100990) – Nhóm Nghiên cứu EEG.
 
-Bản tiếng Anh chính thức để nộp: [`REPORT_EN.md`](REPORT_EN.md). Phân công và tỷ lệ đóng góp: [`docs/contributions.md`](../docs/contributions.md).
+Bản cuối để nộp: [PDF tiếng Anh](../docs/EEG_Final_Report_EN.pdf), [nguồn LaTeX](../docs/EEG_Final_Report_EN.tex). Bản Markdown tiếng Anh: [`REPORT_EN.md`](REPORT_EN.md). Phân công và tỷ lệ đóng góp: [`docs/contributions.md`](../docs/contributions.md).
 
 ---
 
@@ -205,11 +205,11 @@ Có 32/402 đặc trưng đạt mức phân biệt ≥ 0,7 và 156/402 đặc tr
 
 ### 6.5 Phân tích & Nhận xét chuyên môn
 1. **Ưu thế vượt trội của các mô hình tuyến tính có điều chuẩn (Logistic Regression và LDA)**:
-   - Logistic Regression với trọng số lớp cân bằng (`class_weight='balanced'`) đạt Balanced Accuracy cao nhất (**87,4% ± 3,7%**), độ nhạy Sensitivity đạt **84,1% ± 8,7%** và độ đặc hiệu Specificity đạt **90,8% ± 2,7%**. Đây là chỉ số lý tưởng cho bài toán giao tiếp não - máy tính (BCI), cân bằng tối ưu giữa việc phát hiện kích thích đích và hạn chế báo động giả.
+   - Logistic Regression với trọng số lớp cân bằng (`class_weight='balanced'`) đạt Balanced Accuracy cao nhất (**87,4% ± 3,7%**), độ nhạy Sensitivity đạt **84,1% ± 8,7%** và độ đặc hiệu Specificity đạt **90,8% ± 2,7%**. Đây là kết quả offline; hiệu quả BCI trực tuyến chưa được kiểm chứng.
    - LDA (sử dụng bộ giải LSQR với tự động co rút hiệp phương sai shrinkage theo Ledoit-Wolf) đạt ROC-AUC cao nhất (**0,947 ± 0,022**), PR-AUC **0,791 ± 0,075** và F1-macro **0,835 ± 0,045**. Trong không gian 402 chiều đặc trưng, tính chất chiếu tuyến tính kết hợp điều chuẩn co rút giúp LDA kháng nhiễu và kiểm soát hiện tượng biến thiên giữa các cá nhân (inter-subject variability) xuất sắc.
 2. **Khả năng phân tách xác suất (Ranking Quality)**:
    - Cả ba mô hình LDA, Logistic Regression và RBF SVM đều đạt ROC-AUC rất cao (~0,946 - 0,947), vượt xa mức cơ sở ngẫu nhiên (0,497).
-   - Đồ thị Precision-Recall (PR curve) chỉ ra PR-AUC của cả ba mô hình đều đạt xấp xỉ **0,791**, cao gấp gần 6 lần so với tỷ lệ hiện diện tự nhiên của lớp đích (Prevalence = 13,4%). Điều này khẳng định độ tin cậy cực cao của các dự đoán dương tính khi ứng dụng trong bài toán BCI Speller.
+   - Đồ thị Precision-Recall (PR curve) chỉ ra PR-AUC của cả ba mô hình đều đạt xấp xỉ **0,791**, cao gấp gần 6 lần so với tỷ lệ hiện diện tự nhiên của lớp đích (Prevalence = 13,5%). AP mô tả xếp hạng trên dữ liệu hiện có, chưa đánh giá BCI Speller trực tuyến.
 3. **Hiện tượng suy giảm độ nhạy của Random Forest trên không gian đặc trưng bảng EEG**:
    - Random Forest đạt ROC-AUC cao (0,907) và Specificity gần như tuyệt đối (0,988), nhưng độ nhạy Sensitivity ở ngưỡng xác suất 0,5 bị sụt giảm xuống còn 28,9%. Nguyên nhân là do không gian 402 đặc trưng EEG chứa nhiều kênh và cửa sổ có tương quan cao; cơ chế lấy mẫu ngẫu nhiên tập con đặc trưng (feature bagging) tại mỗi nút phân nhánh của Random Forest khiến các đặc trưng P300 cốt lõi (như `Pz_p3b_mean`) bị pha loãng bởi các đặc trưng ít phân biệt, dẫn đến việc phân bố xác suất dự đoán bị nén thiên lệch về phía lớp đa số (Standard).
 
@@ -311,7 +311,7 @@ Các bước sau được nhóm thêm vào hoặc làm khác, để cùng một 
 5. Hạ tần số lấy mẫu xuống 250 Hz để giảm dung lượng (khoảng 3,6 GB cho 42 người). Vì đã lọc 40 Hz nên việc này không làm mất thông tin.
 
 ### 7.6 Hạn chế
-- **Nhiễu bấm nút và chớp mắt.** Người tham gia bấm nút khoảng 540 ms sau target, và nhiều người chớp mắt ngay sau khi bấm. Hoạt động vận động và phần nhiễu mắt còn sót có thể "đi kèm" với target. Kiểm tra trên toàn bộ người: phân loại distractor với standard (cả hai đều không bấm nút) vẫn đạt AUC 0,90, so với 0,95 khi phân loại target với standard. Như vậy P300 vẫn là nguồn thông tin chính.
+- **Nhiễu bấm nút và chớp mắt.** Người tham gia bấm nút khoảng 540 ms sau target, và nhiều người chớp mắt ngay sau khi bấm. Hoạt động vận động và phần nhiễu mắt còn sót có thể "đi kèm" với target. Kiểm tra trên toàn bộ người: phân loại distractor với standard (cả hai đều không bấm nút) vẫn đạt AUC 0,90, so với 0,95 khi phân loại target với standard. Đây là kiểm tra baseline được mô tả trong tài liệu cũ, chưa chứng minh nguồn thông tin chính hoặc đặc trưng EEGNet; bản cuối chỉ dùng ERP distractor đã kiểm chứng và ghi rõ đối chứng EEGNet còn thiếu.
 - **Loại nhiều thành phần cơ.** Trung bình mỗi người bị loại 12 thành phần cơ. Một phần hoạt động não ở tần số cao có thể bị loại theo, nhưng điều này ít ảnh hưởng tới P300 vì P300 nằm chủ yếu dưới 8 Hz.
 - **Không có thông tin trên 40 Hz** (không phân tích được gamma). Mỗi epoch dài 1,2 s, nên độ phân giải tần số khi tính phổ trên cả epoch chỉ khoảng 1 Hz.
 - **Chỉ số ICA chỉ đúng với lần fit này.** Danh sách thành phần loại bằng tay chỉ đúng khi giữ nguyên tham số ICA. Mô hình ICA của cả 42 người được lưu kèm (Release `data-v1`, file `ica_v1_42subjects.zip`, giải nén vào `derivatives/v1/`) để kiểm tra lại; kết quả kiểm tra ở mục 7.7.
@@ -464,7 +464,7 @@ EEGNet được đánh giá trên **đúng tập dữ liệu và đúng 5 fold**
 | **Sensitivity (Độ nhạy Target)** | **0,884 ± 0,060** | 0,886 |
 | **Specificity (Độ đặc hiệu)** | **0,930 ± 0,030** | 0,929 |
 
-Kết quả từng fold (`results/tables/eegnet_folds_real.csv`): ROC-AUC 0,968 / 0,974 / 0,974 / 0,980 / 0,954; balanced accuracy 0,884 / 0,922 / 0,915 / 0,928 / 0,886. Bốn trên năm fold chạy hết 50 epoch mà early stopping chưa kích hoạt, nên mô hình có thể còn cải thiện thêm nếu huấn luyện lâu hơn.
+Kết quả từng fold (`results/tables/eegnet_folds_real.csv`): ROC-AUC 0,968 / 0,974 / 0,974 / 0,980 / 0,954; balanced accuracy 0,884 / 0,922 / 0,915 / 0,928 / 0,886. Ba trên năm fold chạm 50 epoch (48, 50, 49, 50, 50); chưa đủ bằng chứng rằng tăng thời gian huấn luyện sẽ cải thiện test.
 
 *Ghi chú:* kết quả EEGNet trước đây (balanced accuracy 0,821, ROC-AUC 0,890) là thử nghiệm sơ bộ trên **1 người** (sub-01, 540 trial, `StratifiedKFold`), không so sánh được với baseline 39 người và đã được thay thế.
 
@@ -472,9 +472,9 @@ Kết quả từng fold (`results/tables/eegnet_folds_real.csv`): ROC-AUC 0,968 
 
 ### 10.3 Phân tích khả năng giải thích bằng bản đồ độ nhạy (Saliency Map)
 Saliency được tính bằng gradient đầu vào trên một mô hình tham chiếu (huấn luyện trên 85% toàn bộ trial), lấy trung bình trên toàn bộ 2.951 trial Target:
-$$S_{c, t} = \frac{1}{N_{\text{target}}} \sum_{i=1}^{N_{\text{target}}} \left| \frac{\partial \hat{y}_i^{(\text{target})}}{\partial X_{i, c, t}} \right|$$
+$$S_{c, t} = \frac{1}{N_{\text{target}}} \sum_{i=1}^{N_{\text{target}}} \left| \frac{\partial \hat{y}_i^{(\text{target})}}{\partial \widetilde X_{i, c, t}} \right|$$
 
-Trong đó $\hat{y}_i^{(\text{target})}$ là logit lớp Target và $X_{i, c, t}$ là điện thế tại kênh $c$, thời điểm $t$ của trial $i$.
+Với $\widetilde X=X/s$ là đầu vào đã chia SD toàn cục từ train. Trong đó $\hat{y}_i^{(\text{target})}$ là logit lớp Target và $X_{i, c, t}$ là điện thế tại kênh $c$, thời điểm $t$ của trial $i$.
 
 ![EEGNet Saliency Map Analysis](figures/eegnet_saliency_real.png)
 ![EEGNet saliency topography](figures/eegnet_saliency_topomap_real.png)
@@ -524,31 +524,25 @@ ROC-AUC theo từng người: EEGNet 0,972 ± 0,035 (trung vị 0,986), LDA 0,94
 
 - **Kết quả tốt nhất (đánh giá liên người, người ở tập test chưa từng xuất hiện khi huấn luyện)**: **EEGNet** trên epoch thô đạt balanced accuracy **90,7% ± 2,1%**, ROC-AUC **0,970 ± 0,010**, PR-AUC **0,873 ± 0,042** (gấp khoảng 6,5 lần tỉ lệ target 13,5%), với sensitivity **88,4%** và specificity **93,0%**.
 - **Tốt nhất trong nhóm học máy truyền thống**: Logistic Regression (balanced accuracy 87,4% ± 3,7%) và LDA (ROC-AUC 0,947 ± 0,022).
-- **Ý nghĩa**: hiệu năng này đạt được **không cần hiệu chỉnh theo từng người** (không có dữ liệu của người test trong tập huấn luyện), vượt xa mức ngẫu nhiên (50% / AUC 0,50). Kết quả trên một trial đơn lẻ đủ cao cho ứng dụng BCI, với lưu ý ở mục 11.4 về hoạt động bấm nút.
+- **Ý nghĩa**: hiệu năng này đạt được **không cần hiệu chỉnh theo từng người** (không có dữ liệu của người test trong tập huấn luyện), vượt xa mức ngẫu nhiên (50% / AUC 0,50). Đây là kết quả offline; chưa có kiểm chứng ứng dụng BCI trực tuyến.
 
-### 11.3 Trả lời Câu hỏi Nghiên cứu 2 (Research Question 2)
-> **Câu hỏi 2**: *Deep learning có tốt hơn các kỹ thuật machine learning chuẩn trong phân loại single-trial không?*
+### 11.3 RQ2 — EEGNet có vượt ML không?
 
-- **Kết luận thực nghiệm**: **Có**, trên bộ dữ liệu này và với cùng sơ đồ đánh giá. EEGNet vượt mọi mô hình baseline ở balanced accuracy (+3,3 điểm so với Logistic Regression), ROC-AUC (+0,023 so với LDA), PR-AUC (+0,082) và có độ lệch chuẩn giữa các fold nhỏ hơn. Chênh lệch có ý nghĩa thống kê ở cấp từng người (ROC-AUC tốt hơn ở 34–35/39 người, p < 10⁻⁸).
-- **Mức chênh lệch về ROC-AUC là vừa phải** (0,947 → 0,970): ở cả hai phương pháp, phần lớn thông tin phân biệt đã nằm trong P3b vùng đỉnh mà bộ đặc trưng của V4 mô tả tốt. Lợi thế của EEGNet thể hiện rõ hơn ở PR-AUC và balanced accuracy, tức ở vùng khó (các trial target biên độ thấp).
-- **Giải thích nguyên nhân**:
-  1. **Thông tin không gian đầy đủ**: bộ đặc trưng thủ công chỉ dùng 12 kênh. EEGNet dùng cả 128 kênh và tự học tổ hợp không gian (lọc không gian) có thể triệt nhiễu chung giữa các kênh, điều mà đặc trưng theo từng kênh không làm được.
-  2. **Thông tin thời gian chi tiết**: đặc trưng thủ công tóm tắt tín hiệu thành trung bình trong 5 cửa sổ cố định. EEGNet học bộ lọc thời gian trên toàn epoch và tận dụng được cả các đáp ứng sớm (~180–340 ms) lẫn phần đuôi muộn (600–800 ms).
-  3. **Đủ dữ liệu cho mô hình nhỏ**: với khoảng 14.900 trial huấn luyện mỗi fold và chỉ 3.930 tham số, EEGNet không bị quá khớp. Khi chỉ có 1 người (khoảng 430 trial huấn luyện), EEGNet chỉ đạt ROC-AUC 0,890, thấp hơn rõ. Lợi thế của deep learning phụ thuộc nhiều vào lượng dữ liệu.
-  4. **Đổi lại**: EEGNet cần GPU (khoảng 8 phút/fold so với vài giây cho LDA) và khó giải thích hơn (mục 11.4). Trong khi đó LDA và Logistic Regression trên đặc trưng sinh lý học vẫn đạt ROC-AUC 0,947 và giải thích trực tiếp được bằng các đặc trưng như `Pz_p3b_mean`.
+**Có, với các pipeline đã thử, kể cả đối chứng LDA đủ 128 kênh.** Đối chứng mới dùng 12 bin 100 ms phủ toàn epoch, cùng 5 fold, scaler chỉ fit trên train và cùng ngưỡng 0,5. LDA 12 kênh đạt ROC-AUC 0,937 ± 0,025; LDA 128 kênh đạt **0,949 ± 0,022**, balanced accuracy **0,830 ± 0,054**, AP **0,821 ± 0,059**. EEGNet vẫn đạt ROC-AUC **0,970 ± 0,010**, balanced accuracy **0,907 ± 0,021**, AP **0,873 ± 0,042**. Như vậy số kênh không giải thích hết lợi thế; biểu diễn thời gian và tối ưu hóa vẫn khác nhau nên chưa cô lập tác động riêng của kiến trúc.
 
-### 11.4 Trả lời Câu hỏi Nghiên cứu 3 (Research Question 3)
-> **Câu hỏi 3**: *Các đặc trưng mà mô hình deep learning khám phá có giải thích được không (tránh "hộp đen")? Nếu DL không tốt hơn, cần giải thích lý do.*
+![ROC đối chứng số kênh](figures/lda_channel_controls_roc.png)
 
-- **Trả lời: giải thích được một phần.**
-- **Phần phù hợp với P300 (Polich, 2007)**:
-  1. **Miền thời gian**: saliency tập trung trong cửa sổ P3b (40,2% saliency trong 300–600 ms, gấp khoảng 1,6 lần mức phân bố đều, đỉnh ở 504 ms) và rất thấp trong khoảng trước kích thích (3,8%). Mô hình không dựa vào nhiễu ngẫu nhiên hay giai đoạn baseline.
-  2. **Có đóng góp của vùng đỉnh**: saliency vùng đỉnh (Pz, CPz, P1, P2) đạt đỉnh khoảng 340 ms, nằm trong cửa sổ P3; tương quan dương (r = 0,32) giữa saliency và hiệu ứng P300 theo kênh.
-- **Phần chưa khớp và chưa giải thích được hoàn toàn**:
-  1. Điểm nóng saliency nằm ở vùng **trung tâm – trán trung tâm bên trái** (C1, FCC3h, CCP3h, C3), không phải ở Pz nơi hiệu ứng P300 lớn nhất. Đỉnh ở khoảng 460 ms, ngay trước thời điểm bấm nút (RT khoảng 542 ms). Đây là vị trí của vỏ não vận động, nên **giả thuyết mô hình dùng tín hiệu chuẩn bị vận động** (chỉ có ở trial Target, vì chỉ target mới bấm nút) cần được xem xét nghiêm túc.
-  2. Mặt khác, ERP trung bình không cho thấy lệch trái ở C3 so với C4 (p = 0,50), và gradient chỉ phản ánh trọng số bộ lọc chứ không phải vị trí nguồn tín hiệu (Haufe et al., 2014). Do đó điểm nóng này cũng có thể là kênh tham chiếu dùng để khử nhiễu.
-  3. Mục 7.6 (V2) đã cho thấy phân loại distractor vs standard (không bấm nút) bằng đặc trưng vẫn đạt AUC 0,90, so với 0,95 cho target vs standard. Như vậy P300 vẫn là nguồn thông tin chính cho baseline, nhưng phần chênh còn lại có thể đến từ hoạt động vận động, và điều này có thể đúng hơn với EEGNet.
-- **Tổng kết**: EEGNet **không phải hoàn toàn "hộp đen"**: hồ sơ thời gian của nó khớp với cửa sổ P3b. Nhưng hồ sơ không gian **không tái hiện đơn thuần** phân bố P3b vùng đỉnh, và phần lợi thế so với ML có thể một phần đến từ thông tin không phải P300 (vận động). Để kết luận chắc chắn, cần: (1) huấn luyện EEGNet cho distractor vs standard (cùng P3 nhưng không bấm nút); (2) tính activation pattern theo Haufe et al. (2014); (3) phân tích saliency theo từng trial đã căn theo thời điểm bấm nút (response-locked).
+Kết quả: `results/tables/lda_channel_controls.csv`; chạy lại bằng `python -m src.ml.report_controls`. LDA 402 đặc trưng đã được huấn luyện lại và khớp toàn bộ chỉ số cũ tới sai số số học.
+
+### 11.4 RQ3 — giải thích được đến đâu?
+
+**Giải thích được một phần.** Mô hình tham chiếu tập trung 40,2% saliency trong 300–600 ms, đỉnh 504 ms. Notebook 04 còn có phép hold-out riêng trên tám người chưa thấy (4.472 trial, 593 target): đỉnh **508 ms**, **40,5%** saliency trong cửa sổ này, tương quan không gian **r = 0,15**. Đây là đầu ra cũ được kiểm tra và trích xuất, chưa chạy lại; không phải saliency OOF của đủ năm fold. Bản đồ ERP đối chiếu dùng toàn bộ nhóm.
+
+![Saliency trên người chưa thấy](figures/eegnet_saliency_holdout_notebook.png)
+
+Đáp ứng distractor–standard trong 300–500 ms đạt −1,06 ± 1,94 µV tại Fz, +0,71 ± 1,54 µV tại Cz và +3,54 ± 1,67 µV tại Pz. Con số 26/39 chỉ là xu hướng trán tương đối so với target; không xác nhận P3a trán điển hình. Hai điều kiện đều không bấm nút ở các lượt đúng, nhưng ERP này chưa xác định cách EEGNet phân loại distractor.
+
+EEGNet distractor–standard và saliency trên đủ năm fold test vẫn chưa chạy: môi trường thiếu PyTorch và driver NVIDIA không hoạt động. Do đó chưa tách được cơ chế P300 với hoạt động vận động hoặc khử nhiễu. Kết quả kiểm chứng được lưu ở `results/tables/report_verification.json`; chạy `python -m src.verify_report` để tái lập các kiểm tra từ kết quả lưu.
 
 ### Tài liệu tham khảo bổ sung (mục 10–11)
 - Lawhern VJ, Solon AJ, Waytowich NR, Gordon SM, Hung CP, Lance BJ. EEGNet: a compact convolutional neural network for EEG-based brain–computer interfaces. *J Neural Eng* 2018;15(5):056013.

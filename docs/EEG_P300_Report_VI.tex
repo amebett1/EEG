@@ -1,0 +1,499 @@
+% Biên dịch từ thư mục gốc của repository:
+% latexmk -xelatex -interaction=nonstopmode -halt-on-error -outdir=docs docs/EEG_P300_Report_VI.tex
+% Hoặc từ docs/: latexmk -xelatex -interaction=nonstopmode -halt-on-error EEG_P300_Report_VI.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=24mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont[Scale=0.85]{DejaVu Sans Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{vietnamese}
+\usepackage{amsmath,amssymb,booktabs,tabularx,array,graphicx,placeins}
+\usepackage{caption,microtype,xcolor,enumitem,fancyhdr}
+\usepackage[unicode,colorlinks=true,linkcolor=teal,citecolor=teal,urlcolor=teal]{hyperref}
+\graphicspath{{docs/report_figures/}{report_figures/}}
+\hypersetup{pdftitle={Phân loại P300 trên từng lượt thử: So sánh học máy và EEGNet},pdfauthor={Nhóm Mini Project EEG}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\emergencystretch}{2em}
+\setlist{nosep,leftmargin=*}
+\captionsetup{font=small,labelfont=bf}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small AIT3012 Neuroscience}
+\fancyhead[R]{\small Phân tích và phân loại EEG P300}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{15pt}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcommand{\reportfig}[4][0.98]{\begin{figure}[htbp]\centering\includegraphics[width=#1\linewidth,height=0.63\textheight,keepaspectratio]{#2}\caption{#3}\label{#4}\end{figure}}
+\begin{document}
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\centering
+{\sffamily\Large AIT3012 Neuroscience\par}
+\vspace{7mm}
+{\sffamily\large Báo cáo Mini Project\par}
+\vspace{16mm}
+{\sffamily\bfseries\LARGE Phân tích và phân loại P300\par}
+\vspace{4mm}
+{\sffamily\Large Kiểm chứng đáp ứng điện não và so sánh học máy truyền thống với EEGNet trên từng lượt thử\par}
+\vspace{10mm}
+{\large Bộ dữ liệu EEG/ERP Nencki--Symfonia\par}
+{Tác vụ oddball thị giác --- GigaDB 100990\par}
+\vspace{4mm}
+{Báo cáo tiếng Việt theo cấu trúc IMRaD\par}
+\vspace{10mm}
+\begin{tabular}{ll}
+\toprule
+\textbf{Thành viên} & \textbf{Vai trò chính}\\\midrule
+Nguyễn Văn Vũ & Quản lý dự án và dữ liệu\\
+Thái Nguyễn Hoàng Bách & Tiền xử lý và kiểm tra chất lượng\\
+Trương Huy Hoàng & Phân tích ERP và trực quan hóa\\
+Nguyễn Công Kiên & Trích xuất đặc trưng\\
+Nguyễn Việt Đức & Mô hình học máy truyền thống\\
+Đồng Minh Đức & Học sâu và phân tích khả năng giải thích\\
+\bottomrule
+\end{tabular}
+\vfill
+{Giảng viên: GS. Guy Nagels, VUB\par}
+{Trợ giảng: Trần Quốc Sang; Nguyễn Tiến Dũng\par}
+\vspace{4mm}
+{Ngày 22 tháng 11 năm 2026\par}
+\end{titlepage}
+\pagenumbering{roman}
+\hypersetup{pageanchor=true}
+
+\begin{abstract}
+\textbf{Mục tiêu:} Khảo sát đáp ứng P300 và đánh giá khả năng phân biệt kích thích thường xuyên với kích thích đích trên từng lượt thử EEG; so sánh các mô hình học máy sử dụng đặc trưng với mạng EEGNet và xem xét khả năng giải thích của mô hình.
+
+\textbf{Phương pháp:} Phân tích thứ cấp tác vụ oddball thị giác thuộc bộ dữ liệu Nencki--Symfonia gồm 42 người. Quy trình tiền xử lý tạo các đoạn tín hiệu 128 kênh, 250 Hz, từ $-200$ đến $1000$ ms. Phân tích chính dùng 39 người đáp ứng yêu cầu hành vi và 21.878 lượt thử đúng thuộc hai lớp, trong đó 2.951 lượt là kích thích đích. Các mô hình dùng 402 đặc trưng được so sánh với EEGNet-8,2 trên cùng thiết kế kiểm định chéo năm phần theo người tham gia. ERP được lấy trung bình với trọng số bằng nhau cho từng người; gradient đầu vào được dùng để khảo sát độ nhạy của mạng.
+
+\textbf{Kết quả:} Hiệu biên độ đích trừ thường xuyên tại Pz trong 300--500 ms đạt $5{,}05\pm2{,}28\,\mu$V, $t(38)=13{,}82$, $d_z=2{,}21$. Có 22/39 người thỏa đồng thời ba tiêu chí P3b do dự án định nghĩa; tỷ lệ tăng lên 32/39 trong phân tích bổ sung 300--600 ms. Logistic regression đạt balanced accuracy $0{,}874\pm0{,}037$; LDA đạt ROC-AUC $0{,}947\pm0{,}022$. EEGNet đạt balanced accuracy $0{,}907\pm0{,}021$, ROC-AUC $0{,}970\pm0{,}010$ và average precision $0{,}873\pm0{,}042$. Khoảng $40{,}2\%$ tổng saliency nằm trong 300--600 ms, nhưng cực đại theo không gian tập trung ở các kênh trung tâm hơn là vùng đỉnh.
+
+\textbf{Kết luận:} EEGNet cho kết quả cao nhất trong phép so sánh hiện có. Hồ sơ thời gian phù hợp với sự đóng góp của P300, song chưa tách được thông tin nhận thức khỏi hoạt động liên quan đáp ứng vận động. Báo cáo dựa trên mã nguồn và kết quả đã lưu, có đối chiếu thống kê; không chạy lại toàn bộ tiền xử lý hoặc huấn luyện mô hình.
+\end{abstract}
+\textbf{Từ khóa:} EEG; P300; ERP; oddball; phân loại từng lượt thử; EEGNet; kiểm định chéo theo người.
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\section{Đặt vấn đề (Introduction)}
+\subsection{Bối cảnh và cơ sở khoa học}
+Điện não đồ (electroencephalography, EEG) ghi nhận biến thiên điện thế trên da đầu với độ phân giải thời gian cao. Khi căn chỉnh tín hiệu theo thời điểm xuất hiện kích thích và lấy trung bình nhiều lượt thử, các điện thế liên quan sự kiện (event-related potentials, ERP) có thể được quan sát rõ hơn. Tuy nhiên, nhận diện một thành phần trên ERP trung bình và dự đoán điều kiện kích thích từ một lượt thử là hai yêu cầu khác nhau: dữ liệu từng lượt có tỷ số tín hiệu trên nhiễu thấp và biến thiên giữa người tham gia.
+
+Trong mô hình oddball, kích thích thường xuyên xen kẽ với các kích thích hiếm. Khi người tham gia phải phát hiện kích thích đích, EEG thường xuất hiện thành phần dương muộn P300. Khung lý thuyết của Polich phân biệt P3a, liên quan định hướng chú ý và thường có ưu thế trán--trung tâm, với P3b, liên quan xử lý kích thích có ý nghĩa nhiệm vụ và cập nhật ngữ cảnh, thường có ưu thế vùng đỉnh~\cite{polich}. Thời gian và phân bố của các thành phần thay đổi theo tác vụ; không thể xác định cơ chế chỉ từ tên cửa sổ thời gian hoặc một điện cực.
+
+Bài toán nhận diện P300 có ý nghĩa đối với nghiên cứu chú ý và giao tiếp não--máy tính. Các bộ phân loại truyền thống sử dụng đặc trưng biên độ, thời gian và phổ có ưu điểm về chi phí và khả năng diễn giải. EEGNet là một mạng tích chập gọn, kết hợp bộ lọc thời gian và không gian học trực tiếp từ tín hiệu EEG~\cite{eegnet}. Việc so sánh hai hướng tiếp cận cần chung dữ liệu kiểm tra và cách chia tập theo người để phản ánh khả năng khái quát sang người mới.
+
+\subsection{Mục tiêu và câu hỏi nghiên cứu}
+Dự án khai thác tác vụ oddball thị giác trong bộ dữ liệu Nencki--Symfonia~\cite{dataset}. Hai lớp của bài toán chính là kích thích thường xuyên (standard, nhãn 0) và kích thích đích (target, nhãn 1). Kích thích gây xao nhãng (distractor) được giữ cho phân tích ERP nhưng không thuộc phép phân loại chính. Ba câu hỏi nghiên cứu gồm:
+\begin{enumerate}
+\item \textbf{RQ1:} Có thể phân loại hai điều kiện trên từng lượt thử ở người chưa xuất hiện trong tập huấn luyện với hiệu quả như thế nào?
+\item \textbf{RQ2:} EEGNet có vượt các mô hình học máy truyền thống trong cùng thiết kế đánh giá ngoài hay không?
+\item \textbf{RQ3:} Độ nhạy của EEGNet theo kênh và thời gian phù hợp đến đâu với đáp ứng P300 dự kiến?
+\end{enumerate}
+Mục tiêu sinh lý và mục tiêu dự đoán được đánh giá riêng. Một hiệu ứng ERP rõ ở mức nhóm không đồng nghĩa mọi cá nhân đều đáp ứng cùng ngưỡng kiểm tra; tương tự, điểm phân loại cao không tự chứng minh mô hình chỉ sử dụng P300.
+
+\section{Đối tượng và phương pháp (Methods)}
+\subsection{Thiết kế nghiên cứu và nguồn dữ liệu}
+Đây là nghiên cứu phân tích thứ cấp dữ liệu có sẵn. Dữ liệu gốc thuộc bộ Nencki--Symfonia EEG/ERP, GigaDB 100990, được mô tả bởi Dzianok và cộng sự~\cite{dataset}. Bộ dữ liệu gồm 42 người trưởng thành khỏe mạnh; dự án chỉ sử dụng tác vụ oddball thị giác. Theo cấu hình dự án, dữ liệu BrainVision có tần số lấy mẫu 1000 Hz, 127 điện cực ghi và FCz làm tham chiếu trực tuyến. Sau khi thêm lại FCz, dữ liệu có 128 kênh; vị trí điện cực được gán theo montage Colin27 10--05, với O9/O10 dùng vị trí I1/I2.
+
+Một phiên điển hình gồm 660 kích thích: khoảng 75\% thường xuyên, 12\% đích và 12\% gây xao nhãng. Marker S5, S6, S7 tương ứng ba điều kiện; S1 biểu thị nhấn nút. Người tham gia chỉ nhấn nút khi gặp kích thích đích. Một số bản ghi có số kích thích khác hoặc được ghép từ nhiều đoạn nên quy trình không giả định tất cả phiên đều liên tục và cùng độ dài.
+
+\subsection{Tiêu chí đưa vào phân tích}
+Ba người \code{sub-02}, \code{sub-14} và \code{sub-17} thuộc nhóm hiểu sai nhiệm vụ, thể hiện qua việc thường xuyên phản hồi với kích thích gây xao nhãng. Đây là danh sách loại trừ theo hành vi đã được cấu hình trước trong dự án. Dữ liệu của họ vẫn được xử lý và ghi nhận trong bảng kiểm tra, nhưng không đưa vào phân tích ERP nhóm chính hoặc phân loại hai lớp.
+
+Một lượt đích được coi là đúng khi có nhấn nút trong 100--1400 ms sau kích thích. Với thường xuyên và gây xao nhãng, lượt đúng là lượt không có nhấn nút. Sau tiền xử lý, phân tích chính chỉ dùng các lượt đúng còn giữ lại. Mô hình phân loại dùng đúng hai điều kiện thường xuyên và đích. Không loại thêm người dựa trên việc có vượt ngưỡng biên độ hoặc độ trễ ERP hay không.
+
+\subsection{Quy trình tiền xử lý}
+Quy trình sử dụng MNE-Python~\cite{mne}. Mã triển khai nằm trong notebook \code{notebooks/01_preprocessing.ipynb}. Các bước gồm:
+\begin{enumerate}
+\item \textbf{Đồng nhất kênh và cắt khoảng làm nhiệm vụ.} Thêm lại FCz, sắp xếp thứ tự 128 kênh thống nhất và gán montage. Cắt bỏ phần ngoài tác vụ với khoảng đệm; đánh dấu biên ghép đoạn để bộ lọc và epoch không đi qua vùng gián đoạn.
+\item \textbf{Phát hiện kênh xấu.} Trên bản sao 200 Hz, lọc 1--40 Hz và tham chiếu trung vị, đánh dấu kênh nếu robust z-score của log-IQR có trị tuyệt đối lớn hơn 4, tương quan trung vị với sáu kênh lân cận nhỏ hơn $0{,}4$, hoặc có tương quan với kênh lân cận nhỏ hơn $-0{,}8$. Nội suy bằng spline cầu, sau đó tham chiếu trung bình.
+\item \textbf{Ước lượng ICA và nhận diện nhiễu.} Khớp 40 thành phần bằng extended Picard trên bản sao lọc 1--100 Hz, 250 Hz, seed 97. ICLabel hỗ trợ nhận diện thành phần mắt, tim và cơ; loại các thành phần thuộc ba nhóm này khi xác suất ít nhất $0{,}8$. Notebook ghi nhận ba ngoại lệ thủ công: loại thêm một thành phần chớp mắt ở mỗi người \code{sub-13}, \code{sub-14} và \code{sub-36}.
+\item \textbf{Lọc tín hiệu để phân tích.} Áp dụng bộ lọc FIR không lệch pha 0,5--40 Hz trên dữ liệu ở tần số gốc và áp dụng nghiệm ICA. Lọc thông thấp được thực hiện trước giảm tần số lấy mẫu.
+\item \textbf{Tạo epoch và loại lượt nhiễu.} Cắt từ $-200$ đến $1000$ ms quanh kích thích, hiệu chỉnh đường nền $-200$ đến 0 ms, decimation hệ số 4 xuống 250 Hz. Loại epoch trùng biên xấu hoặc có biên độ đỉnh--đỉnh trên bất kỳ kênh nào vượt $150\,\mu$V.
+\item \textbf{Lưu đầu ra và QC.} Lưu tín hiệu float32 với 128 kênh, 301 mẫu, metadata điều kiện, phản hồi, thời gian phản ứng và tính đúng; đồng thời xuất thống kê chất lượng theo người.
+\end{enumerate}
+Trong báo cáo, đầu vào tín hiệu của EEGNet là các epoch \emph{đã tiền xử lý}, chưa trích xuất đặc trưng thủ công. Thuật ngữ ``raw epochs'' trong mã nguồn không có nghĩa mô hình dùng bản ghi thu nhận chưa lọc.
+
+\subsection{Kiểm tra chất lượng và phạm vi kiểm chứng}
+Dự án cung cấp bảng QC và kết quả kiểm tra bàn giao epoch--feature trong \code{v2_epoch_audit.json}. Các kiểm tra bao gồm hình dạng, tần số lấy mẫu, thứ tự kênh, montage, tính hữu hạn, nhãn, tham chiếu trung bình, ngưỡng loại epoch và khớp số lượng với QC. Với bộ phân loại, kiểm tra còn đối chiếu thứ tự lượt thử, nhãn, thời gian phản ứng và tính lại \code{Pz_p3b_mean} so với bảng đặc trưng.
+
+Hiệu chỉnh đường nền được áp dụng ở 1000 Hz trước decimation. Vì các mẫu lưu ở 250 Hz chỉ là một phần của mẫu gốc, trung bình đường nền của tín hiệu lưu không nhất thiết bằng 0 tuyệt đối. Phần dư được ghi nhận để kiểm tra, không tự hiệu chỉnh lại khi chưa tạo lại toàn bộ đặc trưng và kết quả phụ thuộc.
+
+Khi chuẩn bị báo cáo, mã nguồn, tài liệu, bảng thống kê và mảng saliency được đối chiếu. Trung bình, SD theo fold và kiểm định Wilcoxon được tính lại từ kết quả lưu. Toàn bộ tiền xử lý, ICA và huấn luyện không được chạy lại; môi trường hiện tại thiếu PyTorch. Kết quả audit có sẵn phản ánh phạm vi kiểm tra đã triển khai, không thay thế việc kiểm chứng độc lập toàn bộ 402 đặc trưng hoặc quyết định ICA từ bản ghi gốc.
+
+\subsection{Phân tích ERP và tiêu chí P3b}
+Với mỗi điều kiện, ERP được tính trung bình trong từng người trên các lượt đúng, sau đó lấy trung bình nhóm với trọng số bằng nhau cho 39 người. Sóng hiệu số được định nghĩa:
+\begin{equation}
+\begin{aligned}
+\Delta_T(t)&=\operatorname{ERP}_{\mathrm{target}}(t)-\operatorname{ERP}_{\mathrm{standard}}(t),\\
+\Delta_D(t)&=\operatorname{ERP}_{\mathrm{distractor}}(t)-\operatorname{ERP}_{\mathrm{standard}}(t).
+\end{aligned}
+\end{equation}
+Dự án định nghĩa ba tiêu chí lõi trong cửa sổ chính 300--500 ms: (i) biên độ trung bình target tại Pz lớn hơn Fz; (ii) target trừ standard tại Pz ít nhất $1{,}5\,\mu$V; và (iii) cực đại dương target Pz nằm trong 300--500 ms khi tìm trên khoảng độc lập 200--800 ms. Tìm đỉnh trên khoảng rộng tránh kiểm tra vòng tròn do chỉ tìm trong chính khoảng chấp nhận.
+
+Một chỉ số mô tả bổ sung kiểm tra xem hiệu Fz trừ Pz ở distractor có lớn hơn hiệu tương ứng ở target hay không. Chỉ số này tách biệt với ba tiêu chí lõi P3b. Các ngưỡng là lựa chọn vận hành của dự án dựa trên khung P3a/P3b~\cite{polich}, không phải tiêu chuẩn chẩn đoán hoặc ngưỡng do Polich quy định.
+
+Phân tích độ nhạy mở rộng cửa sổ biên độ và chấp nhận độ trễ tới 300--600 ms, giữ nguyên khoảng tìm đỉnh 200--800 ms. Biên độ QC ban đầu cũng dùng 300--600 ms nhưng tính trên tất cả epoch giữ lại, kể cả lượt sai; không thay thế chúng cho kết quả ERP chính trên lượt đúng.
+
+\subsection{Trích xuất và khảo sát đặc trưng}
+Mỗi lượt được biểu diễn bằng 402 đặc trưng tại 12 kênh: Fz, FCz, Cz, CPz, Pz, Oz, F3/F4, C3/C4 và P3/P4. Năm cửa sổ biên độ là 100--200, 250--400, 400--600, 300--600 và 600--800 ms. Một số đặc trưng đỉnh tham khảo cách tiếp cận của Laton và cộng sự~\cite{laton}; dự án áp dụng trên từng lượt thay vì ERP đã lấy trung bình.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Các nhóm đặc trưng được triển khai trong dự án.}
+\label{tab:features}
+\begin{tabularx}{\linewidth}{lYr}
+\toprule
+Nhóm & Nội dung & Số cột\\\midrule
+Biên độ cửa sổ & Trung bình và SD trong năm khoảng tại 12 kênh & 120\\
+P300 & Biên độ đỉnh, độ trễ và diện tích trong 300--600 ms & 36\\
+Đỉnh sớm & Biên độ và độ trễ N1/P2/N2 tại Fz, Cz, Pz & 18\\
+Đỉnh--đỉnh & Cực đại trừ cực tiểu trong 200--700 ms & 12\\
+Hjorth & Activity, mobility và complexity trên cả epoch & 36\\
+Phổ & Công suất Welch, tỷ số dải và spectral entropy & 132\\
+Wavelet & db4 bốn mức, thống kê trong 300--600 ms & 48\\\midrule
+Tổng & & 402\\\bottomrule
+\end{tabularx}
+\end{table}
+
+Đặc trưng phổ bao gồm công suất tuyệt đối và tương đối trong delta (0,5--4 Hz), theta (4--8 Hz), alpha (8--13 Hz), beta (13--30 Hz), hai tỷ số theta/alpha và delta/theta, cùng entropy phổ. Wavelet phân rã đa mức db4 giữ thông tin thời gian, tạo các dải xấp xỉ 0--8, 8--16 và 16--31 Hz để đo trong cửa sổ P300. Với đặc trưng đỉnh, bộ trích xuất tìm cực trị cục bộ; khi không có cực trị, dùng điểm có đạo hàm gần 0 nhất. Tên cửa sổ hoặc đặc trưng không tự xác nhận một thành phần sinh lý riêng biệt.
+
+Mức phân biệt của từng đặc trưng được khảo sát bằng ROC-AUC trong từng người, rồi lấy trung bình $A$ trên 39 người. Bảng xếp hạng dùng $\max(A,1-A)$ để thể hiện cả đặc trưng tăng và giảm ở target. Vì bảng này sử dụng toàn bộ dữ liệu, nó chỉ phục vụ mô tả; tất cả 402 đặc trưng vẫn được đưa vào các bộ phân loại, không chọn trước đặc trưng theo kết quả toàn bộ mẫu.
+
+\subsection{Các mô hình và thiết kế đánh giá}
+\subsubsection{Mô hình học máy truyền thống}
+Các baseline gồm: Dummy dự đoán ngẫu nhiên theo tỷ lệ lớp; LDA với solver \code{lsqr} và shrinkage tự động; logistic regression với điều chuẩn L2; SVM kernel RBF có ước lượng xác suất; và Random Forest 100 cây. Logistic regression và SVM dùng trọng số lớp \code{balanced}; Random Forest dùng \code{balanced_subsample}. LDA, logistic regression và SVM đặt \code{StandardScaler} trong pipeline, chỉ khớp trên dữ liệu huấn luyện của từng fold. Random Forest dùng trực tiếp đặc trưng.
+
+Các mô hình được đánh giá với cấu hình triển khai, không có tối ưu siêu tham số lồng nhau. Hiệu chỉnh xác suất nội bộ của SVM không được cấu hình rõ theo nhóm người; đây là điểm khác với một thiết kế hiệu chỉnh hoàn toàn theo người tham gia.
+
+\subsubsection{Mạng EEGNet}
+EEGNet-8,2~\cite{eegnet} nhận tensor $B\times1\times128\times301$. Khối đầu gồm tích chập thời gian với tám bộ lọc dài 125 mẫu (500 ms), tích chập không gian depthwise phủ 128 kênh với depth multiplier bằng hai, batch normalization, ELU, average pooling hệ số bốn và dropout $0{,}5$. Khối tiếp theo gồm tích chập depthwise theo thời gian dài 16 mẫu, tích chập pointwise, batch normalization, ELU, average pooling hệ số tám và dropout. Lớp tuyến tính xuất hai logit. Ràng buộc max-norm ở lớp không gian và lớp phân loại lần lượt là $1{,}0$ và $0{,}25$. Với đầu vào này, mô hình có 3.930 tham số học được.
+
+Huấn luyện dùng Adam, learning rate $10^{-3}$, batch size 64, cross-entropy có trọng số lớp và tối đa 50 epoch. Tín hiệu được chia cho SD toàn cục ước lượng từ tập tối ưu hóa. Early stopping theo validation loss dùng patience 15. Trong mỗi tập huấn luyện ngoài, 15\% lượt thử được lấy ngẫu nhiên có phân tầng theo nhãn để làm validation; việc chia này không tách theo người. Do đó, cùng một người có thể xuất hiện trong tập tối ưu hóa và validation, dù không xuất hiện trong tập test ngoài tương ứng.
+
+\subsubsection{Kiểm định chéo và chỉ số}
+Cả hai hướng dùng năm fold \code{GroupKFold} theo người trên cùng bộ 39 người. Dữ liệu của một người chỉ thuộc một fold test, không xuất hiện trong tập huấn luyện ngoài của fold đó. Tài liệu dự án và kiểm tra bàn giao hỗ trợ sự thống nhất thứ tự lượt thử giữa đầu vào đặc trưng và tín hiệu.
+
+Mất cân bằng lớp được xử lý trong huấn luyện theo cấu hình từng mô hình và trong đánh giá bằng các chỉ số phù hợp. Đặt target là lớp dương:
+\begin{equation}
+\begin{gathered}
+\mathrm{Sensitivity}=\frac{TP}{TP+FN},\qquad
+\mathrm{Specificity}=\frac{TN}{TN+FP},\\[4pt]
+\mathrm{Balanced\ accuracy}=\frac{\mathrm{Sensitivity}+\mathrm{Specificity}}{2}.
+\end{gathered}
+\end{equation}
+Báo cáo dùng balanced accuracy, ROC-AUC, average precision (AP), macro-F1, độ nhạy và độ đặc hiệu. AP được tính bằng \code{average_precision_score}; trong file kết quả, chỉ số được đặt tên PR-AUC nhưng không phải tích phân hình thang của đường precision--recall. Các chỉ số cần nhãn dự đoán dùng ngưỡng xác suất target ít nhất $0{,}5$.
+
+Kết quả tổng hợp là trung bình $\pm$ SD mẫu qua năm fold. Chỉ số gộp ngoài mẫu (out-of-fold, OOF) được tính từ tất cả dự đoán ở các lượt test; khác với trung bình các chỉ số theo fold. SD giữa fold không được diễn giải như khoảng tin cậy.
+
+\subsection{Phân tích thống kê và saliency}
+Hiệu biên độ ERP target trừ standard được kiểm định $t$ ghép cặp qua người. Kích thước hiệu ứng $d_z$ bằng trung bình hiệu chia SD mẫu của hiệu. Tương quan giữa thời gian phản ứng và biên độ được mô tả bằng hệ số Pearson. Chênh lệch chỉ số OOF theo người giữa EEGNet và hai baseline được kiểm định Wilcoxon signed-rank hai phía. Đây là các so sánh thăm dò, chưa điều chỉnh đa kiểm định; người trong một fold dùng chung mô hình và các tập huấn luyện giữa fold chồng lấn.
+
+Saliency được tính cho một mô hình tham chiếu khớp trên 85\% toàn bộ lượt thử. Với $z_{i,T}$ là logit target và $X_{i,c,t}$ là đầu vào ở kênh $c$, thời điểm $t$, dự án tính:
+\begin{equation}
+S_{c,t}=\frac{1}{N_T}\sum_{i:y_i=1}\left|\frac{\partial z_{i,T}}{\partial\widetilde X_{i,c,t}}\right|.
+\end{equation}
+Ở đây $\widetilde X=X/s$ là đầu vào chia SD toàn cục từ train; gradient được tính theo đầu vào đã chuẩn hóa. Trị tuyệt đối gradient được lấy trung bình trên tất cả 2.951 lượt target, theo hướng tiếp cận trực quan hóa độ nhạy gradient~\cite{saliency}. Các lượt này bao gồm dữ liệu đã dùng khớp mô hình tham chiếu, nên saliency không phải lời giải thích ngoài mẫu của từng dự đoán kiểm định chéo.
+\FloatBarrier
+
+\section{Kết quả (Results)}
+\subsection{Dữ liệu sau xử lý và chất lượng}
+Quy trình giữ 27.034 trong 27.865 epoch của 42 người, tương đương khoảng $97{,}0\%$. Sau loại trừ hành vi và chọn lượt đúng của hai điều kiện, bộ phân loại gồm 21.878 lượt từ 39 người, trong đó target chiếm $13{,}49\%$ (Bảng~\ref{tab:data}). Nếu luôn dự đoán standard, độ chính xác thông thường sẽ đạt $86{,}51\%$ nhưng độ nhạy với target bằng 0.
+
+\begin{table}[htbp]
+\centering
+\caption{Số lượng dữ liệu ở các giai đoạn. Epoch giữ lại gồm cả lượt đúng và sai; tập phân loại chỉ gồm lượt đúng.}
+\label{tab:data}
+\begin{tabularx}{\linewidth}{Yr}
+\toprule
+Giai đoạn & Số lượng\\\midrule
+Người được tiền xử lý & 42\\
+Epoch ứng viên & 27.865\\
+Epoch giữ lại ở cả ba điều kiện & 27.034\\
+Standard / target / distractor giữ lại & 20.375 / 3.326 / 3.333\\
+Người trong phân tích chính & 39\\
+Lượt standard đúng dùng phân loại & 18.927\\
+Lượt target đúng dùng phân loại & 2.951\\
+Tổng lượt phân loại hai lớp & 21.878\\
+Số kênh $\times$ số mẫu mỗi lượt & $128\times301$\\\bottomrule
+\end{tabularx}
+\end{table}
+
+QC có sẵn ghi nhận trung bình $2{,}9\pm3{,}4$ kênh được nội suy và $15{,}0\pm4{,}7$ thành phần ICA bị loại trên mỗi người. Tỷ lệ epoch bị loại trung bình theo người là $3{,}0\pm7{,}8\%$; riêng \code{sub-07} mất khoảng $49{,}5\%$. Nhiễu mắt tồn dư vẫn cần lưu ý ở một số bản ghi, đặc biệt \code{sub-40} và \code{sub-30}, theo chỉ số Fp1 trong QC.
+
+Kết quả audit lưu trạng thái vượt tất cả kiểm tra đã triển khai cho 42 file và khớp 21.878 hàng đặc trưng ở nhóm phân loại. Giá trị lớn nhất của trị tuyệt đối trung bình đường nền sau decimation, tính riêng mỗi người, nằm trong $0{,}193$--$1{,}006\,\mu$V.
+
+\subsection{Đáp ứng ERP và các tiêu chí P3b}
+Trong 300--500 ms, biên độ trung bình tại Pz là $6{,}97\pm2{,}74\,\mu$V với target và $1{,}92\pm1{,}49\,\mu$V với standard. Hiệu ghép cặp đạt $5{,}05\pm2{,}28\,\mu$V, $t(38)=13{,}82$, $p=2{,}14\times10^{-16}$ và $d_z=2{,}21$. SD ở đây biểu thị biến thiên giữa người. ERP và sóng hiệu số được trình bày ở Hình~\ref{fig:erp} và Hình~\ref{fig:diff}.
+
+\reportfig{grand_average_fz_pz.png}{ERP trung bình nhóm tại Fz và Pz trên lượt đúng của 39 người, mỗi người có trọng số bằng nhau. Vùng tô quanh đường là SEM giữa người; khoảng đánh dấu là 300--500 ms. Điểm đỉnh được đánh dấu trong hình không thay thế cách tìm đỉnh cá nhân trên 200--800 ms.}{fig:erp}
+\reportfig{grand_average_difference_waves.png}{Sóng hiệu số target trừ standard và distractor trừ standard tại Fz, Cz, Pz. Đáp ứng target ở vùng đỉnh rõ hơn sau kích thích; phép trừ không cô lập duy nhất một nguồn thần kinh.}{fig:diff}
+\reportfig{grand_average_p300_summary_topomap.png}{Bản đồ điện thế da đầu trung bình 300--500 ms ở cùng nhóm 39 người và cùng cách lấy trọng số. Hiệu target trừ standard có ưu thế vùng đỉnh. Nhãn trong các hình được giữ nguyên từ đầu ra phân tích của dự án.}{fig:topo}
+
+Tất cả 39 người có target Pz lớn hơn Fz, trong khi 37/39 vượt ngưỡng hiệu biên độ. Chỉ 22/39 có đỉnh trong cửa sổ chính; 17 người còn lại có cực đại muộn hơn 500 ms, trong khoảng 508--748 ms. Bảng~\ref{tab:erp} trình bày từng tiêu chí và phân tích mở rộng.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Kết quả tiêu chí ERP. Nhóm hiểu sai nhiệm vụ chỉ dùng đối chiếu; tư cách đưa vào phân loại được xác định theo hành vi.}
+\label{tab:erp}
+\begin{tabularx}{\linewidth}{Ycc}
+\toprule
+Tiêu chí & Nhóm chính & Hiểu sai nhiệm vụ\\
+ & ($N=39$) & ($N=3$)\\\midrule
+Target Pz $>$ Fz, 300--500 ms & 39/39 & 3/3\\
+Hiệu Pz $\geq1{,}5\,\mu$V & 37/39 & 3/3\\
+Đỉnh dương trong 300--500 ms & 22/39 & 2/3\\
+Xu hướng distractor tương đối về trán & 26/39 & 2/3\\
+Đồng thời ba tiêu chí lõi & 22/39 & 2/3\\
+Ba tiêu chí và đủ điều kiện hành vi & 22/39 & 0/3\\
+Ba tiêu chí bổ sung, 300--600 ms & 32/39 & 3/3\\\bottomrule
+\end{tabularx}
+\end{table}
+
+Thời gian phản ứng target trung bình theo QC là $542{,}1\pm65{,}5$ ms. Tương quan với biên độ target Pz trên lượt đúng trong 300--500 ms là $r=-0{,}493$, $p=0{,}00144$ ở 39 người.
+\FloatBarrier
+
+\subsection{Mức phân biệt của đặc trưng}
+Bảng xếp hạng cho thấy \code{Pz_p3b_mean}, tức biên độ trung bình Pz trong 400--600 ms, đạt mức phân biệt cao nhất $0{,}836$. Một số đặc trưng tiêu biểu được trình bày ở Bảng~\ref{tab:ranking}. Có 32/402 đặc trưng đạt ít nhất $0{,}7$ và 156/402 đạt ít nhất $0{,}6$.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Một số đặc trưng nổi bật theo bảng xếp hạng thăm dò. Mức phân biệt đã đổi chiều nếu AUC trung bình nhỏ hơn 0,5.}
+\label{tab:ranking}
+\begin{tabularx}{\linewidth}{Ylc}
+\toprule
+Ý nghĩa & Tên đặc trưng & Mức phân biệt\\\midrule
+Biên độ trung bình Pz, 400--600 ms & \code{Pz_p3b_mean} & $0{,}836$\\
+Biên độ trung bình CPz, 400--600 ms & \code{CPz_p3b_mean} & $0{,}818$\\
+Trung bình wavelet tần số thấp Pz & \code{Pz_wav_delta_theta_p3_mean} & $0{,}802$\\
+Diện tích P300 tại Pz & \code{Pz_p3_auc} & $0{,}802$\\
+Hjorth complexity tại Pz & \code{Pz_hjorth_complexity} & $0{,}780$\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{So sánh hiệu quả phân loại}
+Bảng~\ref{tab:models} và Bảng~\ref{tab:threshold} tổng hợp chỉ số trên năm fold theo người. EEGNet có trung bình cao nhất về balanced accuracy, ROC-AUC và AP. Trong các mô hình đặc trưng, logistic regression có balanced accuracy cao nhất, còn LDA có ROC-AUC cao nhất. Kết quả trên dữ liệu mô phỏng và thử nghiệm một người không được trộn vào phép so sánh này.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Hiệu quả phân loại, trung bình $\pm$ SD mẫu qua năm fold. AP là average precision; số in đậm biểu thị trung bình cao nhất trong cột.}
+\label{tab:models}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Mô hình & Balanced accuracy & ROC-AUC & AP\\\midrule
+Dummy & $0{,}497\pm0{,}005$ & $0{,}497\pm0{,}005$ & $0{,}134\pm0{,}004$\\
+LDA & $0{,}815\pm0{,}060$ & $0{,}947\pm0{,}022$ & $0{,}791\pm0{,}075$\\
+Logistic regression & $0{,}874\pm0{,}037$ & $0{,}946\pm0{,}021$ & $0{,}791\pm0{,}073$\\
+RBF SVM & $0{,}799\pm0{,}056$ & $0{,}946\pm0{,}016$ & $0{,}791\pm0{,}045$\\
+Random Forest & $0{,}638\pm0{,}041$ & $0{,}907\pm0{,}025$ & $0{,}652\pm0{,}046$\\
+EEGNet & $\mathbf{0{,}907\pm0{,}021}$ & $\mathbf{0{,}970\pm0{,}010}$ & $\mathbf{0{,}873\pm0{,}042}$\\\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Các chỉ số tại ngưỡng xác suất target bằng 0,5, trung bình $\pm$ SD qua fold.}
+\label{tab:threshold}
+\begin{tabular}{lccc}
+\toprule
+Mô hình & Độ nhạy & Độ đặc hiệu & Macro-F1\\\midrule
+Dummy & $0{,}127\pm0{,}009$ & $0{,}867\pm0{,}002$ & $0{,}497\pm0{,}005$\\
+LDA & $0{,}659\pm0{,}126$ & $0{,}971\pm0{,}013$ & $0{,}835\pm0{,}045$\\
+Logistic regression & $0{,}841\pm0{,}087$ & $0{,}908\pm0{,}027$ & $0{,}816\pm0{,}029$\\
+RBF SVM & $0{,}625\pm0{,}120$ & $0{,}973\pm0{,}011$ & $0{,}824\pm0{,}043$\\
+Random Forest & $0{,}289\pm0{,}087$ & $0{,}988\pm0{,}005$ & $0{,}678\pm0{,}053$\\
+EEGNet & $0{,}884\pm0{,}060$ & $0{,}930\pm0{,}030$ & $0{,}857\pm0{,}028$\\\bottomrule
+\end{tabular}
+\end{table}
+
+EEGNet tăng balanced accuracy $3{,}25$ điểm phần trăm so với logistic regression, tăng ROC-AUC $0{,}0232$ so với LDA và tăng AP khoảng $0{,}082$ so với các baseline đặc trưng tốt nhất. Các chỉ số OOF gộp của EEGNet lần lượt là $0{,}907$, $0{,}968$ và $0{,}863$. Số epoch đã chạy theo fold là 48, 50, 49, 50 và 50; ba fold chạm giới hạn huấn luyện.
+
+\reportfig{ml_vs_dl_comparison.png}{So sánh balanced accuracy, ROC-AUC và AP giữa các mô hình. Thanh sai số là SD qua fold, không phải khoảng tin cậy hay biến thiên của các lần huấn luyện độc lập.}{fig:comparison}
+\reportfig{eegnet_roc_pr_real.png}{Đường ROC và precision--recall của dự đoán OOF gộp từ EEGNet trên dữ liệu thực. Tỷ lệ target khoảng 13,5\% là mốc tham chiếu cho AP.}{fig:roc}
+
+\subsection{Đối chứng LDA cùng số kênh}
+Huấn luyện shrinkage LDA với biên độ trung bình trong 12 bin 100 ms phủ $-200$ đến $1000$ ms trên 12 hoặc 128 kênh. Bin đóng bên trái, mở bên phải; bin cuối giữ cả mẫu 1000 ms. Hai mô hình có 144 và 1.536 đặc trưng, dùng cùng năm fold theo người, chuẩn hóa trong train, prior thực nghiệm và ngưỡng $0{,}5$; không tìm độ rộng bin hay siêu tham số từ test. Nhãn và nhóm đã khớp từng dòng với feature và EEGNet OOF.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Đối chứng mới, trung bình $\pm$ SD mẫu qua năm fold.}
+\begin{tabular}{lccc}
+\toprule
+Mô hình & Balanced accuracy & ROC-AUC & AP\\\midrule
+LDA 12 kênh & $0{,}804\pm0{,}045$ & $0{,}937\pm0{,}025$ & $0{,}774\pm0{,}072$\\
+LDA 128 kênh & $0{,}830\pm0{,}054$ & $0{,}949\pm0{,}022$ & $0{,}821\pm0{,}059$\\
+EEGNet 128 kênh & $0{,}907\pm0{,}021$ & $0{,}970\pm0{,}010$ & $0{,}873\pm0{,}042$\\\bottomrule
+\end{tabular}
+\end{table}
+LDA cải thiện khi thêm kênh nhưng chưa bắt kịp EEGNet. Lần chạy lại LDA 402 đặc trưng tái lập các chỉ số cũ tới sai số số học.
+\reportfig{baseline_roc_curves.png}{ROC baseline gộp OOF; AUC gộp khác trung bình AUC qua fold.}{fig:baselineroc}
+\reportfig{lda_channel_controls_roc.png}{ROC OOF của đối chứng số kênh, LDA 402 đặc trưng và EEGNet đã lưu.}{fig:channelcontrol}
+\FloatBarrier
+
+\subsection{Tính nhất quán giữa người tham gia}
+Từ bảng kết quả OOF theo người, EEGNet có ROC-AUC cao hơn LDA ở 35/39 người và cao hơn logistic regression ở 34/39 người. Kiểm định ghép cặp tính lại từ bảng lưu cho kết quả ở Bảng~\ref{tab:paired}.
+
+\begin{table}[htbp]
+\centering\small
+\caption{So sánh EEGNet với baseline theo 39 người. Chênh lệch là EEGNet trừ baseline; $p$ từ Wilcoxon hai phía, chưa điều chỉnh đa kiểm định.}
+\label{tab:paired}
+\begin{tabularx}{\linewidth}{Ylccc}
+\toprule
+Baseline & Chỉ số & Trung vị tăng & Số người tăng & $p$\\\midrule
+LDA & ROC-AUC & $0{,}023$ & 35/39 & $1{,}9\times10^{-9}$\\
+LDA & Balanced accuracy & $0{,}075$ & 37/39 & $1{,}6\times10^{-9}$\\
+Logistic regression & ROC-AUC & $0{,}023$ & 34/39 & $3{,}3\times10^{-9}$\\
+Logistic regression & Balanced accuracy & $0{,}036$ & 31/39 & $2{,}5\times10^{-4}$\\\bottomrule
+\end{tabularx}
+\end{table}
+\FloatBarrier
+
+\subsection{Đáp ứng distractor và cách hiểu P3a}
+Trong 300--500 ms, hiệu distractor trừ standard đạt $-1{,}06\pm1{,}94\,\mu$V tại Fz, $0{,}71\pm1{,}54\,\mu$V tại Cz và $3{,}54\pm1{,}67\,\mu$V tại Pz, tính trên 39 người với trọng số bằng nhau. Hiệu ứng trong cửa sổ này thiên đỉnh. Chỉ số $(D_{Fz}-D_{Pz})-(T_{Fz}-T_{Pz})$ đạt $1{,}43\pm2{,}46\,\mu$V, dương ở 26/39 người. Đây là xu hướng trán tương đối so với target, không xác nhận P3a trán điển hình. Hai điều kiện đều không bấm nút ở các lượt đúng, nhưng ERP này chưa cho biết EEGNet dùng đặc trưng gì trong bài toán distractor--standard.
+
+\subsection{Phân bố saliency theo thời gian và không gian}
+Tính lại từ mảng saliency lưu cho thấy cực đại thời gian tại 504 ms; $40{,}2\%$ tổng saliency nằm trong 300--600 ms, dù cửa sổ này chỉ chiếm $24{,}9\%$ số mẫu. Tỷ lệ tập trung do đó khoảng $1{,}6$ lần phân bố đều. Hình~\ref{fig:saliency} thể hiện độ nhạy theo kênh và thời gian.
+
+\reportfig{eegnet_saliency_real.png}{Saliency bằng trị tuyệt đối gradient đầu vào, hồ sơ thời gian và đối chiếu theo kênh với hiệu ứng ERP. Đây là phân tích mô tả của mô hình tham chiếu, không phải tập hợp giải thích test riêng từng fold.}{fig:saliency}
+\reportfig{eegnet_saliency_topomap_real.png}{Đối chiếu bản đồ saliency và điện thế target trừ standard trong 300--600 ms cùng các đường thời gian theo vùng. Hai bản đồ mô tả hai đại lượng khác nhau.}{fig:saliencytopo}
+
+Các kênh C1, FCC3h và CCP3h có saliency trung bình nổi bật, trong khi hiệu ứng P300 trên điện thế có ưu thế vùng đỉnh, gồm Pz và CPz. Pz xếp thứ 37/128 về saliency trung bình. Tương quan giữa saliency trung bình theo kênh và hiệu ứng P300 là khoảng $r=0{,}317$, làm tròn $0{,}32$.
+\FloatBarrier
+
+\subsection{Saliency trên người chưa thấy trong notebook}
+Notebook 04 lưu một phép chia hold-out riêng theo người, dùng GroupShuffleSplit. Tập test gồm tám người, 4.472 lượt (593 target), không trùng người train. Đỉnh saliency ở 508 ms, $40{,}5\%$ khối lượng trong 300--600 ms và tương quan theo kênh $r=0{,}15$. Hồ sơ thời gian vẫn muộn nhưng tương quan không gian yếu hơn mô hình tham chiếu ($r=0{,}32$). Đây là đầu ra notebook cũ được đọc và trích xuất, chưa chạy lại; không phải saliency test của đủ năm fold. Bản đồ ERP tham chiếu vẫn dùng toàn bộ nhóm.
+\reportfig{eegnet_saliency_holdout_notebook.png}{Saliency trên target của người test trong phép chia hold-out riêng, trích từ đầu ra notebook 04. Đường ERP đối chiếu dùng toàn bộ nhóm.}{fig:holdoutsaliency}
+\FloatBarrier
+
+\section{Thảo luận (Discussion)}
+\noindent\textbf{RQ1:} EEGNet đạt ROC-AUC $0{,}970$ và balanced accuracy $90{,}7\%$ trên người ở test ngoài chưa thấy khi huấn luyện.
+\textbf{RQ2:} Có, với các pipeline đã thử, kể cả đối chứng LDA đủ 128 kênh (ROC-AUC $0{,}949$).
+\textbf{RQ3:} Giải thích được một phần: saliency muộn còn xuất hiện trên người chưa thấy (508 ms; $40{,}5\%$ trong 300--600 ms), nhưng tương quan không gian chỉ $r=0{,}15$ và chưa tách được ảnh hưởng vận động.
+\subsection{Diễn giải đáp ứng sinh lý}
+Hiệu target trừ standard tại Pz lớn và ưu thế vùng đỉnh phù hợp với sự đóng góp của P3b trong tác vụ oddball. Đặc trưng mạnh nhất cũng là biên độ trung bình Pz giai đoạn 400--600 ms, tạo sự nhất quán giữa phân tích ERP và thông tin dự đoán. Mức phân biệt cao của biên độ trung bình có thể liên quan tính ổn định trước nhiễu từng mẫu so với phép chọn một điểm đỉnh, nhưng đây là giải thích phương pháp chứ chưa phải kết quả của một thí nghiệm loại bỏ đặc trưng có kiểm soát.
+
+Tỷ lệ vượt ba tiêu chí tăng từ 22/39 lên 32/39 khi mở rộng cửa sổ cho thấy kết luận kiểm tra cá nhân nhạy với giới hạn độ trễ. Người không đạt cửa sổ hẹp vẫn có thể có đáp ứng muộn. Vì vậy, không thể diễn giải không vượt ngưỡng là không có P300. Tương tự, nhóm hiểu sai nhiệm vụ vẫn có thể biểu hiện ERP; họ bị loại theo hành vi để định nghĩa bài toán nhận diện target có ý nghĩa nhiệm vụ. Xu hướng distractor tương đối về trán chỉ có ở 26/39 người nên không đủ cơ sở kết luận mọi người đều có cùng kiểu P3a.
+
+Tương quan âm giữa thời gian phản ứng và biên độ Pz gợi ý sự đồng biến giữa hiệu quả hành vi và đáp ứng, nhưng không xác định quan hệ nhân quả hoặc cơ chế nhận thức duy nhất. Bản đồ da đầu cũng không xác định trực tiếp nguồn thần kinh bên dưới.
+
+\subsection{RQ1: Hiệu quả phân loại trên từng lượt thử}
+Trong thiết kế test ngoài theo người, EEGNet đạt balanced accuracy khoảng $90{,}7\%$, ROC-AUC $0{,}970$ và AP $0{,}873$. Logistic regression và LDA là các baseline đặc trưng mạnh, lần lượt nổi bật ở balanced accuracy và ROC-AUC. Đây là bằng chứng về hiệu quả phân loại offline trên tập hiện có khi test bằng người không xuất hiện trong tập huấn luyện ngoài.
+
+ROC-AUC gần tương đương ở LDA, logistic regression và SVM, trong khi độ nhạy khác đáng kể tại ngưỡng $0{,}5$. Điều này phù hợp với khác biệt về vị trí ngưỡng và phân bố điểm dự đoán. Trọng số lớp có thể thay đổi hành vi quyết định nhưng không đảm bảo xác suất được hiệu chỉnh giống nhau. Random Forest có độ đặc hiệu cao và độ nhạy thấp, nhấn mạnh rằng tỷ lệ dự đoán đúng tổng thể dễ gây hiểu nhầm trong dữ liệu mất cân bằng.
+
+Kết quả chưa xác lập hiệu quả trong hệ giao tiếp não--máy tính trực tuyến: chưa có đánh giá độ trễ quyết định, tốc độ truyền thông tin, ổn định hiệu chỉnh hoặc hoạt động trong phiên mới.
+
+\subsection{RQ2: EEGNet có vượt học máy truyền thống không?}
+Trong các pipeline đã triển khai, EEGNet có kết quả cao hơn về ba chỉ số chính; lợi ích cũng xuất hiện ở phần lớn người. Kết quả Wilcoxon củng cố tính nhất quán trong mẫu này, nhưng không thay thế việc lặp lại huấn luyện hoặc kiểm tra trên bộ dữ liệu độc lập.
+
+Đối chứng LDA mới trên đủ 128 kênh đạt ROC-AUC $0{,}949\pm0{,}022$, vẫn thấp hơn EEGNet $0{,}021$. LDA dùng cùng năm fold, cùng toàn bộ khoảng epoch, với trung bình các bin 100 ms thay cho mẫu tín hiệu đầy đủ. Số kênh vì vậy không giải thích hết lợi thế; khác biệt biểu diễn thời gian và tối ưu hóa vẫn còn. Kết luận phù hợp là EEGNet tốt hơn trong các pipeline đã thử, chưa phải hiệu ứng riêng của kiến trúc.
+
+Số lượng 3.930 tham số làm mô hình tương đối nhỏ, nhưng không tự chứng minh không quá khớp. Ba fold chạm giới hạn 50 epoch cũng không đủ để bảo đảm huấn luyện lâu hơn sẽ cải thiện hiệu quả ngoài mẫu.
+
+\subsection{RQ3: Có thể giải thích EEGNet bằng P300 đến đâu?}
+Hồ sơ thời gian có đỉnh ở 504 ms và tập trung trong 300--600 ms, phù hợp với vai trò của đáp ứng muộn. Tuy nhiên, saliency không gian tập trung ở trung tâm và trán--trung tâm hơn là Pz. Vì chỉ target yêu cầu nhấn nút và thời gian phản ứng trung bình khoảng 542 ms, mạng có thể sử dụng thông tin chuẩn bị vận động, thực hiện đáp ứng hoặc nhiễu tương quan với hành vi.
+
+Một cách giải thích khác là mạng dùng các kênh trung tâm để giảm nhiễu chung khi khai thác tín hiệu đỉnh. Trọng số hoặc gradient của mô hình dự đoán không đồng nhất với bản đồ nguồn tín hiệu; đây là phân biệt quan trọng trong diễn giải mô hình thần kinh đa biến~\cite{haufe}. Saliency hiện tại chưa phân biệt được giả thuyết vận động với giả thuyết tham chiếu giảm nhiễu.
+
+Do đó, câu trả lời cho RQ3 là \textbf{giải thích được một phần}. Có sự phù hợp theo thời gian với P300, nhưng chưa chứng minh mô hình là bộ phát hiện P3b thuần túy. Saliency hold-out đã lưu củng cố kết quả thời gian; tương quan không gian chỉ $r=0{,}15$. EEGNet distractor--standard và saliency đủ năm fold test vẫn là hai đối chứng thiếu. Môi trường hiện tại không có PyTorch và driver NVIDIA không hoạt động, nên hai thí nghiệm này chưa chạy trong lần sửa báo cáo.
+
+\subsection{Hạn chế nghiên cứu}
+\begin{enumerate}
+\item \textbf{Nhiễu do quan hệ giữa kích thích và phản hồi.} Target đồng thời gắn với nhận diện nhận thức và nhấn nút. Vận động và nhiễu mắt tồn dư có thể mang thông tin nhãn. Chưa có đối chứng đủ để định lượng phần đóng góp riêng của P300.
+\item \textbf{Khác biệt đầu vào.} Đã thêm LDA đủ 128 kênh và cùng khoảng epoch; biểu diễn bin 100 ms vẫn khác đầu vào mẫu tín hiệu của EEGNet. So sánh chưa cô lập ảnh hưởng của kiến trúc.
+\item \textbf{Validation và hiệu chỉnh.} Validation nội bộ EEGNet chia theo lượt, còn hiệu chỉnh xác suất SVM không được nhóm theo người một cách tường minh. Test ngoài vẫn tách người, song thiết kế lồng nhau hoàn toàn theo người sẽ phù hợp hơn với mục tiêu chọn mô hình cho người mới.
+\item \textbf{Chọn mẫu và phạm vi áp dụng.} Phân tích loại người hiểu sai nhiệm vụ và chỉ giữ lượt đúng, nên hiệu quả có điều kiện trên hành vi tuân thủ tác vụ. Chưa có tập độc lập, phiên thu mới hoặc đánh giá triển khai thực tế.
+\item \textbf{Tiền xử lý và nhiễu còn lại.} ICA loại nhiều thành phần cơ, có ngoại lệ thủ công và còn một số bản ghi nhiễu mắt. Kết quả kiểm tra bàn giao không tái dựng mọi quyết định từ dữ liệu thu nhận.
+\item \textbf{Suy luận thăm dò.} Xếp hạng đặc trưng và saliency tham chiếu dùng toàn bộ nhóm. Các so sánh thống kê chưa điều chỉnh đa kiểm định; mô hình và tập huấn luyện có quan hệ phụ thuộc giữa người và fold. SD qua fold không đại diện đầy đủ cho bất định khái quát hóa.
+\item \textbf{Giới hạn tái lập trong báo cáo.} Đã huấn luyện các đối chứng LDA và tái lập kết quả LDA 402 đặc trưng; chưa chạy lại EEGNet, ICA, nhiều seed hoặc tìm siêu tham số lồng nhau. Không thể chứng thực đầy đủ môi trường và toàn bộ cấu hình của lần chạy lịch sử chỉ bằng các bảng kết quả.
+\end{enumerate}
+
+\subsection{Kết luận}
+Dữ liệu cho thấy hiệu ứng target vùng đỉnh rõ ở mức nhóm, đồng thời có biến thiên độ trễ đáng kể giữa người. LDA đủ 128 kênh đạt ROC-AUC $0{,}949$, so với $0{,}947$ của LDA 402 đặc trưng; EEGNet đạt $0{,}970$ và balanced accuracy khoảng $90{,}7\%$ trong phép đánh giá theo người hiện có. Hồ sơ saliency hỗ trợ sự đóng góp của đáp ứng muộn nhưng chưa tách được P300 khỏi tín hiệu liên quan phản hồi. Ưu tiên tiếp theo về khoa học là xây dựng đối chứng vận động và thiết kế validation hoàn toàn theo người, sau đó kiểm tra độc lập khả năng khái quát của kết quả.
+\FloatBarrier
+
+\section*{Đóng góp của các thành viên}
+\addcontentsline{toc}{section}{Đóng góp của các thành viên}
+Tỷ lệ theo \code{docs/contributions.md}; bảng dùng giá trị chính xác để tổng bằng đúng $100\%$. Đây là phân bổ do nhóm ghi nhận, không phải ước lượng mới từ lịch sử Git.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Phân công và tỷ lệ đóng góp được ghi nhận trong dự án.}
+\begin{tabularx}{\linewidth}{lYr}
+\toprule
+Thành viên & Nội dung đóng góp & Tỷ lệ\\\midrule
+Nguyễn Văn Vũ & Điều phối, dữ liệu, tích hợp và tài liệu & $17\frac{2}{3}\%$\\
+Thái Nguyễn Hoàng Bách & Tiền xử lý, QC và kiểm tra bàn giao & $10\frac{2}{3}\%$\\
+Trương Huy Hoàng & Phân tích ERP, thống kê nhóm và hình minh họa & $17\frac{2}{3}\%$\\
+Nguyễn Công Kiên & Đặc trưng thời gian--tần số và xếp hạng & $17\frac{2}{3}\%$\\
+Nguyễn Việt Đức & Pipeline baseline và đánh giá học máy & $17\frac{2}{3}\%$\\
+Đồng Minh Đức & EEGNet, saliency và so sánh ML/DL & $18\frac{2}{3}\%$\\\midrule
+Tổng & & $100\%$\\\bottomrule
+\end{tabularx}
+\end{table}
+\FloatBarrier
+
+\appendix
+\section{Nguồn kết quả và hướng dẫn tái lập}
+Bản tiếng Việt được viết lại theo IMRaD từ mã nguồn, tài liệu và kết quả cùng dự án, có đối chiếu với bản tiếng Anh. Bảng~\ref{tab:evidence} chỉ ra các đầu ra hỗ trợ số liệu chính. Các tài liệu tham khảo cung cấp cơ sở khoa học; số liệu thực nghiệm trong báo cáo lấy từ dự án này.
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{Nguồn bằng chứng cục bộ; đường dẫn tương đối từ thư mục gốc dự án.}
+\label{tab:evidence}
+\begin{tabularx}{\linewidth}{lY}
+\toprule
+Nội dung & File hoặc thư mục\\\midrule
+Kiểm tra epoch--feature & \code{results/tables/v2_epoch_audit.json}\\
+Tổng hợp QC & \code{derivatives/v1/qc_summary.csv}\\
+Thống kê ERP nhóm & \code{results/tables/v3_p300_summary.json}\\
+Tiêu chí ERP từng người & \code{results/tables/v3_p300_group_results.csv}\\
+Mức phân biệt đặc trưng & \code{results/tables/v4_feature_auc.csv}\\
+Chỉ số baseline & \code{results/tables/baseline_metrics.csv}\\
+Chỉ số EEGNet & \code{results/tables/eegnet_metrics_real.csv}\\
+Kết quả từng fold EEGNet & \code{results/tables/eegnet_folds_real.csv}\\
+So sánh theo người & \code{results/tables/ml_vs_dl_per_subject.csv}\\
+Mảng saliency & \code{results/tables/eegnet_saliency_real.npz}\\
+Đối chứng số kênh & \code{results/tables/lda_channel_controls.csv}\\
+Kiểm chứng và distractor & \code{results/tables/report_verification.json}\\
+Saliency hold-out & \code{notebooks/04_deep_learning.ipynb}, đầu ra đã lưu\\
+Hình gốc & \code{report/figures/}\\
+Phân công và đóng góp & \code{docs/contributions.md}\\\bottomrule
+\end{tabularx}
+\end{table}
+
+Đã chạy lại audit epoch, kiểm chứng kết quả lưu và đối chứng LDA. Các điểm vào dưới đây hỗ trợ tái lập; các lệnh còn lại của pipeline không được chạy toàn bộ trong lần sửa này:
+\begin{verbatim}
+python -m src.preprocessing.audit_epochs
+python -m src.verify_report
+python -m src.ml.report_controls
+python src/erp/plot_erp.py --group
+python src/features/extract_features.py --all
+python src/features/rank_features.py
+python src/ml/train_baseline.py --save-models
+python src/dl/train_eegnet.py --save --batch-size 64 --epochs 50
+\end{verbatim}
+Để biên dịch báo cáo từ thư mục gốc bằng XeLaTeX:
+\begin{verbatim}
+latexmk -xelatex -interaction=nonstopmode -halt-on-error \
+  -outdir=docs docs/EEG_P300_Report_VI.tex
+\end{verbatim}
+File hình dùng chung nằm tại \code{docs/report_figures/}. Nếu biên dịch trong \code{docs/}, bỏ tùy chọn \code{-outdir=docs} và tiền tố \code{docs/} của tên file nguồn. Các tham chiếu được nhúng trong file \code{.tex}, không cần tải cơ sở dữ liệu tài liệu tham khảo khi biên dịch.
+\FloatBarrier
+
+\begin{thebibliography}{9}
+\bibitem{dataset} Dzianok P, Antonova I, Wojciechowski J, Dreszer J, Kublik E. The Nencki--Symfonia electroencephalography/event-related potential dataset: multiple cognitive tasks and resting-state data collected in a sample of healthy adults. \emph{GigaScience}. 2022;11:giac015. \href{https://doi.org/10.1093/gigascience/giac015}{doi:10.1093/gigascience/giac015}. Data: \url{https://gigadb.org/dataset/100990}.
+\bibitem{polich} Polich J. Updating P300: an integrative theory of P3a and P3b. \emph{Clinical Neurophysiology}. 2007;118:2128--2148. \href{https://doi.org/10.1016/j.clinph.2007.04.019}{doi:10.1016/j.clinph.2007.04.019}.
+\bibitem{mne} Gramfort A, et al. MEG and EEG data analysis with MNE-Python. \emph{Frontiers in Neuroscience}. 2013;7:267. \href{https://doi.org/10.3389/fnins.2013.00267}{doi:10.3389/fnins.2013.00267}.
+\bibitem{laton} Laton J, et al. Single-subject classification of schizophrenia patients based on a combination of oddball and mismatch evoked potential paradigms. \emph{Journal of the Neurological Sciences}. 2014;347:262--267. \href{https://doi.org/10.1016/j.jns.2014.10.015}{doi:10.1016/j.jns.2014.10.015}.
+\bibitem{eegnet} Lawhern VJ, Solon AJ, Waytowich NR, Gordon SM, Hung CP, Lance BJ. EEGNet: a compact convolutional neural network for EEG-based brain--computer interfaces. \emph{Journal of Neural Engineering}. 2018;15:056013. \href{https://doi.org/10.1088/1741-2552/aace8c}{doi:10.1088/1741-2552/aace8c}.
+\bibitem{saliency} Simonyan K, Vedaldi A, Zisserman A. Deep inside convolutional networks: visualising image classification models and saliency maps. 2013. \href{https://arxiv.org/abs/1312.6034}{arXiv:1312.6034}.
+\bibitem{haufe} Haufe S, et al. On the interpretation of weight vectors of linear models in multivariate neuroimaging. \emph{NeuroImage}. 2014;87:96--110. \href{https://doi.org/10.1016/j.neuroimage.2013.10.067}{doi:10.1016/j.neuroimage.2013.10.067}.
+\end{thebibliography}
+\end{document}

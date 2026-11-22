@@ -1,0 +1,96 @@
+{
+  "n_trials": 21878,
+  "n_target": 2951,
+  "n_participants": 39,
+  "bin_edges_ms": [
+    -200,
+    -100,
+    0,
+    100,
+    200,
+    300,
+    400,
+    500,
+    600,
+    700,
+    800,
+    900,
+    1000
+  ],
+  "last_bin_includes_1000ms": true,
+  "splitter": "GroupKFold(n_splits=5)",
+  "standardisation": "outer train only",
+  "classifier": "LDA(solver='lsqr', shrinkage='auto'), empirical priors",
+  "alignment": "epoch/feature/EEGNet labels and groups identical row by row",
+  "folds": [
+    {
+      "fold": 1,
+      "test_subjects": [
+        "sub-04",
+        "sub-06",
+        "sub-09",
+        "sub-11",
+        "sub-13",
+        "sub-18",
+        "sub-38"
+      ],
+      "n_test": 4033
+    },
+    {
+      "fold": 2,
+      "test_subjects": [
+        "sub-07",
+        "sub-08",
+        "sub-12",
+        "sub-15",
+        "sub-20",
+        "sub-23",
+        "sub-29",
+        "sub-37"
+      ],
+      "n_test": 4269
+    },
+    {
+      "fold": 3,
+      "test_subjects": [
+        "sub-05",
+        "sub-10",
+        "sub-19",
+        "sub-21",
+        "sub-24",
+        "sub-27",
+        "sub-28",
+        "sub-33"
+      ],
+      "n_test": 4527
+    },
+    {
+      "fold": 4,
+      "test_subjects": [
+        "sub-03",
+        "sub-16",
+        "sub-22",
+        "sub-31",
+        "sub-34",
+        "sub-35",
+        "sub-36",
+        "sub-40"
+      ],
+      "n_test": 4523
+    },
+    {
+      "fold": 5,
+      "test_subjects": [
+        "sub-01",
+        "sub-25",
+        "sub-26",
+        "sub-30",
+        "sub-32",
+        "sub-39",
+        "sub-41",
+        "sub-42"
+      ],
+      "n_test": 4526
+    }
+  ]
+}

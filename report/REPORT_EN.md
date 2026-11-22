@@ -1,5 +1,8 @@
 # Single-Trial P300 ERP Classification: Neurophysiological Validation and Benchmark Comparison between Feature-Engineered Machine Learning and Deep Learning (EEGNet)
 
+**Final submission:** [English PDF](../docs/EEG_Final_Report_EN.pdf); [LaTeX source](../docs/EEG_Final_Report_EN.tex). This Markdown report shares the same revised conclusions and evidence.
+
+
 **Course:** AIT3012 Neuroscience — Mini Project (Prof. Guy Nagels, VUB)
 **Dataset:** Nencki-Symfonia EEG/ERP dataset, visual oddball task (GigaDB 100990; Dzianok et al., 2022)
 **Team:** Nguyễn Văn Vũ (V1), Thái Nguyễn Hoàng Bách (V2), Trương Huy Hoàng (V3), Nguyễn Công Kiên (V4), Nguyễn Việt Đức (V5), Đồng Minh Đức (V6)
@@ -10,7 +13,7 @@
 
 We studied the P300 event-related potential (ERP) in a three-stimulus visual oddball task recorded with 128-channel EEG in 42 healthy adults. After a standardised preprocessing pipeline with three manual ICA exclusions (bad-channel interpolation, Picard ICA with ICLabel, 0.5–40 Hz filtering, −200 to +1000 ms epochs at 250 Hz), we first verified the presence and topography of the P300 against the integrative P3a/P3b framework of Polich (2007). We then addressed single-trial classification of standard versus target stimuli in 39 subjects (21,878 correct trials, 13.5% targets) under a common subject-wise evaluation protocol (`GroupKFold`, 5 folds, no subject shared between training and test data). Feature-engineered machine-learning models built on 402 time–frequency features (following Laton et al., 2014) were compared with an end-to-end convolutional network (EEGNet-8,2; Lawhern et al., 2018) trained on raw epochs, and the network's decisions were examined with input-gradient saliency maps.
 
-The included group showed a large parietal oddball effect at Pz in 300–500 ms (target − standard +5.05 ± 2.28 µV, paired t(38) = 13.82, p = 2.14 × 10⁻¹⁶, Cohen’s dz = 2.21). Under the project's operational criteria, 22/39 subjects met all three core P3b checks; 32/39 did so in the secondary 300–600 ms analysis. The best feature-based models were logistic regression (balanced accuracy 0.874 ± 0.037) and shrinkage LDA (ROC-AUC 0.947 ± 0.022). EEGNet outperformed all of them (balanced accuracy 0.907 ± 0.021, ROC-AUC 0.970 ± 0.010, PR-AUC 0.873 ± 0.042), with higher ROC-AUC in 34–35 of 39 subjects (Wilcoxon $p < 10^{-8}$). Saliency maps placed 40% of the model's sensitivity in the 300–600 ms P3b window (peak 504 ms), but emphasised left central rather than parietal electrodes, suggesting that the network may also exploit motor activity related to the button press. Deep learning is therefore more accurate on this dataset, but only partly interpretable in terms of the P300.
+The included group showed a large parietal oddball effect at Pz in 300–500 ms (target − standard +5.05 ± 2.28 µV, paired t(38) = 13.82, p = 2.14 × 10⁻¹⁶, Cohen’s dz = 2.21). Under the project's operational criteria, 22/39 subjects met all three core P3b checks; 32/39 did so in the secondary 300–600 ms analysis. Among the original 402-feature models, the strongest were logistic regression (balanced accuracy 0.874 ± 0.037) and shrinkage LDA (ROC-AUC 0.947 ± 0.022). EEGNet outperformed all of them (balanced accuracy 0.907 ± 0.021, ROC-AUC 0.970 ± 0.010, PR-AUC 0.873 ± 0.042), with higher ROC-AUC in 34–35 of 39 subjects (Wilcoxon $p < 10^{-8}$). Saliency maps placed 40% of the model's sensitivity in the 300–600 ms P3b window (peak 504 ms), but emphasised left central rather than parietal electrodes, suggesting that the network may also exploit motor activity related to the button press. Deep learning is therefore more accurate on this dataset, but only partly interpretable in terms of the P300. The newly trained 128-channel LDA control reaches ROC-AUC 0.949 ± 0.022, below EEGNet. A separate saved unseen-participant experiment retains late saliency (508 ms; 40.5% in 300–600 ms) but has weak spatial correspondence (r = 0.15). LDA controls were trained for this revision; EEGNet and raw-data cleaning were not rerun.
 
 ---
 
@@ -199,6 +202,8 @@ The maps show a parietal positive target − standard effect. A relative frontal
 for distractors was present in 26/39 subjects, so a uniform frontal P3a pattern across the
 whole sample should not be claimed. Scalp potentials do not establish source localisation.
 
+The additional correct-trial distractor–standard contrasts in 300–500 ms are **−1.06 ± 1.94 µV at Fz, +0.71 ± 1.54 µV at Cz and +3.54 ± 1.67 µV at Pz** (mean ± participant SD). The relative frontal contrast `(D_Fz − D_Pz) − (T_Fz − T_Pz)` averages +1.43 ± 2.46 µV and is positive in 26/39 participants. Thus 26/39 denotes a distribution relative to targets; the absolute distractor response in this window is predominantly parietal, not a canonical frontal P3a. Both conditions have no button press on these correct trials. Statistics are recorded in `report_verification.json`.
+
 ### 5.3 Operational verification in 42 subjects
 
 | Check | Included group (N = 39) | Task-misunderstood (N = 3) |
@@ -315,7 +320,7 @@ Each feature was scored by the target-versus-standard AUC, computed within each 
 - **Strong class imbalance:** targets make up 13.5% of trials (≈ 1:6.4). A classifier predicting "standard" for every trial would reach 86.5% raw accuracy while detecting no P300, so raw accuracy is not reported.
 - **Countermeasures:** `class_weight="balanced"` for logistic regression and the RBF SVM, and `balanced_subsample` for the random forest. Evaluation uses **balanced accuracy**, **ROC-AUC**, **PR-AUC (average precision)**, **F1-macro**, **sensitivity (target recall)** and **specificity**; threshold-dependent metrics use a fixed probability threshold of 0.5.
 
-### 7.2 Leakage-free cross-validation
+### 7.2 Participant-wise outer cross-validation
 
 - **Inside-fold scaling:** `StandardScaler` is part of the scikit-learn `Pipeline`, so its parameters are estimated on the training fold only.
 - **Subject-wise splitting:** `GroupKFold(n_splits=5)` grouped by subject, so each test fold contains only subjects never seen during training (**cross-subject generalisation**). Mean ± SD are computed over the 5 folds; out-of-fold (OOF) metrics pool all test predictions.
@@ -342,12 +347,28 @@ Each feature was scored by the target-versus-standard AUC, computed within each 
 
 ### 7.5 Discussion of the baselines
 
-1. **Regularised linear models perform best.** Logistic regression with balanced class weights reached the highest balanced accuracy (**87.4 ± 3.7%**), with sensitivity **84.1 ± 8.7%** and specificity **90.8 ± 2.7%**. LDA with shrinkage reached the highest ROC-AUC (**0.947 ± 0.022**), PR-AUC 0.791 ± 0.075 and F1-macro 0.835 ± 0.045. In a 402-dimensional, highly correlated feature space, a linear projection with covariance shrinkage is robust to noise and to inter-subject variability.
-2. **Ranking quality is essentially identical for the three best models** (ROC-AUC 0.946–0.947; PR-AUC ≈ 0.791, about six times the 13.4% prevalence). Their differences in balanced accuracy, sensitivity and specificity therefore reflect where the 0.5 threshold falls on similar score distributions — LDA and the SVM, which are not class-weighted in the same way, operate at higher specificity and lower sensitivity — rather than different discriminative information.
-3. **The random forest loses sensitivity at the default threshold.** It ranks well (ROC-AUC 0.907) and is almost perfectly specific (0.988), but its sensitivity at threshold 0.5 drops to 28.9%. With many redundant, correlated features, random feature sub-sampling at each split dilutes the few strong P300 features (e.g. `Pz_p3b_mean`), and the averaged votes are compressed towards the majority class.
+Logistic regression has the highest balanced accuracy among the original feature models (0.874 ± 0.037), while LDA has the highest mean ROC-AUC (0.947 ± 0.022). LDA, SVM and logistic regression have similar ranking scores, but different sensitivity/specificity at probability threshold 0.5. Both SVM and logistic regression use balanced class weights; LDA uses empirical priors. The forest has high specificity (0.988) and low sensitivity (0.289). These operating points do not identify a unique mechanism without controlled ablations.
+
+Target prevalence is 2,951/21,878 = 13.49%, rounded to **13.5%** throughout. AP is computed by `average_precision_score`, rather than trapezoidal PR integration. SD is the sample SD over five folds; pooled OOF metrics differ from mean fold metrics.
 
 ![Baseline ROC curves](figures/baseline_roc_curves.png)
 ![Baseline PR curves](figures/baseline_pr_curves.png)
+
+### 7.6 New channel-matched LDA control
+
+We trained shrinkage LDA on mean amplitudes in twelve fixed 100 ms bins covering the full −200 to +1000 ms epoch, on either the original 12 channels or all 128. Bins are left-closed/right-open except the final bin includes 1000 ms. No bin-width or hyperparameter search was performed. The scaler is fitted within each outer training fold; LDA uses `lsqr`, automatic shrinkage, empirical priors and threshold 0.5. Epoch labels and groups match the feature table and saved EEGNet predictions row by row, ensuring the same five `GroupKFold` test sets.
+
+| Model | Channels | Features | Balanced accuracy | ROC-AUC | AP |
+|---|---:|---:|---:|---:|---:|
+| Binned LDA | 12 | 144 | 0.804 ± 0.045 | 0.937 ± 0.025 | 0.774 ± 0.072 |
+| Binned LDA | 128 | 1,536 | 0.830 ± 0.054 | 0.949 ± 0.022 | 0.821 ± 0.059 |
+| EEGNet | 128 | Preprocessed samples | 0.907 ± 0.021 | 0.970 ± 0.010 | 0.873 ± 0.042 |
+
+The two binned LDA models were trained for this revision; EEGNet is the verified historical benchmark. Adding channels improves binned LDA, but EEGNet still leads by 0.021 ROC-AUC and 0.052 AP. Electrode count alone does not explain the gap. Temporal representation and optimisation remain different, so this is a pipeline comparison rather than an isolated architectural effect. Re-running the original 402-feature LDA reproduced all its saved metrics to numerical precision.
+
+![Channel-control pooled OOF ROC curves](figures/lda_channel_controls_roc.png)
+
+Evidence: `results/tables/lda_channel_controls.csv`, `.json` and `lda_channel_controls_oof.npz`. Reproduce with `python -m src.ml.report_controls`.
 
 ---
 
@@ -374,7 +395,7 @@ Input: raw epoch (B, 1, 128 channels, 301 samples @ 250 Hz)
 
 - The temporal convolution acts as a set of data-driven band-pass filters.
 - The depthwise convolution learns, for each temporal filter, a linear combination of the 128 channels — a spatial filter comparable to xDAWN/CSP, but optimised jointly with the temporal filters.
-- The network has **3,930 trainable parameters** (128 channels × 301 samples), about 5.6 times fewer than the training trials in a fold, which limits over-fitting on low-SNR EEG.
+- The network has **3,930 trainable parameters** (128 channels × 301 samples), a compact model; parameter count alone does not establish absence of overfitting.
 
 ### 8.2 Training and evaluation protocol
 
@@ -393,7 +414,7 @@ Input: raw epoch (B, 1, 128 channels, 301 samples @ 250 Hz)
 | **Sensitivity** | **0.884 ± 0.060** | 0.886 |
 | **Specificity** | **0.930 ± 0.030** | 0.929 |
 
-Per-fold ROC-AUC was 0.968, 0.974, 0.974, 0.980 and 0.954; per-fold balanced accuracy was 0.884, 0.922, 0.915, 0.928 and 0.886 (`results/tables/eegnet_folds_real.csv`). Four of the five folds reached the 50-epoch limit before early stopping triggered, so longer training might improve performance slightly.
+Per-fold ROC-AUC was 0.968, 0.974, 0.974, 0.980 and 0.954; per-fold balanced accuracy was 0.884, 0.922, 0.915, 0.928 and 0.886 (`results/tables/eegnet_folds_real.csv`). Three of the five folds reached 50 epochs (epoch counts: 48, 50, 49, 50, 50). This alone does not establish that longer training would improve held-out performance.
 
 A preliminary single-subject run (sub-01, 540 trials, `StratifiedKFold`) had given ROC-AUC 0.890; it is not comparable with the 39-subject baselines and is superseded by the results above.
 
@@ -407,16 +428,16 @@ A preliminary single-subject run (sub-01, 540 trials, `StratifiedKFold`) had giv
 
 ### 9.1 Method
 
-Saliency was computed as the absolute input gradient of the target logit, averaged over all 2,951 target trials, for a reference model trained on 85% of all trials (Simonyan et al., 2013):
+The reference model is fitted on 85% of all trials, with 15% reserved for validation. Absolute gradients of the target logit are averaged over all 2,951 targets, including training examples. The implementation differentiates with respect to the scaled input $\widetilde X=X/s$, where $s$ is the training SD:
 
-$$S_{c, t} = \frac{1}{N_{\text{target}}} \sum_{i=1}^{N_{\text{target}}} \left| \frac{\partial \hat{y}_i^{(\text{target})}}{\partial X_{i, c, t}} \right|$$
+$$S_{c,t}=\frac{1}{N_T}\sum_{i:y_i=1}\left|\frac{\partial z_{i,T}}{\partial\widetilde X_{i,c,t}}\right|.$$
 
-where $\hat{y}_i^{(\text{target})}$ is the target logit and $X_{i, c, t}$ the potential at channel $c$ and time $t$ of trial $i$.
+Global scaling leaves relative temporal and spatial profiles unchanged. The reference voltage map is the trial-pooled target-minus-standard effect in 300–600 ms, distinct from the main equal-participant-weight 300–500 ms ERP.
 
-![EEGNet saliency map](figures/eegnet_saliency_real.png)
-![EEGNet saliency topography](figures/eegnet_saliency_topomap_real.png)
+![Reference EEGNet saliency](figures/eegnet_saliency_real.png)
+![Reference EEGNet saliency topography](figures/eegnet_saliency_topomap_real.png)
 
-*Figure 5. (Top) Channel × time saliency, temporal saliency profile, and channel-wise saliency versus the P300 effect. (Bottom) Scalp topography of saliency in 300–600 ms (left), topography of the target − standard effect in the same window (centre), and saliency time courses for left-central, right-central and parietal channel groups (right).*
+The reference maps are descriptive; they are not explanations of each outer-fold test prediction.
 
 ### 9.2 Temporal profile — consistent with the P300
 
@@ -431,9 +452,17 @@ where $\hat{y}_i^{(\text{target})}$ is the target logit and $X_{i, c, t}$ the po
 - Left-central saliency (C3, C1, CCP3h, FCC3h) was about 1.75 times right-central saliency and showed two peaks, near 180 ms and near 460 ms; parietal saliency (Pz, CPz, P1, P2) peaked earlier, near 340 ms.
 - The averaged ERP itself was **not** left-lateralised: the target − standard difference at 400–700 ms was 1.81 µV at C3 and 2.04 µV at C4 (paired test over 39 subjects, p = 0.50), compared with 6.96 µV at Pz.
 
-### 9.4 How to read these maps
+### 9.4 Existing unseen-participant check
 
-Input gradients describe the model's **filters** (a backward model), not where the discriminative signal is located (a forward model). Filter weights can be large at channels used to cancel shared noise rather than at the signal source (Haufe et al., 2014). The left-central hotspot therefore has two explanations that the present analysis cannot separate: (1) the network exploits **motor preparation** for the button press, which occurs only on target trials; or (2) it uses these channels as references to denoise the parietal P3b. Section 10.4 discusses the consequences for RQ3.
+Notebook 04 contains a separate `GroupShuffleSplit(test_size=0.2, random_state=42)` run with **8 unseen test participants, 4,472 test trials and 593 targets**, with zero participant overlap with training. Its saved saliency output reports a **508 ms peak, 40.5% saliency in 300–600 ms and spatial correlation r = 0.15**. This supports late temporal sensitivity beyond training examples, with weaker spatial correspondence than the reference model (r = 0.32).
+
+![Saliency from the separate held-out-participant experiment](figures/eegnet_saliency_holdout_notebook.png)
+
+These historical notebook outputs were inspected and extracted, not regenerated. This is one hold-out experiment, not five-fold OOF saliency. Its comparison ERP map uses the whole cohort rather than test participants alone.
+
+### 9.5 How to read these maps
+
+Gradients measure local predictive sensitivity, not neural activation or source location. Large central gradients may reflect response-related activity or noise suppression (Haufe et al., 2014). Both reference and hold-out analyses emphasise late responses, but neither separates P300 processing from motor preparation.
 
 ---
 
@@ -467,50 +496,35 @@ Same 39 subjects, 21,878 trials, identical subject-wise folds and threshold (mea
 
 Per-subject ROC-AUC: EEGNet 0.972 ± 0.035 (median 0.986), LDA 0.948 ± 0.048, logistic regression 0.948 ± 0.048.
 
-### 10.2 RQ1 — best single-trial performance for standard versus target
+### 10.2 RQ1 — best single-trial performance
 
-- **Best overall, under cross-subject evaluation** (test subjects never seen in training): **EEGNet** on raw epochs reached a balanced accuracy of **90.7 ± 2.1%**, ROC-AUC **0.970 ± 0.010** and PR-AUC **0.873 ± 0.042** (about 6.5 times the 13.5% prevalence), with sensitivity **88.4%** and specificity **93.0%**.
-- **Best among standard machine-learning models:** logistic regression (balanced accuracy 87.4 ± 3.7%) and shrinkage LDA (ROC-AUC 0.947 ± 0.022).
-- **Significance:** this performance was obtained **without any subject-specific calibration**, far above chance (50%; AUC 0.50). Single-trial detection is reliable enough for BCI use, subject to the caveat on motor activity in §10.4.
+**EEGNet achieves ROC-AUC 0.970 ± 0.010, balanced accuracy 90.7 ± 2.1% and AP 0.873 ± 0.042** on unseen outer-test participants. Sensitivity is 88.4% and specificity 93.0%. These are offline results on correct trials from 39 task-compliant participants. Online BCI performance and external generalisation were not evaluated.
 
 ### 10.3 RQ2 — does deep learning outperform standard machine learning?
 
-- **Answer: yes, on this dataset and under an identical evaluation.** EEGNet outperformed every baseline in balanced accuracy (+3.3 points over logistic regression), ROC-AUC (+0.023 over LDA) and PR-AUC (+0.082), with smaller fold-to-fold variability. The advantage is consistent across subjects (higher ROC-AUC in 34–35 of 39 subjects, p < 10⁻⁸).
-- **The gain in ROC-AUC is moderate** (0.947 → 0.970): most of the discriminative information lies in the parietal P3b, which the hand-crafted features already capture well. The advantage of EEGNet is larger in PR-AUC and balanced accuracy, i.e. on the harder, low-amplitude target trials.
-- **Why deep learning helps here:**
-  1. **Full spatial information.** The hand-crafted features use 12 channels; EEGNet uses all 128 and learns spatial filters that can cancel noise shared across channels, which per-channel features cannot do.
-  2. **Finer temporal information.** The features summarise the signal as means over five fixed windows; EEGNet learns temporal filters over the whole epoch and can use both early responses (~180–340 ms) and the late tail (600–800 ms).
-  3. **Enough data for a small model.** With about 14,900 training trials per fold and only 3,930 parameters, EEGNet does not over-fit. With a single subject (~430 training trials) it reached only ROC-AUC 0.890: the advantage of deep learning depends strongly on the amount of training data.
-  4. **Costs.** EEGNet needs a GPU (about 8 minutes per fold, versus seconds for LDA) and is harder to interpret (§10.4), whereas LDA and logistic regression on physiological features still reach ROC-AUC 0.947 and can be read directly through features such as `Pz_p3b_mean`.
+**Yes, for the tested pipelines, including the new 128-channel LDA control.** EEGNet leads that control in ROC-AUC (0.970 versus 0.949), AP (0.873 versus 0.821) and balanced accuracy (0.907 versus 0.830). Compared with the original feature models it gains 3.25 balanced-accuracy percentage points over logistic regression and 0.0232 ROC-AUC over LDA. Electrode count alone therefore does not explain the lead. LDA averages time bins while EEGNet learns from individual samples; further representation-matched experiments would be needed to isolate an architectural cause.
 
-### 10.4 RQ3 — are the features discovered by deep learning interpretable?
+### 10.4 RQ3 — are the learned features interpretable?
 
-- **Answer: partly.**
-- **Consistent with the P300 (Polich, 2007):**
-  1. **Time:** saliency is concentrated in the P3b window (40.2% within 300–600 ms, ≈ 1.6 times the uniform share; peak at 504 ms) and is very low before stimulus onset (3.8%). The network does not rely on baseline noise.
-  2. **Parietal contribution:** saliency over Pz, CPz, P1 and P2 peaks near 340 ms, inside the P3 window, and saliency correlates positively with the channel-wise P300 effect (r = 0.32).
-- **Not (yet) explained:**
-  1. The saliency hotspot lies over **left central and fronto-central sites** (C1, FCC3h, CCP3h, C3) rather than at Pz, where the P300 effect is maximal, and it peaks near 460 ms, just before the button press (RT ≈ 542 ms). These sites overlie the motor cortex, so the hypothesis that the network uses **motor-preparation activity** — present only on target trials, since only targets require a response — must be taken seriously.
-  2. On the other hand, the averaged ERP shows no C3 versus C4 asymmetry (p = 0.50), and gradients reflect filter weights rather than source locations (Haufe et al., 2014); the hotspot may therefore be a denoising reference.
-  3. In the preprocessing control (§11.1), distractor-versus-standard classification with features — where neither class involves a button press — still reached AUC 0.90, against 0.95 for target versus standard. The P300 is therefore the main source of information for the feature-based models, but the remaining margin may be motor-related, and this may apply more strongly to EEGNet.
-- **Conclusion:** EEGNet is **not a pure black box** — its temporal profile matches the P3b window — but its spatial profile does **not simply reproduce** the parietal P3b topography, and part of its advantage over standard machine learning may come from non-P300 (motor) information. Three analyses would settle the question: (1) training EEGNet on distractor versus standard (a P3 without a button press); (2) computing activation patterns (Haufe et al., 2014) instead of raw gradients; (3) response-locked saliency analysis.
+**Partly.** Both the reference model and separate unseen-participant model emphasise the P300 time range: peaks at 504 and 508 ms, and 40.2% and 40.5% of saliency in 300–600 ms. Spatial correspondence is weak, particularly in the hold-out model (r = 0.15). Central sensitivity could reflect motor preparation or correlated-noise suppression; gradients cannot distinguish these mechanisms.
 
----
+The no-button distractor ERP is substantial but predominantly parietal in 300–500 ms (§5). It does not establish what EEGNet uses in distractor classification. Distractor-versus-standard EEGNet training and saliency on every outer test fold remain unperformed controls. The current environment lacks PyTorch and has a nonfunctional NVIDIA driver, so these experiments were not run for this revision.
 
 ## 11. Limitations, conclusion and author contributions
 
 ### 11.1 Limitations
 
-- **Button-press and blink confound.** Participants pressed a button about 540 ms after targets, and many blinked right after the press. Motor activity and residual ocular artefacts may therefore co-vary with the target class. Distractor-versus-standard classification with features (no button press in either class) still reached AUC 0.90, against 0.95 for target versus standard, so the P300 remains the main source of information for the feature-based models; for EEGNet see §10.4.
-- **Extensive muscle-component removal.** On average 12 muscle components were removed per subject. Some high-frequency brain activity may have been removed as well, which matters little for the P300 (mainly below 8 Hz).
-- **No information above 40 Hz** (no gamma analysis). Epochs last 1.2 s, so whole-epoch spectra have a frequency resolution of about 1 Hz.
-- **Manual ICA decisions** are valid only for the fitted ICA solution. Raw recordings and per-subject ICA models are not available in this working copy, so the present V2 audit validates the epoch/feature hand-off rather than rerunning ICA.
-- **Training budget.** Four of five EEGNet folds reached the 50-epoch limit; no hyper-parameter search was performed for either approach, and both were evaluated at a fixed 0.5 threshold.
-- **Saliency is a backward-model explanation** and cannot by itself localise the signal (§9.4).
+- Only targets require a button press; motor preparation and residual artefacts can covary with labels. A no-button EEGNet control is still needed.
+- EEGNet's inner validation splits trials rather than participants; SVM probability fitting is not explicitly grouped. Outer test participants remain disjoint.
+- The channel-matched LDA control covers the full epoch, but its temporal representation differs from EEGNet. No nested tuning or repeated-seed training was performed. Three of five historical EEGNet folds reached 50 epochs.
+- Feature rankings use the whole cohort. Reference saliency includes training trials; the saved hold-out result is a single separate run. Participant comparisons are exploratory, with shared models, overlapping training sets and unadjusted p-values.
+- The epoch/feature hand-off, ERP results, rankings and EEGNet prediction metrics were verified. LDA controls were trained and the original LDA reproduced; raw-data cleaning and EEGNet training were not repeated. The study has no external or online BCI validation.
 
 ### 11.2 Conclusion
 
-The visual oddball data show a large group-level parietal target − standard effect (+5.05 µV in 300–500 ms, Cohen’s dz = 2.21). All 39 included subjects had a Pz > Fz gradient; 22/39 met the strict project-defined core P3b checks, increasing to 32/39 in the secondary 300–600 ms analysis. On single trials and across subjects, regularised linear models on 402 physiologically motivated features reached ROC-AUC 0.947, and a compact CNN on raw epochs reached ROC-AUC 0.970 and balanced accuracy 90.7%, a small but consistent and statistically significant improvement. The network's decisions are concentrated in the P3b time window, but its spatial emphasis on left central sites indicates that it may also exploit response-related activity; separating these contributions is the main open question.
+The data show a group-level parietal target–standard effect of 5.05 µV in 300–500 ms (Cohen's dz = 2.21). EEGNet reaches ROC-AUC 0.970 and balanced accuracy 90.7% and remains ahead of a newly trained 128-channel LDA control (ROC-AUC 0.949). RQ1 has a numerical answer and RQ2 is positive for the tested pipelines. For RQ3, late temporal sensitivity persists on unseen participants, while weak spatial correspondence and stimulus–response confounding limit the physiological explanation.
+
+Verification evidence is saved in `results/tables/report_verification.json`. Run `python -m src.verify_report` to recompute the saved-result checks and extract the held-out saliency figure from notebook 04.
 
 ### 11.3 Author contributions
 

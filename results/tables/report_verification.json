@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "eegnet_pooled": {
+    "balanced_accuracy": 0.907395877259571,
+    "roc_auc": 0.9676576488556856,
+    "pr_auc": 0.8634659627453382,
+    "f1_macro": 0.8555365426289744,
+    "sensitivity": 0.8858014232463571,
+    "specificity": 0.928990331272785
+  },
+  "eegnet_folds_verified": 5,
+  "paired_participant_comparisons": {
+    "LDA": {
+      "auc_median_gain": 0.023402250979225436,
+      "n_higher": 35,
+      "wilcoxon_p": 1.949956640601158e-09
+    },
+    "Logistic Regression": {
+      "auc_median_gain": 0.023409859265665633,
+      "n_higher": 34,
+      "wilcoxon_p": 3.2887328416109085e-09
+    }
+  },
+  "eegnet_folds_at_50_epochs": 3,
+  "ranked_features_verified": 402,
+  "erp_participants_verified": 42,
+  "p3a_300_500": {
+    "Fz": {
+      "difference_mean_uv": -1.0595051977513124,
+      "difference_sd_uv": 1.9377790148691743,
+      "paired_t": -3.4145316821362903,
+      "p": 0.0015328975280280467
+    },
+    "Cz": {
+      "difference_mean_uv": 0.708546995103162,
+      "difference_sd_uv": 1.5447573071485134,
+      "paired_t": 2.86444643809996,
+      "p": 0.006767716365958902
+    },
+    "Pz": {
+      "difference_mean_uv": 3.539195114458121,
+      "difference_sd_uv": 1.665194446000215,
+      "paired_t": 13.273084388926373,
+      "p": 7.595937483074167e-16
+    },
+    "relative_frontal": {
+      "mean_uv": 1.433076425827595,
+      "sd_uv": 2.4642835730706474,
+      "positive_count": 26
+    }
+  },
+  "reference_saliency": {
+    "peak_ms": 504.0,
+    "mass_300_600": 0.4019270541505588,
+    "spatial_r": 0.31744974427673545
+  },
+  "holdout_saliency": {
+    "source": "notebooks/04_deep_learning.ipynb",
+    "rerun": false,
+    "n_test": 4472,
+    "n_subjects": 8,
+    "n_target": 593,
+    "peak_ms": 508,
+    "mass_300_600": 0.405,
+    "spatial_r": 0.15,
+    "correlation_reference": "whole-cohort trial-pooled ERP effect"
+  }
+}

@@ -1,5 +1,18 @@
 # EEG P300 Mini Project
 
+Báo cáo cuối để nộp: [PDF tiếng Anh](docs/EEG_Final_Report_EN.pdf) · [nguồn LaTeX](docs/EEG_Final_Report_EN.tex). Bản tiếng Việt: [PDF](docs/EEG_P300_Report_VI.pdf) · [LaTeX](docs/EEG_P300_Report_VI.tex).
+
+Đối chứng bổ sung và kiểm chứng kết quả từ thư mục gốc, trong môi trường ảo hiện có:
+
+```bash
+python -m src.preprocessing.audit_epochs
+python -m src.verify_report
+python -m src.ml.report_controls
+python -m unittest discover -s tests
+```
+
+LDA đủ 128 kênh đạt ROC-AUC 0,949 ± 0,022, so với EEGNet 0,970 ± 0,010. Kết quả và thiết lập nằm trong `results/tables/lda_channel_controls.*`; kiểm chứng ERP, dự đoán EEGNet và saliency hold-out đã lưu nằm trong `results/tables/report_verification.json`. Hai thí nghiệm EEGNet distractor–standard và saliency test đủ năm fold chưa được chạy trong lần chốt này do môi trường thiếu PyTorch và driver NVIDIA không hoạt động.
+
 ## Cấu trúc repository
 
 ```text
@@ -65,7 +78,7 @@ EEG/
 
 3. **Huấn luyện và đánh giá benchmark Machine Learning baseline trên 39 đối tượng (V5)**:
    ```bash
-   python src/ml/train_baseline.py --save
+   python src/ml/train_baseline.py --save-models
    ```
 
 4. **Huấn luyện mô hình Deep Learning EEGNet và phân tích Saliency map (V6)**:
