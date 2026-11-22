@@ -54,7 +54,8 @@ EEG/
 
 1. **Phân tích ERP và bản đồ địa hình da đầu (V3)**:
    ```bash
-   python src/erp/plot_erp.py --population --grand-average --table
+   python src/erp/plot_erp.py --group
+   # Hoặc chạy theo từng đối tượng: python src/erp/plot_erp.py --sub sub-01
    ```
 
 2. **Xếp hạng 402 đặc trưng theo mức phân biệt AUC (V4)**:

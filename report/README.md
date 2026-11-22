@@ -71,14 +71,13 @@ các biên độ này thay cho ERP 300–500 ms trên trial đúng.
 
 Tất cả hình ảnh chất lượng cao (300 DPI, tối ưu cho slide thuyết trình và chèn báo cáo) được lưu tại `results/figures/` và `report/figures/`:
 1. `{sub}_fz_pz_erp.png`: Dạng sóng ERP chuẩn 2 kênh mốc **Fz** và **Pz** với cửa sổ 300–500 ms tô sáng, font lớn chuẩn slide.
-2. `grand_average_fz_pz.png`: Dạng sóng **Grand Average ERP (Fz, Pz)** trung bình toàn thể.
-3. `grand_average_39subs.png`: Biểu đồ Grand Average tổng hợp 39 đối tượng chuẩn (từ pipeline tiền xử lý).
-4. `{sub}_midline_erp.png`: Dạng sóng ERP 3 kênh đường giữa Fz, Cz, Pz kèm dải sai số chuẩn (SEM).
-5. `{sub}_difference_waves.png`: Sóng hiệu số bóc tách trực diện P3a và P3b.
-6. `{sub}_scalp_topomap.png`: Bản đồ địa hình da đầu 128 kênh (Scalp map) diễn tiến từ 150 ms đến 550 ms.
-7. `{sub}_p300_summary_topomap.png`: Scalp map trung bình toàn cửa sổ P300 (300–500 ms) chỉ rõ tiêu điểm dương tính vùng đỉnh (Parietal Positivity).
-8. `population_p300_summary.png`: Phân tích thống kê quần thể 42 đối tượng kiểm chứng ảnh hưởng của nhóm hiểu sai nhiệm vụ.
-9. `eegnet_roc_pr_real.png`, `eegnet_saliency_real.png`, `eegnet_saliency_topomap_real.png`, `ml_vs_dl_comparison.png`: Kết quả EEGNet trên 39 đối tượng và so sánh ML vs DL (V6).
+2. `grand_average_fz_pz.png`: Dạng sóng **Grand Average ERP (Fz, Pz)** trung bình toàn thể 39 đối tượng.
+3. `grand_average_difference_waves.png`: Sóng hiệu số toàn nhóm bóc tách trực diện P3a và P3b tại Fz, Cz, Pz.
+4. `grand_average_scalp_topomap.png`: Bản đồ địa hình da đầu 128 kênh toàn nhóm (150–550 ms).
+5. `grand_average_p300_summary_topomap.png`: Bản đồ Scalp map trung bình toàn cửa sổ P300 (300–500 ms) của 39 đối tượng chuẩn.
+6. `population_p300_summary.png`: Phân tích thống kê quần thể 42 đối tượng kiểm chứng ảnh hưởng của nhóm hiểu sai nhiệm vụ.
+7. `{sub}_midline_erp.png`, `{sub}_difference_waves.png`, `{sub}_scalp_topomap.png`, `{sub}_p300_summary_topomap.png`: Bộ biểu đồ ví dụ minh họa từng người (mặc định: `sub-01`).
+8. `eegnet_roc_pr_real.png`, `eegnet_saliency_real.png`, `eegnet_saliency_topomap_real.png`, `ml_vs_dl_comparison.png`: Kết quả EEGNet trên 39 đối tượng và so sánh ML vs DL (V6).
 
 ---
 
