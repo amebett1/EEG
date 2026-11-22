@@ -514,19 +514,19 @@ The visual oddball data show a large group-level parietal target − standard ef
 
 ### 11.3 Author contributions
 
-Following the course requirements (slide 143), contributions are reported per member and sum to 100%. The team agreed on equal shares.
+Following the course requirements (slide 143), contributions are reported per member and sum to 100%.
 
 | Code | Member | Role | Contribution |
 |:---:|:---|:---|:---:|
-| V1 | Nguyễn Văn Vũ | Project management and data management | 16.7% |
-| V2 | Thái Nguyễn Hoàng Bách | Preprocessing | 16.7% |
-| V3 | Trương Huy Hoàng | Visualisation and ERP analysis | 16.7% |
-| V4 | Nguyễn Công Kiên | Feature extraction | 16.7% |
-| V5 | Nguyễn Việt Đức | Machine-learning baselines | 16.7% |
-| V6 | Đồng Minh Đức | Deep learning and interpretability | 16.7% |
+| V1 | Nguyễn Văn Vũ | Project management and data management | 17.7% |
+| V2 | Thái Nguyễn Hoàng Bách | Preprocessing | 10.7% |
+| V3 | Trương Huy Hoàng | Visualisation and ERP analysis | 17.7% |
+| V4 | Nguyễn Công Kiên | Feature extraction | 17.7% |
+| V5 | Nguyễn Việt Đức | Machine-learning baselines | 17.7% |
+| V6 | Đồng Minh Đức | Deep learning and interpretability | 18.7% |
 | | **Total** | | **100%** |
 
-*Each member contributed exactly one sixth (≈ 16.67%); values are rounded to one decimal place.* A detailed work log per member is given in `docs/contributions.md`.
+*Exact shares are 10⅔% (V2), 18⅔% (V6) and 17⅔% (V1, V3, V4, V5 each), summing to exactly 100%; values are rounded to one decimal place.* A detailed work log per member is given in `docs/contributions.md`.
 
 ---
 

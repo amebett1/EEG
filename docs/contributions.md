@@ -7,19 +7,19 @@ Môn AIT3012 Neuroscience (GS. Guy Nagels, VUB).
 
 ## Tỷ lệ đóng góp cá nhân (Individual Contribution Shares)
 
-Theo yêu cầu Slide 143 của GS. Guy Nagels, mỗi thành viên được ghi nhận tỷ lệ đóng góp, tổng bằng 100%. Nhóm thống nhất chia đều cho 6 thành viên.
+Theo yêu cầu Slide 143 của GS. Guy Nagels, mỗi thành viên được ghi nhận tỷ lệ đóng góp, tổng bằng 100%.
 
 | Mã | Thành viên | Vai trò | Tỷ lệ đóng góp |
 |:---:|:---|:---|:---:|
-| V1 | Nguyễn Văn Vũ | Quản lý dự án & dữ liệu (Project Manager & Data Management) | 16,7% |
-| V2 | Thái Nguyễn Hoàng Bách | Tiền xử lý dữ liệu (Preprocessing) | 16,7% |
-| V3 | Trương Huy Hoàng | Trực quan hóa & Phân tích ERP (Visualization / ERP) | 16,7% |
-| V4 | Nguyễn Công Kiên | Trích xuất đặc trưng (Feature Extraction) | 16,7% |
-| V5 | Nguyễn Việt Đức | Học máy truyền thống (Machine Learning Baseline) | 16,7% |
-| V6 | Đồng Minh Đức | Học sâu & Giải thích (Deep Learning & Interpretability) | 16,7% |
+| V1 | Nguyễn Văn Vũ | Quản lý dự án & dữ liệu (Project Manager & Data Management) | 17,7% |
+| V2 | Thái Nguyễn Hoàng Bách | Tiền xử lý dữ liệu (Preprocessing) | 10,7% |
+| V3 | Trương Huy Hoàng | Trực quan hóa & Phân tích ERP (Visualization / ERP) | 17,7% |
+| V4 | Nguyễn Công Kiên | Trích xuất đặc trưng (Feature Extraction) | 17,7% |
+| V5 | Nguyễn Việt Đức | Học máy truyền thống (Machine Learning Baseline) | 17,7% |
+| V6 | Đồng Minh Đức | Học sâu & Giải thích (Deep Learning & Interpretability) | 18,7% |
 | | **Tổng** | | **100%** |
 
-*Ghi chú: mỗi thành viên đóng góp đúng 1/6 (≈ 16,67%); số trong bảng được làm tròn đến một chữ số thập phân nên hiển thị 16,7%.*
+*Ghi chú: giá trị chính xác là V2 = 10⅔%, V6 = 18⅔%, V1/V3/V4/V5 = 17⅔% mỗi người (tổng đúng 100%); số trong bảng được làm tròn đến một chữ số thập phân.*
 
 ---
 
