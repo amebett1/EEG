@@ -127,12 +127,12 @@ Limits: trial-based inner validation, non-grouped SVM probability estimation, no
 
 | Member | Role | Exact share |
 |---|---|---|
-| Nguyễn Văn Vũ | Project management and data | 17⅔% |
-| Thái Nguyễn Hoàng Bách | Preprocessing and QC | 10⅔% |
-| Trương Huy Hoàng | ERP and visualisation | 17⅔% |
-| Nguyễn Công Kiên | Feature extraction | 17⅔% |
-| Nguyễn Việt Đức | ML baselines | 17⅔% |
-| Đồng Minh Đức | EEGNet and interpretability | 18⅔% |
+| Nguyễn Văn Vũ | Project management and data | 17.67% |
+| Thái Nguyễn Hoàng Bách | Preprocessing and QC | 11.65% |
+| Trương Huy Hoàng | ERP and visualisation | 17.67% |
+| Nguyễn Công Kiên | Feature extraction | 17.67% |
+| Nguyễn Việt Đức | ML baselines | 17.67% |
+| Đồng Minh Đức | EEGNet and interpretability | 17.67% |
 | Total | | 100% |
 
 Shares follow `docs/contributions.md` and sum exactly to 100%. Eleven behavioural tests passed. The final five-fold metrics, participant scores, ERP statistics, feature rankings and saliency pooling were independently checked. Main evidence: `results/tables/eegnet_controls/manifest.json`, task summaries, per-fold records and OOF arrays; canonical `baseline_metrics.csv`, `baseline_oof.npz`, `eegnet_metrics_real.csv`, `eegnet_folds_real.csv`, `eegnet_oof_real.npz`, `eegnet_saliency_real.npz`; `lda_channel_controls.csv`; `ml_vs_dl_per_subject.csv`, `ml_vs_dl_paired.json`; `report_verification.json`.

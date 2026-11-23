@@ -11,15 +11,15 @@ Theo yêu cầu Slide 143 của GS. Guy Nagels, mỗi thành viên được ghi 
 
 | Mã | Thành viên | Vai trò | Tỷ lệ đóng góp |
 |:---:|:---|:---|:---:|
-| V1 | Nguyễn Văn Vũ | Quản lý dự án & dữ liệu (Project Manager & Data Management) | 17,7% |
-| V2 | Thái Nguyễn Hoàng Bách | Tiền xử lý dữ liệu (Preprocessing) | 10,7% |
-| V3 | Trương Huy Hoàng | Trực quan hóa & Phân tích ERP (Visualization / ERP) | 17,7% |
-| V4 | Nguyễn Công Kiên | Trích xuất đặc trưng (Feature Extraction) | 17,7% |
-| V5 | Nguyễn Việt Đức | Học máy truyền thống (Machine Learning Baseline) | 17,7% |
-| V6 | Đồng Minh Đức | Học sâu & Giải thích (Deep Learning & Interpretability) | 18,7% |
+| V1 | Nguyễn Văn Vũ | Quản lý dự án & dữ liệu (Project Manager & Data Management) | 17,67% |
+| V2 | Thái Nguyễn Hoàng Bách | Tiền xử lý dữ liệu (Preprocessing) | 11,65% |
+| V3 | Trương Huy Hoàng | Trực quan hóa & Phân tích ERP (Visualization / ERP) | 17,67% |
+| V4 | Nguyễn Công Kiên | Trích xuất đặc trưng (Feature Extraction) | 17,67% |
+| V5 | Nguyễn Việt Đức | Học máy truyền thống (Machine Learning Baseline) | 17,67% |
+| V6 | Đồng Minh Đức | Học sâu & Giải thích (Deep Learning & Interpretability) | 17,67% |
 | | **Tổng** | | **100%** |
 
-*Ghi chú: giá trị chính xác là V2 = 10⅔%, V6 = 18⅔%, V1/V3/V4/V5 = 17⅔% mỗi người (tổng đúng 100%); số trong bảng được làm tròn đến một chữ số thập phân.*
+*Ghi chú: V1/V3/V4/V5/V6 đóng góp 17,67% mỗi người; V2 (Thái Nguyễn Hoàng Bách) nhận phần còn lại là 11,65%. Tổng đúng 100%.*
 
 ---
 
