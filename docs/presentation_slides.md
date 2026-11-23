@@ -71,10 +71,10 @@ Môn AIT3012 Neuroscience (GS. Guy Nagels, VUB). Thời lượng tối đa **10 
 ## Slide 5 — From signal to 402 features (Laton et al., 2014)
 
 - **Người nói**: V4 – Nguyễn Công Kiên (1:15)
-- **Hình**: bảng nhóm đặc trưng (mục 6.3 của `REPORT_EN.md`) và bảng "best feature per group" (mục 6.4); có thể vẽ nhanh bar chart top-10 từ `results/tables/v4_feature_auc.csv`.
+- **Hình**: bảng nhóm đặc trưng và top đặc trưng (Bảng 1 & Bảng 5 trong `docs/EEG_Final_Report_EN.pdf`, mục 3 của `REPORT_EN.md`); có thể vẽ nhanh bar chart top-10 từ `results/tables/v4_feature_auc.csv`.
 - **Key takeaways**:
   - 12 channels × 5 windows: window amplitudes, P300/N1/P2/N2 peaks (Laton et al., 2014), Hjorth, band power, spectral entropy, db4 wavelet → **402 features per trial**.
-  - P3 window widened to **300–600 ms**: in 5/10 subjects the Pz peak came after 500 ms.
+  - P3 window widened to **300–600 ms**: in **17/39 subjects (43.6%)** the Pz peak came after 500 ms.
   - Best single feature: **mean Pz amplitude 400–600 ms (AUC 0.84)** — exactly the P3b.
 - **Script**:
   > "Following Laton and colleagues, we described each single trial with 402 features from twelve channels: amplitudes in five time windows, peak amplitudes and latencies, Hjorth parameters, spectral power and wavelet energy. One practical lesson: a 300-to-500 millisecond window cut off the peak in half of the subjects, so we widened it to 600. The most discriminative single feature is simply the mean amplitude at Pz between 400 and 600 milliseconds — the P3b itself — with an AUC of 0.84 on its own."
@@ -86,7 +86,7 @@ Môn AIT3012 Neuroscience (GS. Guy Nagels, VUB). Thời lượng tối đa **10 
 - **Key takeaways**:
   - Leakage-free: scaler inside the pipeline, **GroupKFold by subject** → test subjects never seen in training.
   - Imbalance (13.5% targets): class weights; balanced accuracy, ROC-AUC, PR-AUC instead of raw accuracy.
-  - Logistic regression: **balanced accuracy 87.4%**; shrinkage LDA: **ROC-AUC 0.947**; PR-AUC ≈ 0.79 (≈ 6 × prevalence).
+  - Logistic regression: **balanced accuracy 87.5%**; shrinkage LDA: **ROC-AUC 0.947**; PR-AUC ≈ 0.79 (≈ 6 × prevalence).
   - Random forest ranks well (AUC 0.91) but its sensitivity collapses to 29% at the default threshold.
 - **Script**:
   > "Two things make this problem tricky: targets are only 13 percent of trials, so accuracy is meaningless — always saying 'standard' gives 87 percent — and trials from the same person must never be in both training and test sets. So we used class weights, balanced metrics, and five-fold cross-validation split by subject. Regularised linear models win: logistic regression reaches 87 percent balanced accuracy, and LDA with shrinkage — the classic P300 BCI method — an AUC of 0.95. This is our machine-learning answer to RQ1, and the benchmark for deep learning."
@@ -94,37 +94,42 @@ Môn AIT3012 Neuroscience (GS. Guy Nagels, VUB). Thời lượng tối đa **10 
 ## Slide 7 — RQ2: does deep learning beat machine learning? Yes.
 
 - **Người nói**: V6 – Đồng Minh Đức (1:30)
-- **Hình**: `report/figures/ml_vs_dl_comparison.png` (phụ: `eegnet_roc_pr_real.png`)
+- **Hình**: `report/figures/ml_vs_dl_comparison.png`, phụ `lda_channel_controls_roc.png`
 - **Key takeaways**:
-  - EEGNet-8,2 on raw epochs (128 × 301), 3,930 parameters, **same 39 subjects and identical folds** as the baselines.
-  - **Balanced accuracy 90.7 ± 2.1%, ROC-AUC 0.970 ± 0.010, PR-AUC 0.873 ± 0.042** — best on every metric except specificity.
-  - Paired per subject: higher AUC in **35/39 (vs LDA)** and **34/39 (vs logistic regression)**, Wilcoxon p < 10⁻⁸.
-  - Why: all 128 channels and learned spatial filters vs 12 channels; full time course vs 5 window means; enough data (~15,000 trials per fold). On one subject only, EEGNet reached just AUC 0.89.
+  - EEGNet-8,2: 128 × 301 preprocessed samples, 3,930 parameters; same 39 participants and five outer test groups.
+  - Balanced accuracy **90.3 ± 2.1%**, ROC-AUC **0.970 ± 0.013**, AP **0.865 ± 0.045**.
+  - LDA given all 128 channels and the full epoch in 100 ms bins reaches AUC **0.949**. Electrode count alone does not explain EEGNet's lead.
+  - Temporal representations and optimisation still differ; the result concerns the tested pipelines.
 - **Script**:
-  > "We then trained EEGNet, a compact convolutional network with fewer than four thousand parameters, directly on the raw epochs — and crucially, on exactly the same subjects and the same folds as the baselines. EEGNet is the best model overall: about 91 percent balanced accuracy, an AUC of 0.97 and a PR-AUC of 0.87. The gain in AUC is moderate, but it is consistent: EEGNet is better in 35 of 39 subjects. Why? It uses all 128 channels and learns spatial filters, and it sees the full time course instead of five window averages. But this only works with enough data: trained on a single subject, it was clearly worse. So for RQ2: yes, on this dataset deep learning wins — given enough data."
+  > "EEGNet achieves 90.3 percent balanced accuracy and an AUC of 0.970 on unseen participants. We also gave LDA all 128 channels over the full epoch. It reached AUC 0.949, so electrode count alone does not explain the advantage. The temporal representations still differ, so our conclusion is about these implemented pipelines: EEGNet performs best."
+
+
 
 ## Slide 8 — RQ3: what did EEGNet learn? + conclusion
 
 - **Người nói**: V6 – Đồng Minh Đức (1:30), kết bài V1 – Nguyễn Văn Vũ (0:15)
-- **Hình**: `report/figures/eegnet_saliency_topomap_real.png`
+- **Hình**: `report/figures/eegnet_controls_oof.png`, phụ `eegnet_controls_topomaps.png`
 - **Key takeaways**:
-  - **Time — consistent with the P3b**: 40% of saliency within 300–600 ms (window = 25% of the epoch), peak at 504 ms; almost nothing before stimulus onset.
-  - **Space — only partly**: P300 effect is maximal at Pz, but saliency peaks over **left central sites (C1, FCC3h, C3)**, near 460 ms — just before the button press (RT ≈ 540 ms). Pz ranks 37/128; r = 0.32.
-  - Caveat: gradients show the model's filters, not where the signal is (Haufe et al., 2014). Next step: EEGNet on distractor vs standard (no button press).
-  - **Answer to RQ3: partly interpretable** — the network uses the P3b window, but may also exploit motor preparation.
+  - All explanations use positive trials from each model's **outer test fold**. Fold maps are normalised before pooling.
+  - Target saliency: peak **504 ms**, **40.7%** mass in 300–600 ms, spatial **r = 0.253**; Pz ranks **43/128**.
+  - Completed no-button distractor–standard control: AUC **0.926 ± 0.015**.
+  - RQ3: partly interpretable. Rare-stimulus discrimination is possible without a button-press contrast; target-specific motor contributions remain unquantified because stimuli and relevance also differ.
 - **Script**:
-  > "Is it a black box? We computed saliency maps — how much each channel and time point influences the target decision. In time, the answer is reassuring: the network looks mostly at the P3b window, peaking around 500 milliseconds, and ignores the baseline. In space, it is more surprising: the P300 is maximal at Pz, but the network's attention is strongest over left central electrodes — the motor cortex — just before the button press. Saliency shows the network's filters, not the source of the signal, so this could be noise cancellation; but it could also mean that part of the deep-learning advantage comes from motor preparation rather than the P300. The decisive test is to train EEGNet on distractors versus standards, where nobody presses a button. So our answer to RQ3 is: partly interpretable."
+  > "We now explain every outer test fold rather than training examples. Target sensitivity peaks at 504 milliseconds, with 40.7 percent in the P300 interval, but spatial correspondence is only partial. We also completed the no-button control: distractor versus standard reaches AUC 0.926. EEGNet can therefore discriminate these stimuli without a motor-response contrast. This does not isolate the target model's motor contribution, because stimulus identity and task relevance also differ. Our answer is partial interpretability, supported by held-out explanations and a completed behavioural control."
   >
-  > **V1 (kết bài):** "To conclude: the group-level parietal target effect is strong, with individual variability in timing; single trials can be classified across subjects with up to 91 percent balanced accuracy; deep learning outperforms standard machine learning on this dataset, but understanding exactly what it uses requires more than a saliency map. Thank you."
+  > **V1:** "The group parietal response is strong; EEGNet reaches 90.3 percent balanced accuracy on unseen participants and leads the tested baselines. Test-only explanations and no-button decoding strengthen the stimulus-related evidence while leaving the exact mechanism open. Thank you."
 
 ---
+
+
 
 ## Chuẩn bị câu hỏi (Q&A)
 
 | Câu hỏi có thể gặp | Người trả lời | Ý chính |
 |---|---|---|
 | Is the comparison fair? | V6 | Same 39 subjects, same 21,878 trials, identical subject-wise folds (verified per subject), same metrics and 0.5 threshold. |
-| Isn't the classifier just detecting the button press? | V6 / V2 | Possible, especially for EEGNet (left-central saliency). Feature-based distractor vs standard (no press) still gives AUC 0.90 vs 0.95. Planned control: EEGNet on distractor vs standard. |
+| Isn't the classifier just detecting the button press? | V6 / V2 | Target saliency does peak over left-central sites (C1, FCC3h, C3) near the 542 ms mean RT, consistent with motor-related sensitivity; however, the completed no-button distractor–standard control still reaches AUC 0.926 with an anterior shift (AFz, AFF2h, FC1), showing stimulus discrimination does not require a button-press contrast while leaving target-specific motor shares unresolved. |
+| Why is spatial r computed over the full epoch rather than 300–600 ms? | V6 | Full-epoch mean saliency correlates at r = 0.253 (target) and 0.102 (distractor); restricting saliency to the 300–600 ms window shown in Figure 7 gives r = 0.203 and 0.048 — supporting the same conclusion of partial spatial correspondence. |
 | Why balanced accuracy and not accuracy? | V5 | 13.5% targets: an all-standard classifier has 86.5% accuracy and detects nothing. |
 | Why do LDA and logistic regression differ in balanced accuracy but not AUC? | V5 | Same ranking quality (AUC 0.947 vs 0.946); different operating point at threshold 0.5 because of class weighting. |
 | Why 300–600 ms for features but 300–500 ms for ERP verification? | V4 / V3 | 300–500 ms is the project’s narrower operational window, not a mandatory course rule. Peaks are searched independently over 200–800 ms; a secondary 300–600 ms ERP analysis shows the effect of the window. No participant is reselected for ML/DL based on ERP checks. |

@@ -1,17 +1,20 @@
 # EEG P300 Mini Project
 
-Báo cáo cuối để nộp: [PDF tiếng Anh](docs/EEG_Final_Report_EN.pdf) · [nguồn LaTeX](docs/EEG_Final_Report_EN.tex). Bản tiếng Việt: [PDF](docs/EEG_P300_Report_VI.pdf) · [LaTeX](docs/EEG_P300_Report_VI.tex).
+Báo cáo cuối để nộp: [PDF tiếng Anh](docs/EEG_Final_Report_EN.pdf) · [nguồn LaTeX](docs/EEG_Final_Report_EN.tex) · [Markdown](report/REPORT_EN.md).
 
 Đối chứng bổ sung và kiểm chứng kết quả từ thư mục gốc, trong môi trường ảo hiện có:
 
 ```bash
 python -m src.preprocessing.audit_epochs
-python -m src.verify_report
+python src/ml/train_baseline.py --splits 5
 python -m src.ml.report_controls
+python -u -m src.dl.report_controls --epochs 50 --batch-size 64
+python -m src.dl.finalize_results
+python -m src.verify_report
 python -m unittest discover -s tests
 ```
 
-LDA đủ 128 kênh đạt ROC-AUC 0,949 ± 0,022, so với EEGNet 0,970 ± 0,010. Kết quả và thiết lập nằm trong `results/tables/lda_channel_controls.*`; kiểm chứng ERP, dự đoán EEGNet và saliency hold-out đã lưu nằm trong `results/tables/report_verification.json`. Hai thí nghiệm EEGNet distractor–standard và saliency test đủ năm fold chưa được chạy trong lần chốt này do môi trường thiếu PyTorch và driver NVIDIA không hoạt động.
+Kết quả cuối: EEGNet target–standard ROC-AUC 0.970 ± 0.013, balanced accuracy 90.3%; LDA 128 kênh ROC-AUC 0.949 ± 0.022. Đã hoàn tất EEGNet distractor–standard không bấm nút (ROC-AUC 0.926 ± 0.015) và saliency test đủ năm fold. Kết quả canonical dùng lần chạy hiện tại; cấu hình và từng fold ở `results/tables/eegnet_controls/`, kiểm chứng ở `results/tables/report_verification.json`. (Các lệnh EEGNet và 3 test PyTorch cần chạy trong môi trường có PyTorch + CUDA.)
 
 ## Cấu trúc repository
 
@@ -60,9 +63,10 @@ EEG/
 │   ├── tables/                       # Nơi lưu bảng kết quả
 │   └── models/                       # Nơi lưu mô hình đã huấn luyện; không commit
 └── report/
-    ├── README.md                     # Báo cáo tiếng Việt (11 mục)
-    ├── REPORT_EN.md                  # Báo cáo tiếng Anh chính thức để nộp
+    ├── REPORT_EN.md                  # Báo cáo tiếng Anh dạng Markdown
     └── figures/                      # Nơi lưu hình dùng trong báo cáo
+```
+
 ## Hướng dẫn thực thi
 
 1. **Phân tích ERP và bản đồ địa hình da đầu (V3)**:
@@ -83,8 +87,10 @@ EEG/
 
 4. **Huấn luyện mô hình Deep Learning EEGNet và phân tích Saliency map (V6)**:
    ```bash
-   python src/dl/train_eegnet.py --save --batch-size 64 --epochs 50
+   python -u -m src.dl.report_controls --epochs 50 --batch-size 64
+   python -m src.dl.finalize_results
+   python -m src.verify_report
    ```
-   Chạy trên toàn bộ 39 người với `GroupKFold(n_splits=5)` theo người (cùng tập và cùng cách chia với V5). Có GPU (CUDA) thì tự dùng GPU, khoảng 25–50 phút trên RTX 4060.
+   Chạy hai bài toán target–standard và distractor–standard, mỗi bài toán năm fold trên 39 người, cùng nhóm test như V5. Lệnh yêu cầu GPU CUDA và lưu checkpoint từng fold để tiếp tục khi gián đoạn. Bước finalize kiểm chứng hai bài toán rồi thay bảng, dự đoán và hình EEGNet chính thức; verify kiểm tra lại toàn bộ số liệu báo cáo.
 
 

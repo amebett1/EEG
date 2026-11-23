@@ -304,6 +304,9 @@ def run_pipeline(
     TABLE_DIR.mkdir(parents=True, exist_ok=True)
     metrics_path = TABLE_DIR / "baseline_metrics.csv"
     summary_df.to_csv(metrics_path, index=False)
+    np.savez_compressed(TABLE_DIR / "baseline_oof.npz", y=y, groups=groups,
+                        **{name.lower().replace(" ", "_"): probs
+                           for name, probs in oof_probs_dict.items()})
     print(f"Saved metrics table: {metrics_path}")
 
     roc_path = FIG_DIR / "baseline_roc_curves.png"

@@ -1,27 +1,28 @@
 {
   "passed": true,
   "eegnet_pooled": {
-    "balanced_accuracy": 0.907395877259571,
-    "roc_auc": 0.9676576488556856,
-    "pr_auc": 0.8634659627453382,
-    "f1_macro": 0.8555365426289744,
-    "sensitivity": 0.8858014232463571,
-    "specificity": 0.928990331272785
+    "balanced_accuracy": 0.9036983790671097,
+    "roc_auc": 0.9676852299003157,
+    "pr_auc": 0.8532959743963586,
+    "f1_macro": 0.8499892854420708,
+    "sensitivity": 0.8817350050830227,
+    "specificity": 0.9256617530511967
   },
   "eegnet_folds_verified": 5,
+  "baseline_models_verified": 5,
   "paired_participant_comparisons": {
     "LDA": {
-      "auc_median_gain": 0.023402250979225436,
+      "auc_median_gain": 0.022856859536912966,
       "n_higher": 35,
-      "wilcoxon_p": 1.949956640601158e-09
+      "wilcoxon_p": 4.984030965715647e-10
     },
     "Logistic Regression": {
-      "auc_median_gain": 0.023409859265665633,
-      "n_higher": 34,
-      "wilcoxon_p": 3.2887328416109085e-09
+      "auc_median_gain": 0.023418674698795217,
+      "n_higher": 35,
+      "wilcoxon_p": 3.2014213502407074e-10
     }
   },
-  "eegnet_folds_at_50_epochs": 3,
+  "eegnet_folds_at_50_epochs": 4,
   "ranked_features_verified": 402,
   "erp_participants_verified": 42,
   "p3a_300_500": {
@@ -49,20 +50,77 @@
       "positive_count": 26
     }
   },
-  "reference_saliency": {
+  "outer_test_saliency": {
     "peak_ms": 504.0,
-    "mass_300_600": 0.4019270541505588,
-    "spatial_r": 0.31744974427673545
+    "mass_300_600": 0.40651747597025634,
+    "spatial_r": 0.2532957803505262
   },
-  "holdout_saliency": {
-    "source": "notebooks/04_deep_learning.ipynb",
-    "rerun": false,
-    "n_test": 4472,
-    "n_subjects": 8,
-    "n_target": 593,
-    "peak_ms": 508,
-    "mass_300_600": 0.405,
-    "spatial_r": 0.15,
-    "correlation_reference": "whole-cohort trial-pooled ERP effect"
+  "new_eegnet_controls": {
+    "target": {
+      "passed": true,
+      "folds_verified": 5,
+      "n_trials": 21878,
+      "n_positive": 2951,
+      "pooled": {
+        "balanced_accuracy": 0.9036983790671097,
+        "roc_auc": 0.9676852299003157,
+        "pr_auc": 0.8532959743963586,
+        "f1_macro": 0.8499892854420708,
+        "sensitivity": 0.8817350050830227,
+        "specificity": 0.9256617530511967
+      },
+      "saliency": {
+        "peak_ms": 504.0,
+        "mass_300_600": 0.40651747597025634,
+        "window_samples": 76,
+        "spatial_r": 0.2532957803505262,
+        "pz_rank": 43,
+        "top_channels": [
+          "C1",
+          "FCC3h",
+          "C3",
+          "Oz",
+          "P2",
+          "CPP1h",
+          "FFC2h",
+          "PPO10h",
+          "CCP3h",
+          "FCC4h"
+        ]
+      }
+    },
+    "distractor": {
+      "passed": true,
+      "folds_verified": 5,
+      "n_trials": 21748,
+      "n_positive": 2821,
+      "pooled": {
+        "balanced_accuracy": 0.8541965757464354,
+        "roc_auc": 0.9248228051780581,
+        "pr_auc": 0.7326419337016102,
+        "f1_macro": 0.7802751510284286,
+        "sensitivity": 0.8234668557249203,
+        "specificity": 0.8849262957679506
+      },
+      "saliency": {
+        "peak_ms": 524.0,
+        "mass_300_600": 0.4390164576469323,
+        "window_samples": 76,
+        "spatial_r": 0.10235523078390629,
+        "pz_rank": 56,
+        "top_channels": [
+          "AFz",
+          "AFF2h",
+          "FC1",
+          "Oz",
+          "AF3",
+          "FC2",
+          "FFC6h",
+          "CCP2h",
+          "FCz",
+          "TP7"
+        ]
+      }
+    }
   }
 }

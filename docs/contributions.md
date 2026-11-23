@@ -29,7 +29,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 
 | Vai trò | Thành viên | Trách nhiệm chính | File mã nguồn / Tài liệu phụ trách | Trạng thái |
 |:---:|:---|:---|:---|:---:|
-| **V1** | **Nguyễn Văn Vũ** | **Quản lý dự án + dữ liệu (Project Manager & Data Management)**<br>- Đọc paper dataset (Dzianok et al., 2022), tải dữ liệu GigaDB 100990<br>- Chốt cấu trúc repo và định dạng epoch dùng chung (`config.py`)<br>- Điều phối, theo dõi deadline, chuẩn bị buổi trung gian với GS. Nagels<br>- Ghép báo cáo, kiểm tra tài liệu tham khảo, chốt bảng % đóng góp<br>- **Đầu ra bàn giao**: kế hoạch 3 tuần, tóm tắt dataset, bảng % đóng góp, báo cáo ghép hoàn chỉnh | `tai_lieu/Ke_hoach_EEG.xlsx`<br>`docs/dataset_cheatsheet.md`<br>`docs/contributions.md`<br>`config.py`<br>`report/README.md`, `report/REPORT_EN.md` | **Tuần 1–2 hoàn thành; Tuần 3 đang làm** |
+| **V1** | **Nguyễn Văn Vũ** | **Quản lý dự án + dữ liệu (Project Manager & Data Management)**<br>- Đọc paper dataset (Dzianok et al., 2022), tải dữ liệu GigaDB 100990<br>- Chốt cấu trúc repo và định dạng epoch dùng chung (`config.py`)<br>- Điều phối, theo dõi deadline, chuẩn bị buổi trung gian với GS. Nagels<br>- Ghép báo cáo, kiểm tra tài liệu tham khảo, chốt bảng % đóng góp<br>- **Đầu ra bàn giao**: kế hoạch 3 tuần, tóm tắt dataset, bảng % đóng góp, báo cáo ghép hoàn chỉnh | `tai_lieu/Ke_hoach_EEG.xlsx`<br>`docs/dataset_cheatsheet.md`<br>`docs/contributions.md`<br>`config.py`<br>`report/REPORT_EN.md` | **Tuần 1–2 hoàn thành; Tuần 3 đang làm** |
 | **V2** | **Thái Nguyễn Hoàng Bách** | **Tiền xử lý dữ liệu (Preprocessing)**<br>- Lọc dải tần 0,5–40 Hz<br>- Phát hiện và nội suy kênh hỏng (IQR, tương quan lân cận)<br>- Picard ICA kết hợp ICLabel loại bỏ artifact (mắt, cơ, tim)<br>- Cắt epoch (−200..+1000 ms), decimation 4 (1000 Hz → 250 Hz), gán nhãn standard/target/distractor<br>- Xuất file QC từng người và `qc_summary.csv`<br>- **Đầu ra bàn giao**: script tiền xử lý và 42 file epoch sạch cho cả nhóm | `notebooks/01_preprocessing.ipynb`<br>`src/preprocessing/`<br>`derivatives/v1/qc/` | **Tuần 1–2 hoàn thành; Tuần 3 đang làm** |
 | **V3** | **Trương Huy Hoàng** | **Trực quan hóa & Phân tích ERP (Visualization / ERP)**<br>- Grand average ERP (Fz, Pz), scalp map, kiểm tra P300 ở khoảng 300–500 ms<br>- Code vẽ dạng sóng ERP đường giữa (Fz, Cz, Pz) kèm sai số chuẩn SEM<br>- Code vẽ sóng hiệu số (Target − Standard, Distractor − Standard)<br>- Code vẽ bản đồ địa hình da đầu 128 kênh (Scalp Topomap)<br>- Kiểm tra định lượng tiêu chuẩn Polich trong cửa sổ 300–500 ms<br>- **Đầu ra bàn giao**: hình ERP và topomap chất lượng cao cho báo cáo, slide | `src/erp/plot_erp.py`<br>`notebooks/02_erp_visualization.ipynb`<br>`results/figures/`, `report/figures/`<br>`results/tables/v3_p300_group_results.csv` | **Hoàn thành (Tuần 1, 2, 3)** |
 | **V4** | **Nguyễn Công Kiên** | **Trích xuất đặc trưng (Feature Extraction)**<br>- Biên độ đỉnh và độ trễ của P300 và N100/P200/N200 theo Laton et al. (2014)<br>- Biên độ trung bình các cửa sổ thời gian quan trọng<br>- Năng lượng dải sóng (Delta, Theta, Alpha, Beta) và tham số Hjorth<br>- Spectral entropy, wavelet db4<br>- **Đầu ra bàn giao**: ma trận đặc trưng 21.878 trial × 402 đặc trưng (39 người) cho V5 | `src/features/extract_features.py`<br>`src/features/rank_features.py`<br>`derivatives/v1/features/`<br>`results/tables/v4_feature_auc.csv` | **Hoàn thành (Tuần 1, 2, 3)** |
@@ -61,7 +61,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 - **Nhiệm vụ theo kế hoạch**: *Ghép báo cáo bản nháp, kiểm tra tài liệu tham khảo, chốt % đóng góp.*
 - **Chi tiết thực hiện**:
   1. Chốt bảng tỷ lệ đóng góp (đầu file này) và chuẩn hóa lại bảng vai trò V1–V6.
-  2. Ghép báo cáo tiếng Việt `report/README.md` và bản tiếng Anh chính thức `report/REPORT_EN.md`.
+  2. Ghép bản thảo tiếng Việt (đã xóa) và bản tiếng Anh chính thức `report/REPORT_EN.md`.
   3. Kiểm tra tài liệu tham khảo của các mục.
   4. Lập khung thuyết trình 10 phút `docs/presentation_slides.md` và phân công người nói.
 - **Hạn chót**: nộp báo cáo tiếng Anh ít nhất 1 tuần trước buổi thuyết trình (~1/12).
@@ -94,7 +94,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 ### Tuần 2 (10–16/11)
 - **Nhiệm vụ theo kế hoạch**: *Hỗ trợ sửa lỗi dữ liệu, rồi viết phần Methods (tiền xử lý).*
 - **Chi tiết thực hiện**:
-  1. **Viết mục 7 "Dữ liệu và Tiền xử lý"** trong `report/README.md`, gồm:
+  1. **Viết mục 7 "Dữ liệu và Tiền xử lý"** trong bản thảo báo cáo tiếng Việt (đã xóa), gồm:
      - quy trình 7 bước;
      - bảng QC;
      - kiểm chứng hành vi và P300;
@@ -114,7 +114,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
   2. **Kiểm tra quyết định ICA từ dữ liệu thô** (phần script audit chưa làm):
      - 42 mô hình ICA đều có 40 thành phần, số thành phần bị loại khớp QC.
      - Với sub-13, 14, 36: dựng lại dữ liệu đầu vào ICA từ dữ liệu thô và chạy lại ICLabel, ra đúng xác suất chớp mắt 0,78 / 0,70 / 0,59 như đã báo cáo. Trọng số lớn nhất ở vùng trán cực.
-     - Đưa 42 mô hình ICA lên Release `data-v1` (`ica_v1_42subjects.zip`) để nhóm và người chấm kiểm tra lại. Cập nhật mục 7.6 và 7.7 trong `report/README.md`.
+     - Đưa 42 mô hình ICA lên Release `data-v1` (`ica_v1_42subjects.zip`) để nhóm và người chấm kiểm tra lại. Cập nhật mục 7.6 và 7.7 trong bản thảo báo cáo tiếng Việt (đã xóa).
   3. **Vẽ sơ đồ pipeline 7 bước cho slide 2**: `report/figures/v2_preprocessing_pipeline.png`, đồng thời chèn vào mục 7.2 của báo cáo.
 
 ---
@@ -166,7 +166,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
      - Nhóm sub-02/14/17 bị loại theo hành vi (false alarm Distractor trung bình 90,95%); không khẳng định không có ERP. Target Pz trên trial đúng **5,29 ± 2,58 µV**; chỉ còn 1/1/19 Distractor đúng nên các trung bình này không ổn định.
   4. **Xuất bảng kết quả và soạn thảo báo cáo**:
      - Xuất bảng kết quả kiểm định 42 đối tượng ra file `results/tables/v3_p300_group_results.csv`.
-     - Soạn thảo toàn bộ phần 8 "Kết quả Nghiên cứu & Phân tích ERP (Results – ERP)" trong `report/README.md`.
+     - Soạn thảo toàn bộ phần 8 "Kết quả Nghiên cứu & Phân tích ERP (Results – ERP)" trong bản thảo báo cáo tiếng Việt (đã xóa).
 
 ### Tuần 3 (17–23/11)
 - **Nhiệm vụ theo kế hoạch**: *Chọn hình cho báo cáo và slide.*
@@ -176,7 +176,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
      - Slide 2: Động học không gian Scalp Topomap 128 kênh và tiêu điểm đỉnh.
      - Slide 3: Phân tách cơ chế P3a vs P3b bằng sóng hiệu số Difference Waves.
      - Slide 4: Thống kê quần thể 42 đối tượng, so sánh nhóm hiểu sai task và tương quan RT vs P3b.
-  2. Biên soạn đầy đủ Figure Captions chuẩn bài báo khoa học và các thông điệp thuyết trình trọng tâm (Key Takeaways) cho từng slide tại mục 9 của `report/README.md`.
+  2. Biên soạn đầy đủ Figure Captions chuẩn bài báo khoa học và các thông điệp thuyết trình trọng tâm (Key Takeaways) cho từng slide tại mục 9 của bản thảo báo cáo tiếng Việt (đã xóa).
   3. Lưu trữ và đồng bộ toàn bộ file ảnh sẵn dùng tại `report/figures/` và `results/figures/`.
 
 ---
@@ -194,7 +194,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
   4. **Thêm đỉnh N100/P200/N200** ở Fz, Cz, Pz theo Bảng 2 của Laton et al. (2014).
   5. **Thêm wavelet db4** (thư viện PyWavelets): năng lượng các dải 0–8, 8–16, 16–31 Hz trong cửa sổ P3.
   6. **Chạy toàn bộ 39 người**: 21.878 trial × 402 đặc trưng, không có giá trị thiếu. Xếp hạng đặc trưng bằng `src/features/rank_features.py` → `results/tables/v4_feature_auc.csv`.
-  7. **Viết phần 5 "Trích xuất đặc trưng"** trong `report/README.md`.
+  7. **Viết phần 5 "Trích xuất đặc trưng"** trong bản thảo báo cáo tiếng Việt (đã xóa).
 - **Bàn giao cho V5**: `derivatives/v1/features/all_subjects_features.csv` (khoảng 150 MB, không commit). Tạo lại bằng `python src/features/extract_features.py --all` (khoảng 7 phút). Hàm `load_features()` trả về `X, y, groups, feature_names`.
 
 ---
@@ -223,7 +223,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
   5. **Xuất bản kết quả thực nghiệm và biểu đồ khoa học**:
      - Bảng số liệu chi tiết: `results/tables/baseline_metrics.csv`.
      - Bộ 3 biểu đồ tiếng Anh Sentence case (300 DPI): `baseline_model_comparison.png`, `baseline_roc_curves.png`, `baseline_pr_curves.png` tại `results/figures/` và `report/figures/`.
-  6. **Viết phần 6 "Mô hình Học máy Truyền thống Baseline"** trong `report/README.md`, trả lời câu hỏi nghiên cứu 1.
+  6. **Viết phần 6 "Mô hình Học máy Truyền thống Baseline"** trong bản thảo báo cáo tiếng Việt (đã xóa), trả lời câu hỏi nghiên cứu 1.
 - **Bàn giao cho V6**: Bảng kết quả benchmark làm mốc so sánh (Baseline) cho mô hình học sâu.
 
 ---
@@ -257,4 +257,4 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
      - Thời gian: đỉnh ở 504 ms; 40,2% saliency trong 300–600 ms (cửa sổ chỉ chiếm 24,9% epoch).
      - Không gian: điểm nóng ở vùng trung tâm trái (C1, FCC3h, CCP3h, C3), không phải Pz (xếp hạng 37/128); tương quan với hiệu ứng P300 theo kênh r = 0,32. ERP trung bình không lệch trái (C3 vs C4, p = 0,50) → cần kiểm soát thêm giả thuyết tín hiệu vận động do bấm nút.
      - Xuất `eegnet_saliency_real.png` và topomap `eegnet_saliency_topomap_real.png` (tại `results/figures/` và `report/figures/`).
-  5. **So sánh ML vs DL và trả lời câu hỏi 2, 3**: `results/tables/ml_vs_dl_comparison.csv`, `results/figures/ml_vs_dl_comparison.png`; soạn mục 10 và 11 trong `report/README.md`.
+  5. **So sánh ML vs DL và trả lời câu hỏi 2, 3**: `results/tables/ml_vs_dl_comparison.csv`, `results/figures/ml_vs_dl_comparison.png`; soạn mục 10 và 11 trong bản thảo báo cáo tiếng Việt (đã xóa).

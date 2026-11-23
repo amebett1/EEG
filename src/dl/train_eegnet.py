@@ -236,7 +236,8 @@ def predict_proba(model: nn.Module, X: np.ndarray, scale: float = 1.0, batch_siz
 def train_eegnet(X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_val: np.ndarray,
                  epochs: int = 100, batch_size: int = 64, lr: float = 1e-3, patience: int = 15,
                  model_kwargs: Optional[dict] = None, device: Optional[torch.device] = None,
-                 seed: int = RANDOM_SEED, verbose: bool = False) -> Tuple[EEGNet, Dict[str, List[float]], float]:
+                 seed: int = RANDOM_SEED, verbose: bool = False,
+                 eval_batch_size: int = 256) -> Tuple[EEGNet, Dict[str, List[float]], float]:
     """Huấn luyện một EEGNet, early stopping theo val loss.
 
     - Lỗi cross-entropy có trọng số lớp (bù mất cân bằng ~12% target, giống class_weight="balanced").
@@ -280,8 +281,8 @@ def train_eegnet(X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_
 
         model.eval()
         with torch.no_grad():
-            logits = torch.cat([model(Xva[i:i + 256].to(device)).cpu()
-                                for i in range(0, len(Xva), 256)])
+            logits = torch.cat([model(Xva[i:i + eval_batch_size].to(device)).cpu()
+                                for i in range(0, len(Xva), eval_batch_size)])
             val_loss = criterion(logits.to(device), yva.to(device)).item()
             probs = torch.softmax(logits, 1)[:, 1].numpy()
         history["val_loss"].append(val_loss)

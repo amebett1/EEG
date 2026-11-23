@@ -1,0 +1,42 @@
+{
+  "fold": 2,
+  "n_test": 4241,
+  "n_positive": 543,
+  "epochs_run": 50,
+  "scale": 7.068216800689697,
+  "seconds": 822.7584871639992,
+  "test_subjects": [
+    "sub-07",
+    "sub-08",
+    "sub-12",
+    "sub-15",
+    "sub-20",
+    "sub-23",
+    "sub-29",
+    "sub-37"
+  ],
+  "balanced_accuracy": 0.8665079028333468,
+  "roc_auc": 0.930455664153736,
+  "pr_auc": 0.7743951783655081,
+  "f1_macro": 0.794742805734914,
+  "f1_target": 0.6565656565656566,
+  "sensitivity": 0.8379373848987108,
+  "specificity": 0.8950784207679827,
+  "peak_ms": 524.0,
+  "mass_300_600": 0.4161853314089911,
+  "window_samples": 76,
+  "spatial_r": 0.018337637150188428,
+  "pz_rank": 70,
+  "top_channels": [
+    "AFz",
+    "FC1",
+    "AF3",
+    "Oz",
+    "PPO6h",
+    "FFC2h",
+    "Fp2",
+    "CCP2h",
+    "CCP6h",
+    "PPO2h"
+  ]
+}

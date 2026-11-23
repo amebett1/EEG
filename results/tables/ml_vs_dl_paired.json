@@ -1,0 +1,30 @@
+[
+  {
+    "baseline": "LDA",
+    "metric": "auc",
+    "median_gain": 0.022856859536912966,
+    "n_higher": 35,
+    "p": 4.984030965715647e-10
+  },
+  {
+    "baseline": "LDA",
+    "metric": "bacc",
+    "median_gain": 0.08058479532163743,
+    "n_higher": 34,
+    "p": 1.5679688658565283e-08
+  },
+  {
+    "baseline": "Logistic Regression",
+    "metric": "auc",
+    "median_gain": 0.023418674698795217,
+    "n_higher": 35,
+    "p": 3.2014213502407074e-10
+  },
+  {
+    "baseline": "Logistic Regression",
+    "metric": "bacc",
+    "median_gain": 0.020270804246463547,
+    "n_higher": 31,
+    "p": 0.00018003877266892232
+  }
+]

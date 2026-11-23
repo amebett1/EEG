@@ -1,0 +1,220 @@
+{
+  "epochs": 50,
+  "batch_size": 64,
+  "eval_batch_size": 64,
+  "lr": 0.001,
+  "patience": 15,
+  "val_size": 0.15,
+  "seed": 42,
+  "inner_split": "stratified trials, matching original benchmark",
+  "outer_split": "original target GroupKFold participants, reused for both tasks",
+  "subjects": [
+    "sub-01",
+    "sub-03",
+    "sub-04",
+    "sub-05",
+    "sub-06",
+    "sub-07",
+    "sub-08",
+    "sub-09",
+    "sub-10",
+    "sub-11",
+    "sub-12",
+    "sub-13",
+    "sub-15",
+    "sub-16",
+    "sub-18",
+    "sub-19",
+    "sub-20",
+    "sub-21",
+    "sub-22",
+    "sub-23",
+    "sub-24",
+    "sub-25",
+    "sub-26",
+    "sub-27",
+    "sub-28",
+    "sub-29",
+    "sub-30",
+    "sub-31",
+    "sub-32",
+    "sub-33",
+    "sub-34",
+    "sub-35",
+    "sub-36",
+    "sub-37",
+    "sub-38",
+    "sub-39",
+    "sub-40",
+    "sub-41",
+    "sub-42"
+  ],
+  "torch": "2.6.0+cu124",
+  "cuda": "12.4",
+  "gpu": "NVIDIA GeForce RTX 3050 Ti Laptop GPU",
+  "python": "3.12.3",
+  "saliency": "outer-test positives only; fold L1 normalisation, positive-count weighting",
+  "erp_reference": "test-only within each fold; pooled test trials for aggregate",
+  "code_sha256": {
+    "/home/armordkay/git clone/EEG/src/dl/report_controls.py": "1f347f9e0b4e574dac48765eecc896f9f77501469cfd45790595190d1d329aee",
+    "/home/armordkay/git clone/EEG/src/dl/train_eegnet.py": "cf22757d9dd67e95a37a4e77f2f8893692538185cb3028e296f27711a022e05e"
+  },
+  "epochs_inventory": {
+    "sub-01": {
+      "size": 100917112,
+      "mtime_ns": 1794036860000000000
+    },
+    "sub-03": {
+      "size": 98294814,
+      "mtime_ns": 1794037348000000000
+    },
+    "sub-04": {
+      "size": 101841651,
+      "mtime_ns": 1794037600000000000
+    },
+    "sub-05": {
+      "size": 99374575,
+      "mtime_ns": 1794037756000000000
+    },
+    "sub-06": {
+      "size": 98602962,
+      "mtime_ns": 1794037904000000000
+    },
+    "sub-07": {
+      "size": 51418083,
+      "mtime_ns": 1794038062000000000
+    },
+    "sub-08": {
+      "size": 100916246,
+      "mtime_ns": 1794038226000000000
+    },
+    "sub-09": {
+      "size": 100916061,
+      "mtime_ns": 1794038448000000000
+    },
+    "sub-10": {
+      "size": 100146031,
+      "mtime_ns": 1794038822000000000
+    },
+    "sub-11": {
+      "size": 101224751,
+      "mtime_ns": 1794039288000000000
+    },
+    "sub-12": {
+      "size": 101841677,
+      "mtime_ns": 1794039564000000000
+    },
+    "sub-13": {
+      "size": 100916370,
+      "mtime_ns": 1794048810000000000
+    },
+    "sub-15": {
+      "size": 101224882,
+      "mtime_ns": 1794040022000000000
+    },
+    "sub-16": {
+      "size": 101379193,
+      "mtime_ns": 1794040150000000000
+    },
+    "sub-18": {
+      "size": 95673613,
+      "mtime_ns": 1794040602000000000
+    },
+    "sub-19": {
+      "size": 96134977,
+      "mtime_ns": 1794040878000000000
+    },
+    "sub-20": {
+      "size": 101378898,
+      "mtime_ns": 1794041172000000000
+    },
+    "sub-21": {
+      "size": 101378851,
+      "mtime_ns": 1794041350000000000
+    },
+    "sub-22": {
+      "size": 101841567,
+      "mtime_ns": 1794041554000000000
+    },
+    "sub-23": {
+      "size": 105699094,
+      "mtime_ns": 1794041776000000000
+    },
+    "sub-24": {
+      "size": 100453712,
+      "mtime_ns": 1794041924000000000
+    },
+    "sub-25": {
+      "size": 100144678,
+      "mtime_ns": 1794042084000000000
+    },
+    "sub-26": {
+      "size": 101224726,
+      "mtime_ns": 1794042244000000000
+    },
+    "sub-27": {
+      "size": 101687380,
+      "mtime_ns": 1794042396000000000
+    },
+    "sub-28": {
+      "size": 101224715,
+      "mtime_ns": 1794042528000000000
+    },
+    "sub-29": {
+      "size": 101379199,
+      "mtime_ns": 1794042672000000000
+    },
+    "sub-30": {
+      "size": 100453249,
+      "mtime_ns": 1794042798000000000
+    },
+    "sub-31": {
+      "size": 101841733,
+      "mtime_ns": 1794042934000000000
+    },
+    "sub-32": {
+      "size": 101533158,
+      "mtime_ns": 1794043078000000000
+    },
+    "sub-33": {
+      "size": 101841728,
+      "mtime_ns": 1794043306000000000
+    },
+    "sub-34": {
+      "size": 99682435,
+      "mtime_ns": 1794043450000000000
+    },
+    "sub-35": {
+      "size": 101841947,
+      "mtime_ns": 1794043584000000000
+    },
+    "sub-36": {
+      "size": 100145004,
+      "mtime_ns": 1794049084000000000
+    },
+    "sub-37": {
+      "size": 97677528,
+      "mtime_ns": 1794043866000000000
+    },
+    "sub-38": {
+      "size": 113878196,
+      "mtime_ns": 1794044016000000000
+    },
+    "sub-39": {
+      "size": 101841648,
+      "mtime_ns": 1794044200000000000
+    },
+    "sub-40": {
+      "size": 94748370,
+      "mtime_ns": 1794044484000000000
+    },
+    "sub-41": {
+      "size": 101379081,
+      "mtime_ns": 1794044620000000000
+    },
+    "sub-42": {
+      "size": 101841623,
+      "mtime_ns": 1794044812000000000
+    }
+  }
+}
