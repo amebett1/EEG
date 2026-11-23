@@ -66,13 +66,13 @@ def compute_evokeds(epochs: mne.Epochs | Dict[str, mne.Evoked]) -> Dict[str, mne
         evokeds["diff_target"] = mne.combine_evoked(
             [evokeds["target"], evokeds["standard"]], weights=[1, -1]
         )
-        evokeds["diff_target"].comment = "Target - Standard (P3b)"
+        evokeds["diff_target"].comment = "Target − standard"
 
     if "distractor" in evokeds and "standard" in evokeds:
         evokeds["diff_distractor"] = mne.combine_evoked(
             [evokeds["distractor"], evokeds["standard"]], weights=[1, -1]
         )
-        evokeds["diff_distractor"].comment = "Distractor - Standard (P3a)"
+        evokeds["diff_distractor"].comment = "Distractor − standard"
 
     return evokeds
 
@@ -101,7 +101,7 @@ def plot_midline_erp(
             ax.set_title(f"{ch} (N/A)")
             continue
 
-        ax.axvspan(w_start_ms, w_end_ms, color="#efefef", alpha=0.9, label=f"P300 Window ({int(w_start_ms)}–{int(w_end_ms)} ms)")
+        ax.axvspan(w_start_ms, w_end_ms, color="#efefef", alpha=0.9, label=f"P300 window ({int(w_start_ms)}–{int(w_end_ms)} ms)")
 
         for cond in ("standard", "target", "distractor"):
             if cond not in epochs.event_id or len(epochs[cond]) == 0:
@@ -136,7 +136,7 @@ def plot_midline_erp(
 
         if show_diff and "diff_target" in evokeds:
             diff_data = evokeds["diff_target"].copy().pick([ch]).data[0] * 1e6
-            ax.plot(times_ms, diff_data, color=COLOR_MAP["diff_target"], lw=1.6, ls="--", label="Target - Standard")
+            ax.plot(times_ms, diff_data, color=COLOR_MAP["diff_target"], lw=1.6, ls="--", label="Target − standard")
 
         ax.axvline(0, color="k", lw=0.8, ls=":")
         ax.axhline(0, color="k", lw=0.8, ls=":")
@@ -207,11 +207,11 @@ def plot_difference_waves(
         ax.axvspan(w_start_ms, w_end_ms, color="#f5f5f5", alpha=0.8)
 
         t_diff = evokeds["diff_target"].copy().pick([ch]).data[0] * 1e6
-        ax.plot(times_ms, t_diff, color=COLOR_MAP["diff_target"], lw=2.2, label="Target - Standard (P3b)")
+        ax.plot(times_ms, t_diff, color=COLOR_MAP["diff_target"], lw=2.2, label="Target − standard")
 
         if "diff_distractor" in evokeds:
             d_diff = evokeds["diff_distractor"].copy().pick([ch]).data[0] * 1e6
-            ax.plot(times_ms, d_diff, color=COLOR_MAP["diff_distractor"], lw=2.0, ls="-.", label="Distractor - Standard (P3a)")
+            ax.plot(times_ms, d_diff, color=COLOR_MAP["diff_distractor"], lw=2.0, ls="-.", label="Distractor − standard")
 
         ax.axvline(0, color="k", lw=0.7, ls=":")
         ax.axhline(0, color="k", lw=0.7, ls=":")
@@ -221,7 +221,7 @@ def plot_difference_waves(
         ax.set_xlim(-100, 850)
 
     axes[0].set_ylabel("Difference amplitude (µV)", fontsize=11)
-    axes[-1].legend(loc="upper right", frameon=True, fontsize=9)
+    axes[0].legend(loc="upper right", frameon=True, fontsize=9)
 
     fig.suptitle(
         f"Difference waves – {sub}: target and distractor contrasts",
@@ -270,8 +270,8 @@ def plot_erp_topomap(
         "standard": "Standard",
         "target": "Target",
         "distractor": "Distractor",
-        "diff_target": "Target - Standard\n(Difference)",
-        "diff_distractor": "Distractor - Standard\n(Difference)"
+        "diff_target": "Target − standard",
+        "diff_distractor": "Distractor − standard"
     }
 
     last_im = None
@@ -330,10 +330,10 @@ def plot_p300_summary_topomap(
 
     titles = {
         "standard": "Standard",
-        "target": "Target (P3b)",
-        "distractor": "Distractor (P3a)",
-        "diff_target": "Target - Standard",
-        "diff_distractor": "Distractor - Standard"
+        "target": "Target",
+        "distractor": "Distractor",
+        "diff_target": "Target − standard",
+        "diff_distractor": "Distractor − standard"
     }
 
     window_data = {}
@@ -364,8 +364,7 @@ def plot_p300_summary_topomap(
     cbar.set_label("Mean amplitude (µV)", fontsize=9.5)
 
     fig.suptitle(
-        f"Mean P300 window topomap ({int(window[0]*1000)}–{int(window[1]*1000)} ms) – {sub}\n"
-        f"Parietal positivity hotspot (P3b component)",
+        f"Mean scalp potential, {int(window[0]*1000)}–{int(window[1]*1000)} ms – {sub}",
         fontsize=12, fontweight="bold", y=1.04
     )
     plt.subplots_adjust(right=0.90)
@@ -647,7 +646,7 @@ def plot_grand_average_erp(
         axes = [axes]
 
     for i, (ax, ch) in enumerate(zip(axes, channels)):
-        ax.axvspan(w_start_ms, w_end_ms, color="#efefef", alpha=0.9, label=f"P300 ({int(w_start_ms)}-{int(w_end_ms)}ms)")
+        ax.axvspan(w_start_ms, w_end_ms, color="#efefef", alpha=0.9, label=f"P300 window ({int(w_start_ms)}–{int(w_end_ms)} ms)")
         for name in ("standard", "target", "distractor"):
             if not per_condition[name]:
                 continue
@@ -679,18 +678,19 @@ def plot_grand_average_erp(
 
         if len(per_condition["target"]) > 0 and len(per_condition["standard"]) > 0:
             diff_mean = np.mean(np.array(per_condition["target"])[:, i, :], axis=0) - np.mean(np.array(per_condition["standard"])[:, i, :], axis=0)
-            ax.plot(times_ms, diff_mean, color=COLOR_MAP["diff_target"], lw=1.6, ls="--", label="Target - Standard")
+            ax.plot(times_ms, diff_mean, color=COLOR_MAP["diff_target"], lw=1.6, ls="--", label="Target − standard")
 
         ax.axvline(0, color="k", lw=0.8, ls=":")
         ax.axhline(0, color="k", lw=0.8, ls=":")
         sub_desc = f"N={n_subs}"
-        ax.set_title(f"Grand average – {ch} ({sub_desc})", fontsize=12.5, fontweight="bold")
-        ax.set_xlabel("Time (ms)", fontsize=10.5)
+        ax.set_title(f"Grand average – {ch} ({sub_desc})", fontsize=15, fontweight="bold")
+        ax.set_xlabel("Time (ms)", fontsize=14)
+        ax.tick_params(labelsize=13)
         ax.grid(True, linestyle=":", alpha=0.5)
 
-    axes[0].set_ylabel("Amplitude (µV)", fontsize=10.5)
+    axes[0].set_ylabel("Amplitude (µV)", fontsize=14)
     axes[0].legend(loc="upper left", frameon=False, fontsize=8.5)
-    fig.suptitle(f"Grand average ERP (Fz, Pz) – Oddball paradigm\nP300 analysis window: [{int(w_start_ms)}, {int(w_end_ms)}] ms", fontsize=13, fontweight="bold", y=1.02)
+    fig.suptitle(f"Grand average ERP at Fz and Pz, oddball task\nP300 analysis window: {int(w_start_ms)}–{int(w_end_ms)} ms", fontsize=16, fontweight="bold", y=1.02)
     fig.tight_layout()
 
     if save_path:
@@ -720,7 +720,7 @@ def plot_population_summary(
     ]
     box = ax1.boxplot(
         data_amps,
-        tick_labels=["Standard", "Distractor (P3a)", "Target (P3b)"],
+        tick_labels=["Standard", "Distractor", "Target"],
         patch_artist=True,
         medianprops=dict(color="black", lw=1.8),
         widths=0.55

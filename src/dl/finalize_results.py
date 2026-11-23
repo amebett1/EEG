@@ -57,12 +57,12 @@ def plot_controls(directory):
         summary = json.loads((directory / f'{task}_summary.json').read_text())
         fpr, tpr, _ = roc_curve(data['y'], data['oof_probs'])
         axes[0].plot(fpr, tpr, color=color,
-                     label=f"{task}: AUC {summary['oof_roc_auc']:.3f}")
+                     label=f"{task.capitalize()}: AUC {summary['oof_roc_auc']:.3f}")
         axes[1].plot(data['times'] * 1000, data['saliency'].sum(axis=0), color=color,
-                     label=f"{task}: {summary['saliency']['peak_ms']:.0f} ms")
+                     label=f"{task.capitalize()}: {summary['saliency']['peak_ms']:.0f} ms")
         axes[2].scatter(data['effect'], data['saliency'].mean(axis=1), s=15,
                         alpha=0.65, color=color,
-                        label=f"{task}: r={summary['saliency']['spatial_r']:.3f}")
+                        label=f"{task.capitalize()}: r={summary['saliency']['spatial_r']:.3f}")
     axes[0].plot([0, 1], [0, 1], 'k--', lw=1)
     axes[0].set(xlabel='False positive rate', ylabel='True positive rate',
                 title='Pooled OOF discrimination')
@@ -143,7 +143,7 @@ def main():
     info = mne.read_epochs(epoch_path('sub-01'), preload=False, verbose='error').info
     plot_saliency_topomaps(target['saliency'], np.round(target['times'], 6), target['effect'], info,
                             FIG_DIR / 'eegnet_saliency_topomap_real.png')
-    fig, ax = plt.subplots(figsize=(7, 5))
+    fig, ax = plt.subplots(figsize=(6.5, 5.2))
     for name in ['LDA-12_bins', 'LDA-128_bins', 'LDA-402_features']:
         probs = baseline['lda'] if name == 'LDA-402_features' else lda[name]
         fpr, tpr, _ = roc_curve(y, probs)
@@ -152,8 +152,10 @@ def main():
     fpr, tpr, _ = roc_curve(y, probs)
     ax.plot(fpr, tpr, label=f'EEGNet: pooled AUC {roc_auc_score(y, probs):.3f}')
     ax.plot([0, 1], [0, 1], 'k--', lw=1)
-    ax.set(xlabel='False positive rate', ylabel='True positive rate',
-            title='Participant-disjoint OOF channel controls')
+    ax.set_xlabel('False positive rate', fontsize=13)
+    ax.set_ylabel('True positive rate', fontsize=13)
+    ax.set_title('Participant-disjoint OOF channel controls', fontsize=14)
+    ax.tick_params(labelsize=12)
     ax.legend(loc='lower right', fontsize=9)
     fig.tight_layout()
     fig.savefig(FIG_DIR / 'lda_channel_controls_roc.png', dpi=200)

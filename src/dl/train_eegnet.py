@@ -387,14 +387,14 @@ def saliency_map(model: nn.Module, X: np.ndarray, scale: float = 1.0, target_cla
 
 
 def plot_roc_pr_curves(y_true: np.ndarray, oof_probs: np.ndarray, save_path: Path) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6))
     fpr, tpr, _ = roc_curve(y_true, oof_probs)
     score_roc = roc_auc_score(y_true, oof_probs)
     axes[0].plot(fpr, tpr, color="#d62728", lw=1.8, label=f"EEGNet (AUC = {score_roc:.3f})")
     axes[0].plot([0, 1], [0, 1], "--", color="#999999", label="Chance (AUC = 0.500)")
-    axes[0].set_xlabel("False positive rate (1 - specificity)", fontsize=10.5)
-    axes[0].set_ylabel("True positive rate (sensitivity)", fontsize=10.5)
-    axes[0].set_title("Receiver operating characteristic (ROC) curve", fontsize=12, fontweight="bold")
+    axes[0].set_xlabel("False positive rate (1 − specificity)", fontsize=13)
+    axes[0].set_ylabel("True positive rate (sensitivity)", fontsize=13)
+    axes[0].set_title("Receiver operating characteristic (ROC) curve", fontsize=14, fontweight="bold")
     axes[0].legend(loc="lower right")
     axes[0].grid(True, ls=":", alpha=0.6)
 
@@ -403,11 +403,13 @@ def plot_roc_pr_curves(y_true: np.ndarray, oof_probs: np.ndarray, save_path: Pat
     prevalence = float(y_true.mean())
     axes[1].plot(rec, prec, color="#d62728", lw=1.8, label=f"EEGNet (AP = {score_pr:.3f})")
     axes[1].axhline(prevalence, ls="--", color="#999999", label=f"Prevalence ({prevalence:.1%})")
-    axes[1].set_xlabel("Recall (sensitivity)", fontsize=10.5)
-    axes[1].set_ylabel("Precision", fontsize=10.5)
-    axes[1].set_title("Precision-recall curve", fontsize=12, fontweight="bold")
+    axes[1].set_xlabel("Recall (sensitivity)", fontsize=13)
+    axes[1].set_ylabel("Precision", fontsize=13)
+    axes[1].set_title("Precision-recall curve", fontsize=14, fontweight="bold")
     axes[1].legend(loc="upper right")
     axes[1].grid(True, ls=":", alpha=0.6)
+    for ax in axes:
+        ax.tick_params(labelsize=12)
 
     fig.tight_layout()
     save_path.parent.mkdir(parents=True, exist_ok=True)
@@ -434,7 +436,7 @@ def plot_saliency_analysis(sal: np.ndarray, times: np.ndarray, diff: np.ndarray,
 
     axes[2].plot(sal.mean(1), color="#333333", lw=1.5, label="Saliency")
     ax2 = axes[2].twinx()
-    ax2.plot(diff, color="#1f77b4", alpha=0.6, lw=1.5, label="P300 effect (Target - Std)")
+    ax2.plot(diff, color="#1f77b4", alpha=0.6, lw=1.5, label="P300 effect (target − standard)")
     axes[2].set_xlabel("Channel index", fontsize=10)
     axes[2].set_ylabel("Mean saliency", fontsize=10)
     ax2.set_ylabel("Amplitude difference (µV)", fontsize=10)

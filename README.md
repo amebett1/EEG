@@ -1,96 +1,110 @@
 # EEG P300 Mini Project
 
-Báo cáo cuối để nộp: [PDF tiếng Anh](docs/EEG_Final_Report_EN.pdf) · [nguồn LaTeX](docs/EEG_Final_Report_EN.tex) · [Markdown](report/REPORT_EN.md).
+Phân loại đơn trial standard và target trong nhiệm vụ oddball thị giác (Nencki-Symfonia, GigaDB 100990), môn AIT3012 Neuroscience (GS. Guy Nagels, VUB).
 
-Đối chứng bổ sung và kiểm chứng kết quả từ thư mục gốc, trong môi trường ảo hiện có:
+Báo cáo nộp: [PDF tiếng Anh](docs/EEG_Final_Report_EN.pdf) · [nguồn LaTeX](docs/EEG_Final_Report_EN.tex) · [bản Markdown](report/REPORT_EN.md). Phân công và tỷ lệ đóng góp: [docs/contributions.md](docs/contributions.md). Khung thuyết trình: [docs/presentation_slides.md](docs/presentation_slides.md).
 
-```bash
-python -m src.preprocessing.audit_epochs
-python src/ml/train_baseline.py --splits 5
-python -m src.ml.report_controls
-python -u -m src.dl.report_controls --epochs 50 --batch-size 64
-python -m src.dl.finalize_results
-python -m src.verify_report
-python -m unittest discover -s tests
-```
+## Kết quả chính
 
-Kết quả cuối: EEGNet target–standard ROC-AUC 0.970 ± 0.013, balanced accuracy 90.3%; LDA 128 kênh ROC-AUC 0.949 ± 0.022. Đã hoàn tất EEGNet distractor–standard không bấm nút (ROC-AUC 0.926 ± 0.015) và saliency test đủ năm fold. Kết quả canonical dùng lần chạy hiện tại; cấu hình và từng fold ở `results/tables/eegnet_controls/`, kiểm chứng ở `results/tables/report_verification.json`. (Các lệnh EEGNet và 3 test PyTorch cần chạy trong môi trường có PyTorch + CUDA.)
+39 người làm đúng nhiệm vụ, 21.878 trial đúng (13,5% target), `GroupKFold` 5 fold theo người; trung bình ± SD qua 5 fold.
+
+| Mô hình | Balanced accuracy | ROC-AUC | AP |
+|---|---|---|---|
+| Logistic Regression (402 đặc trưng) | 0,875 ± 0,037 | 0,946 ± 0,021 | 0,791 ± 0,073 |
+| LDA shrinkage (402 đặc trưng) | 0,815 ± 0,060 | 0,947 ± 0,022 | 0,791 ± 0,075 |
+| LDA shrinkage (128 kênh × 12 bin) | 0,830 ± 0,054 | 0,949 ± 0,022 | 0,821 ± 0,059 |
+| EEGNet-8,2 (epoch 128 × 301) | 0,903 ± 0,021 | 0,970 ± 0,013 | 0,865 ± 0,045 |
+| EEGNet, distractor – standard (không bấm nút) | 0,855 ± 0,020 | 0,926 ± 0,015 | 0,745 ± 0,048 |
+
+ERP: Target − Standard tại Pz, 300–500 ms, 5,05 ± 2,28 µV, t(38) = 13,82, dz = 2,21. Saliency EEGNet chỉ tính trên người test: đỉnh 504 ms, 40,7% trong 300–600 ms, tương quan không gian r = 0,253 với hiệu ứng ERP.
 
 ## Cấu trúc repository
 
 ```text
 EEG/
-├── README.md                         # Tổng quan và cấu trúc dự án
-├── requirements.txt                  # Các thư viện Python của dự án
-├── config.py                         # Đường dẫn, cấu hình epoch, nhãn và danh sách người tham gia
-├── .gitignore                        # Quy tắc loại dữ liệu lớn và file tạm khỏi Git
-├── data/
-│   └── raw/                          # Dữ liệu EEG gốc; không commit
-├── derivatives/
-│   └── v1/                           # Đầu ra của phiên bản pipeline v1
-│       ├── epochs/ (*)               # Epoch đã xử lý: sub-XX_task-oddball_v1-epo.fif
-│       ├── ica/ (*)                  # Mô hình ICA theo người: sub-XX-ica.fif
-│       ├── features/ (*)             # Nơi lưu đặc trưng theo quy ước trong config.py
-│       ├── qc/                       # Kết quả kiểm tra chất lượng theo người: sub-XX.json
-│       ├── qc_summary.csv            # Bảng tổng hợp kiểm tra chất lượng
-│       └── figures/                  # ERP từng người và grand_average.png từ tiền xử lý
+├── README.md
+├── requirements.txt                  # Thư viện Python
+├── config.py                         # Đường dẫn, định dạng epoch, nhãn, danh sách người cần lưu ý
+├── data/raw/ (*)                     # Dữ liệu EEG gốc
+├── derivatives/v1/                   # Đầu ra pipeline tiền xử lý phiên bản v1
+│   ├── epochs/ (*)                   # sub-XX_task-oddball_v1-epo.fif (Release data-v1)
+│   ├── ica/ (*)                      # sub-XX-ica.fif (Release data-v1)
+│   ├── features/ (*)                 # all_subjects_features.csv (21.878 trial × 402 đặc trưng)
+│   ├── qc/, qc_summary.csv           # QC từng người và bảng tổng hợp
+│   └── figures/                      # ERP từng người và grand_average.png
 ├── docs/
-│   ├── dataset_cheatsheet.md         # Ghi chú và nguồn dataset
-│   ├── contributions.md              # Tỷ lệ đóng góp, phân công vai trò (V1-V6) và nhật ký công việc
-│   └── presentation_slides.md        # Khung thuyết trình 10 phút (8 slide, người nói, kịch bản tiếng Anh)
+│   ├── EEG_Final_Report_EN.pdf/.tex  # Báo cáo tiếng Anh chính thức
+│   ├── report_figures/               # Hình dùng khi biên dịch LaTeX
+│   ├── contributions.md              # Vai trò V1–V6, tỷ lệ đóng góp, nhật ký công việc
+│   ├── presentation_slides.md        # Khung thuyết trình 10 phút
+│   └── dataset_cheatsheet.md         # Nguồn dataset
 ├── notebooks/
-│   ├── 00_explore_dataset.ipynb       # Khảo sát dữ liệu: 42 người, sfreq, montage Colin27, tỉ lệ kích thích, RT
-│   ├── 01_preprocessing.ipynb         # Tải dữ liệu, tiền xử lý, xuất epoch/ICA và QC
-│   ├── 02_erp_visualization.ipynb     # V3: Trực quan hóa ERP, Scalp Topomap & kiểm tra P300
-│   ├── 03_machine_learning.ipynb      # V5: Huấn luyện và đánh giá benchmark ML baseline
-│   └── 04_deep_learning.ipynb         # V6: EEGNet trên epoch thô, CV theo người, saliency map
+│   ├── 00_explore_dataset.ipynb      # Khảo sát dữ liệu: 42 người, montage Colin27, tỉ lệ kích thích, RT
+│   ├── 01_preprocessing.ipynb        # V2: tải dữ liệu, kênh hỏng, ICA/ICLabel, lọc, epoch, QC
+│   ├── 02_erp_visualization.ipynb    # V3: ERP, sóng hiệu số, topomap, kiểm tra P300
+│   ├── 03_machine_learning.ipynb     # V5: benchmark ML baseline
+│   └── 04_deep_learning.ipynb        # V6: EEGNet, thử nghiệm một lần chia và saliency
 ├── src/
+│   ├── utils/io.py                   # Đọc epoch, tạo X/y/groups theo người
 │   ├── preprocessing/
-│   │   └── README.md                 # Chỉ dẫn tới pipeline trong notebook
-│   ├── utils/
-│   │   └── io.py                     # Đọc epoch, tạo X/y/groups để chia tập theo người
-│   ├── erp/
-│   │   └── plot_erp.py               # V3: ERP Fz/Cz/Pz, difference waves, topomap, kiểm tra P300
+│   │   ├── README.md                 # Chỉ dẫn tới notebook tiền xử lý
+│   │   └── audit_epochs.py           # Audit 42 file epoch và bảng đặc trưng
+│   ├── erp/plot_erp.py               # V3: ERP Fz/Cz/Pz, sóng hiệu số, topomap, bảng P300 nhóm
 │   ├── features/
-│   │   ├── extract_features.py       # V4: 402 đặc trưng/trial (đỉnh ERP, biên độ cửa sổ, band power, Hjorth, entropy, wavelet)
-│   │   └── rank_features.py          # V4: xếp hạng đặc trưng theo AUC -> results/tables/v4_feature_auc.csv
+│   │   ├── extract_features.py       # V4: 402 đặc trưng/trial (đỉnh ERP, cửa sổ, Hjorth, Welch, wavelet db4)
+│   │   └── rank_features.py          # V4: xếp hạng đặc trưng theo AUC (chỉ tham khảo)
 │   ├── ml/
-│   │   └── train_baseline.py         # V5: Pipeline huấn luyện và đánh giá LDA, SVM, RF, LR
-│   └── dl/
-│       └── train_eegnet.py           # V6: EEGNet-8,2 (PyTorch), dữ liệu mô phỏng, CV, saliency
+│   │   ├── train_baseline.py         # V5: Dummy, LDA, Logistic Regression, RBF SVM, Random Forest
+│   │   └── report_controls.py        # Đối chứng LDA 12 và 128 kênh
+│   ├── dl/
+│   │   ├── train_eegnet.py           # V6: mô hình EEGNet-8,2, huấn luyện, saliency, dữ liệu mô phỏng
+│   │   ├── report_controls.py        # EEGNet target và distractor, saliency trên người test (GPU)
+│   │   └── finalize_results.py       # Gộp lần chạy cuối thành bảng và hình chính thức
+│   └── verify_report.py              # Tính lại toàn bộ số liệu báo cáo
+├── tests/                            # 11 unit test (ERP, nhãn đối chứng, fold, saliency)
 ├── results/
-│   ├── figures/                      # Nơi lưu hình kết quả phân tích ERP & topomap
-│   ├── tables/                       # Nơi lưu bảng kết quả
-│   └── models/                       # Nơi lưu mô hình đã huấn luyện; không commit
+│   ├── tables/                       # Bảng kết quả, dự đoán out-of-fold, eegnet_controls/
+│   ├── figures/                      # Toàn bộ hình kết quả
+│   └── models/                       # 10 checkpoint EEGNet của lần chạy cuối
 └── report/
     ├── REPORT_EN.md                  # Báo cáo tiếng Anh dạng Markdown
-    └── figures/                      # Nơi lưu hình dùng trong báo cáo
+    └── figures/                      # Hình dùng trong báo cáo
 ```
+
+(*) Không commit. Epoch và mô hình ICA tải từ GitHub Release [`data-v1`](https://github.com/amebett1/EEG/releases/tag/data-v1), hướng dẫn giải nén ở mục 5 của `notebooks/01_preprocessing.ipynb`.
 
 ## Hướng dẫn thực thi
 
-1. **Phân tích ERP và bản đồ địa hình da đầu (V3)**:
-   ```bash
-   python src/erp/plot_erp.py --group
-   # Hoặc chạy theo từng đối tượng: python src/erp/plot_erp.py --sub sub-01
-   ```
+Chạy từ thư mục gốc, sau khi đã có `derivatives/v1/epochs/`.
 
-2. **Xếp hạng 402 đặc trưng theo mức phân biệt AUC (V4)**:
+1. Đặc trưng và xếp hạng (V4):
    ```bash
+   python src/features/extract_features.py --all
    python src/features/rank_features.py
    ```
-
-3. **Huấn luyện và đánh giá benchmark Machine Learning baseline trên 39 đối tượng (V5)**:
+2. ERP nhóm và bảng kiểm tra P300 (V3):
    ```bash
-   python src/ml/train_baseline.py --save-models
+   python src/erp/plot_erp.py --group
    ```
-
-4. **Huấn luyện mô hình Deep Learning EEGNet và phân tích Saliency map (V6)**:
+3. Audit dữ liệu bàn giao (V2):
+   ```bash
+   python -m src.preprocessing.audit_epochs
+   ```
+4. Baseline ML và đối chứng số kênh (V5):
+   ```bash
+   python src/ml/train_baseline.py --splits 5
+   python -m src.ml.report_controls
+   ```
+5. EEGNet và saliency (V6, cần GPU CUDA):
    ```bash
    python -u -m src.dl.report_controls --epochs 50 --batch-size 64
    python -m src.dl.finalize_results
-   python -m src.verify_report
    ```
-   Chạy hai bài toán target–standard và distractor–standard, mỗi bài toán năm fold trên 39 người, cùng nhóm test như V5. Lệnh yêu cầu GPU CUDA và lưu checkpoint từng fold để tiếp tục khi gián đoạn. Bước finalize kiểm chứng hai bài toán rồi thay bảng, dự đoán và hình EEGNet chính thức; verify kiểm tra lại toàn bộ số liệu báo cáo.
+   Chạy hai bài toán target – standard và distractor – standard, mỗi bài năm fold với cùng nhóm người test như V5; checkpoint từng fold được lưu để chạy tiếp khi gián đoạn.
+6. Kiểm chứng số liệu báo cáo và unit test:
+   ```bash
+   python -m src.verify_report
+   python -m unittest discover -s tests
+   ```
 
-
+`python src/dl/train_eegnet.py --synthetic` chỉ dùng để thử pipeline trên dữ liệu mô phỏng. Không chạy `train_eegnet.py --save` trên dữ liệu thật vì lệnh này ghi đè bảng chính thức bằng saliency của mô hình tham chiếu cũ.

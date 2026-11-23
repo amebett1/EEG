@@ -175,11 +175,11 @@ def plot_results():
         summary = json.loads((CONTROL_DIR / f"{positive}_summary.json").read_text())
         fpr, tpr, _ = roc_curve(data["y"], data["oof_probs"])
         axes[0].plot(fpr, tpr, color=color,
-                     label=f"{positive}: pooled AUC {summary['oof_roc_auc']:.3f}")
+                     label=f"{positive.capitalize()}: pooled AUC {summary['oof_roc_auc']:.3f}")
         axes[1].plot(data["times"] * 1000, data["saliency"].sum(axis=0), color=color,
-                     label=f"{positive}: peak {summary['saliency']['peak_ms']:.0f} ms")
+                     label=f"{positive.capitalize()}: peak {summary['saliency']['peak_ms']:.0f} ms")
         axes[2].scatter(data["effect"], data["saliency"].mean(axis=1), color=color, s=12,
-                        alpha=0.65, label=f"{positive}: r={summary['saliency']['spatial_r']:.2f}")
+                        alpha=0.65, label=f"{positive.capitalize()}: r={summary['saliency']['spatial_r']:.2f}")
     axes[0].plot([0, 1], [0, 1], "k--", lw=1)
     axes[0].set(xlabel="False positive rate", ylabel="True positive rate", title="OOF discrimination")
     axes[1].axvspan(300, 600, color="0.9", zorder=0)
@@ -203,7 +203,7 @@ def plot_results():
                 (data["effect"], "RdBu_r", "ERP difference (µV)")]):
             im, _ = mne.viz.plot_topomap(values, info, axes=axes[row, col], show=False, cmap=cmap)
             fig.colorbar(im, ax=axes[row, col], fraction=0.04)
-            axes[row, col].set_title(f"{positive} vs standard: {label}", fontsize=10)
+            axes[row, col].set_title(f"{positive.capitalize()} vs standard: {label}", fontsize=10)
     fig.suptitle("All five outer test folds, 300–600 ms")
     fig.tight_layout()
     fig.savefig(FIG_DIR / "eegnet_controls_topomaps.png", dpi=200, bbox_inches="tight")

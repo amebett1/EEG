@@ -29,12 +29,12 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 
 | Vai trò | Thành viên | Trách nhiệm chính | File mã nguồn / Tài liệu phụ trách | Trạng thái |
 |:---:|:---|:---|:---|:---:|
-| **V1** | **Nguyễn Văn Vũ** | **Quản lý dự án + dữ liệu (Project Manager & Data Management)**<br>- Đọc paper dataset (Dzianok et al., 2022), tải dữ liệu GigaDB 100990<br>- Chốt cấu trúc repo và định dạng epoch dùng chung (`config.py`)<br>- Điều phối, theo dõi deadline, chuẩn bị buổi trung gian với GS. Nagels<br>- Ghép báo cáo, kiểm tra tài liệu tham khảo, chốt bảng % đóng góp<br>- **Đầu ra bàn giao**: kế hoạch 3 tuần, tóm tắt dataset, bảng % đóng góp, báo cáo ghép hoàn chỉnh | `tai_lieu/Ke_hoach_EEG.xlsx`<br>`docs/dataset_cheatsheet.md`<br>`docs/contributions.md`<br>`config.py`<br>`report/REPORT_EN.md` | **Tuần 1–2 hoàn thành; Tuần 3 đang làm** |
-| **V2** | **Thái Nguyễn Hoàng Bách** | **Tiền xử lý dữ liệu (Preprocessing)**<br>- Lọc dải tần 0,5–40 Hz<br>- Phát hiện và nội suy kênh hỏng (IQR, tương quan lân cận)<br>- Picard ICA kết hợp ICLabel loại bỏ artifact (mắt, cơ, tim)<br>- Cắt epoch (−200..+1000 ms), decimation 4 (1000 Hz → 250 Hz), gán nhãn standard/target/distractor<br>- Xuất file QC từng người và `qc_summary.csv`<br>- **Đầu ra bàn giao**: script tiền xử lý và 42 file epoch sạch cho cả nhóm | `notebooks/01_preprocessing.ipynb`<br>`src/preprocessing/`<br>`derivatives/v1/qc/` | **Tuần 1–2 hoàn thành; Tuần 3 đang làm** |
-| **V3** | **Trương Huy Hoàng** | **Trực quan hóa & Phân tích ERP (Visualization / ERP)**<br>- Grand average ERP (Fz, Pz), scalp map, kiểm tra P300 ở khoảng 300–500 ms<br>- Code vẽ dạng sóng ERP đường giữa (Fz, Cz, Pz) kèm sai số chuẩn SEM<br>- Code vẽ sóng hiệu số (Target − Standard, Distractor − Standard)<br>- Code vẽ bản đồ địa hình da đầu 128 kênh (Scalp Topomap)<br>- Kiểm tra định lượng tiêu chuẩn Polich trong cửa sổ 300–500 ms<br>- **Đầu ra bàn giao**: hình ERP và topomap chất lượng cao cho báo cáo, slide | `src/erp/plot_erp.py`<br>`notebooks/02_erp_visualization.ipynb`<br>`results/figures/`, `report/figures/`<br>`results/tables/v3_p300_group_results.csv` | **Hoàn thành (Tuần 1, 2, 3)** |
+| **V1** | **Nguyễn Văn Vũ** | **Quản lý dự án, dữ liệu & tài liệu (Project Manager, Data & Documentation)**<br>- Đọc paper dataset (Dzianok et al., 2022), tải dữ liệu GigaDB 100990<br>- Chốt cấu trúc repo và định dạng epoch dùng chung (`config.py`)<br>- Điều phối, theo dõi deadline, chuẩn bị buổi trung gian với GS. Nagels<br>- Ghép báo cáo, kiểm tra tài liệu tham khảo, chốt bảng % đóng góp<br>- Phụ trách vai trò Documentation của Slide 143 (báo cáo, khung slide)<br>- **Đầu ra bàn giao**: kế hoạch 3 tuần, tóm tắt dataset, bảng % đóng góp, báo cáo ghép hoàn chỉnh | `tai_lieu/Ke_hoach_EEG.xlsx`<br>`docs/dataset_cheatsheet.md`<br>`docs/contributions.md`<br>`config.py`<br>`docs/EEG_Final_Report_EN.tex`, `report/REPORT_EN.md`<br>`docs/presentation_slides.md` | **Hoàn thành (Tuần 1, 2, 3)** |
+| **V2** | **Thái Nguyễn Hoàng Bách** | **Tiền xử lý dữ liệu (Preprocessing)**<br>- Lọc dải tần 0,5–40 Hz<br>- Phát hiện và nội suy kênh hỏng (IQR, tương quan lân cận, kênh đối xứng gương)<br>- Picard ICA kết hợp ICLabel loại bỏ artifact (mắt, cơ, tim)<br>- Cắt epoch (−200..+1000 ms), decimation 4 (1000 Hz → 250 Hz), gán nhãn standard/target/distractor<br>- Xuất file QC từng người và `qc_summary.csv`<br>- **Đầu ra bàn giao**: script tiền xử lý và 42 file epoch sạch cho cả nhóm | `notebooks/01_preprocessing.ipynb`<br>`src/preprocessing/`<br>`derivatives/v1/qc/`<br>`report/figures/v2_preprocessing_pipeline.png` | **Hoàn thành (Tuần 1, 2, 3)** |
+| **V3** | **Trương Huy Hoàng** | **Trực quan hóa & Phân tích ERP (Visualization / ERP)**<br>- Grand average ERP (Fz, Pz), scalp map, kiểm tra P300 ở khoảng 300–500 ms<br>- Code vẽ dạng sóng ERP đường giữa (Fz, Cz, Pz) kèm sai số chuẩn SEM<br>- Code vẽ sóng hiệu số (Target − Standard, Distractor − Standard)<br>- Code vẽ bản đồ địa hình da đầu 128 kênh (Scalp Topomap)<br>- Kiểm tra định lượng P300 bằng các tiêu chí do dự án định nghĩa (dựa trên Polich, 2007) trong cửa sổ 300–500 ms<br>- **Đầu ra bàn giao**: hình ERP và topomap chất lượng cao cho báo cáo, slide | `src/erp/plot_erp.py`<br>`notebooks/02_erp_visualization.ipynb`<br>`results/figures/`, `report/figures/`<br>`results/tables/v3_p300_group_results.csv` | **Hoàn thành (Tuần 1, 2, 3)** |
 | **V4** | **Nguyễn Công Kiên** | **Trích xuất đặc trưng (Feature Extraction)**<br>- Biên độ đỉnh và độ trễ của P300 và N100/P200/N200 theo Laton et al. (2014)<br>- Biên độ trung bình các cửa sổ thời gian quan trọng<br>- Năng lượng dải sóng (Delta, Theta, Alpha, Beta) và tham số Hjorth<br>- Spectral entropy, wavelet db4<br>- **Đầu ra bàn giao**: ma trận đặc trưng 21.878 trial × 402 đặc trưng (39 người) cho V5 | `src/features/extract_features.py`<br>`src/features/rank_features.py`<br>`derivatives/v1/features/`<br>`results/tables/v4_feature_auc.csv` | **Hoàn thành (Tuần 1, 2, 3)** |
-| **V5** | **Nguyễn Việt Đức** | **Học máy truyền thống (Machine Learning Baseline)**<br>- Huấn luyện Dummy, LDA, Logistic Regression, RBF SVM, Random Forest<br>- Chia tập chống rò rỉ dữ liệu (GroupKFold theo người)<br>- Xử lý mất cân bằng lớp (class weights; balanced accuracy, ROC-AUC, PR-AUC)<br>- Benchmark trên 39 đối tượng (21.878 trials, 402 đặc trưng)<br>- **Đầu ra bàn giao**: kết quả baseline, trả lời câu hỏi nghiên cứu 1 | `src/ml/train_baseline.py`<br>`notebooks/03_machine_learning.ipynb`<br>`results/tables/baseline_metrics.csv`<br>`results/figures/baseline_*.png` | **Hoàn thành (Tuần 1, 2, 3)** |
-| **V6** | **Đồng Minh Đức** | **Học sâu & Giải thích (Deep Learning & Interpretability)**<br>- Huấn luyện EEGNet-8,2 (PyTorch thuần) trên epoch thô (128 kênh × 301 mẫu)<br>- Đánh giá GroupKFold theo người trên cùng 39 đối tượng như V5<br>- Saliency map theo kênh và thời gian, đối chiếu với P300 (Polich, 2007)<br>- So sánh ML vs DL<br>- **Đầu ra bàn giao**: kết quả DL, trả lời câu hỏi nghiên cứu 2 và 3 | `src/dl/train_eegnet.py`<br>`notebooks/04_deep_learning.ipynb`<br>`results/tables/eegnet_metrics_real.csv`<br>`results/tables/ml_vs_dl_comparison.csv`<br>`results/figures/eegnet_*.png`, `ml_vs_dl_comparison.png` | **Hoàn thành (Tuần 1, 2, 3)** |
+| **V5** | **Nguyễn Việt Đức** | **Học máy truyền thống (Machine Learning Baseline)**<br>- Huấn luyện Dummy, LDA, Logistic Regression, RBF SVM, Random Forest<br>- Chia tập chống rò rỉ dữ liệu (GroupKFold theo người)<br>- Xử lý mất cân bằng lớp (class weights; balanced accuracy, ROC-AUC, average precision)<br>- Benchmark trên 39 đối tượng (21.878 trials, 402 đặc trưng)<br>- **Đầu ra bàn giao**: kết quả baseline, trả lời câu hỏi nghiên cứu 1 | `src/ml/train_baseline.py`<br>`notebooks/03_machine_learning.ipynb`<br>`results/tables/baseline_metrics.csv`<br>`results/figures/baseline_*.png` | **Hoàn thành (Tuần 1, 2, 3)** |
+| **V6** | **Đồng Minh Đức** | **Học sâu & Giải thích (Deep Learning & Interpretability)**<br>- Huấn luyện EEGNet-8,2 (PyTorch thuần) trên epoch thô (128 kênh × 301 mẫu)<br>- Đánh giá GroupKFold theo người trên cùng 39 đối tượng như V5<br>- Saliency map theo kênh và thời gian, đối chiếu với P300 (Polich, 2007)<br>- So sánh ML vs DL<br>- **Đầu ra bàn giao**: kết quả DL, trả lời câu hỏi nghiên cứu 2 và 3 | `src/dl/train_eegnet.py`<br>`notebooks/04_deep_learning.ipynb`<br>`results/tables/eegnet_metrics_real.csv`<br>`results/tables/ml_vs_dl_comparison.csv`<br>`results/figures/eegnet_*.png`, `ml_vs_dl_comparison.png`<br>(số liệu cuối: xem mục 8) | **Hoàn thành (Tuần 1, 2, 3)** |
 
 ---
 
@@ -110,7 +110,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 ### Tuần 3 (17–23/11)
 - **Nhiệm vụ theo kế hoạch**: *Đọc soát phần Methods, hỗ trợ V1 ghép bài.*
 - **Chi tiết thực hiện**:
-  1. **Đọc soát mục 3 "Dataset and preprocessing" của `report/REPORT_EN.md`** so với mục 7 bản tiếng Việt và với QC: bản dịch đúng, mọi con số khớp. Đề xuất V1 sửa câu trong Abstract và câu về ICA trong mục 11.1 (dựa trên kết quả ở ý 2).
+  1. **Đọc soát phần "Dataset and preprocessing" của báo cáo tiếng Anh** so với mục 7 bản tiếng Việt và với QC: bản dịch đúng, mọi con số khớp. Đề xuất V1 sửa câu trong Abstract và câu về ICA trong phần Limitations (dựa trên kết quả ở ý 2).
   2. **Kiểm tra quyết định ICA từ dữ liệu thô** (phần script audit chưa làm):
      - 42 mô hình ICA đều có 40 thành phần, số thành phần bị loại khớp QC.
      - Với sub-13, 14, 36: dựng lại dữ liệu đầu vào ICA từ dữ liệu thô và chạy lại ICLabel, ra đúng xác suất chớp mắt 0,78 / 0,70 / 0,59 như đã báo cáo. Trọng số lớn nhất ở vùng trán cực.
@@ -118,13 +118,6 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
   3. **Vẽ sơ đồ pipeline 7 bước cho slide 2**: `report/figures/v2_preprocessing_pipeline.png`, đồng thời chèn vào mục 7.2 của báo cáo.
 
 ---
-
-### Rà soát bàn giao V2/V3
-
-- V2: `src/preprocessing/audit_epochs.py` đọc lần lượt 42 file (27.034 epoch), đối chiếu metadata, kênh, lọc, baseline metadata, average reference, ngưỡng loại epoch và QC; đối chiếu trial/nhãn/RT và `Pz_p3b_mean` với CSV của 39 người. Tất cả kiểm tra đã triển khai đạt; chi tiết `results/tables/v2_epoch_audit.json`.
-- Không chạy lại tiền xử lý từ dữ liệu thô hoặc xác minh lại các quyết định ICA vì dữ liệu và mô hình ICA tương ứng chưa có trong bản làm việc.
-- V3: sửa kiểm tra latency vòng tròn; thống nhất bảng/ERP trên trial đúng và 300–500 ms; giữ QC 300–600 ms trên toàn bộ trial riêng biệt. Không chọn lại người cho ML/DL theo kiểm tra ERP.
-- Xuất lại bảng 42 người, thống kê tái lập và 5 hình nhóm với trọng số bằng nhau cho 39 người; đồng bộ báo cáo Việt/Anh và nội dung V2/V3 trong khung slide. Có kiểm thử hồi quy bằng `python -m unittest discover -s tests -v`.
 
 ## 4. Nhật ký công việc: Vai trò V3
 
@@ -140,7 +133,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
      - `plot_midline_erp`: Vẽ Fz, Cz, Pz với dải sai số chuẩn (SEM), tô sáng cửa sổ [300, 500] ms và đánh dấu tọa độ đỉnh (biên độ, độ trễ).
      - `plot_fz_pz_erp`: Vẽ tập trung 2 kênh chuẩn **Fz** và **Pz** với font chữ lớn chuẩn slide và báo cáo.
      - `plot_grand_average_erp`: Vẽ sóng **Grand Average ERP (Fz, Pz)**.
-     - `plot_difference_waves`: Trực quan hóa sóng hiệu số so sánh trực diện P3a và P3b.
+     - `plot_difference_waves`: Trực quan hóa sóng hiệu số Target − Standard và Distractor − Standard tại Fz, Cz, Pz.
      - `plot_erp_topomap`: Vẽ bản đồ địa hình da đầu 128 kênh (montage Colin27) qua các mốc thời gian từ 150 ms đến 550 ms.
      - `plot_p300_summary_topomap`: Scalp map trung bình toàn cửa sổ P300 [300, 500] ms chỉ ra tiêu điểm dương tính vùng đỉnh.
      - `verify_p300`: ba tiêu chí lõi P3b và xu hướng P3a mô tả, do dự án định nghĩa; tìm đỉnh 200–800 ms độc lập với cửa sổ chấp nhận 300–500 ms.
@@ -174,7 +167,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
   1. Tuyển chọn 4 bộ hình ảnh cốt lõi chuẩn slide 16:9, độ phân giải cao 300 DPI:
      - Slide 1: Grand Average ERP (Fz, Pz) tô sáng cửa sổ 300–500 ms và sóng hiệu số.
      - Slide 2: Động học không gian Scalp Topomap 128 kênh và tiêu điểm đỉnh.
-     - Slide 3: Phân tách cơ chế P3a vs P3b bằng sóng hiệu số Difference Waves.
+     - Slide 3: So sánh sóng hiệu số Target − Standard và Distractor − Standard (đối chiếu P3b/P3a theo Polich, 2007).
      - Slide 4: Thống kê quần thể 42 đối tượng, so sánh nhóm hiểu sai task và tương quan RT vs P3b.
   2. Biên soạn đầy đủ Figure Captions chuẩn bài báo khoa học và các thông điệp thuyết trình trọng tâm (Key Takeaways) cho từng slide tại mục 9 của bản thảo báo cáo tiếng Việt (đã xóa).
   3. Lưu trữ và đồng bộ toàn bộ file ảnh sẵn dùng tại `report/figures/` và `results/figures/`.
@@ -211,19 +204,24 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
   2. **Thiết lập Pipeline chống rò rỉ dữ liệu (No Data Leakage)**:
      - Tích hợp `StandardScaler` bên trong `Pipeline` của `scikit-learn`, đảm bảo chỉ fit trên tập huấn luyện của từng fold.
      - Hỗ trợ cơ chế phân chia linh hoạt: tự động chia `GroupKFold(n_splits=5)` theo `subject_id` khi có nhiều người và fallback sang `StratifiedKFold(n_splits=5)` khi chạy thử nghiệm trên 1 người (`sub-01`).
-  3. **Xử lý mất cân bằng lớp nghiêm trọng (Prevalence 11,3% - 13,5%)**:
+  3. **Xử lý mất cân bằng lớp (target chiếm 13,5% trong 21.878 trial đúng của 39 người)**:
      - Cấu hình `class_weight="balanced"` cho Logistic Regression, SVM và `balanced_subsample` cho Random Forest.
-     - Đánh giá bằng bộ chỉ số đa chiều: Balanced Accuracy, ROC-AUC, PR-AUC, F1-macro, Sensitivity và Specificity (không dựa vào raw accuracy dễ gây ngộ nhận).
+     - Đánh giá bằng bộ chỉ số đa chiều: Balanced Accuracy, ROC-AUC, average precision (AP, cột `pr_auc` trong CSV), F1-macro, Sensitivity và Specificity (không dựa vào raw accuracy dễ gây ngộ nhận).
   4. **Triển khai và đánh giá 5 mô hình benchmark**:
      - `DummyClassifier` (Stratified chance level).
-     - `LinearDiscriminantAnalysis` (bộ giải `lsqr` kèm shrinkage tự động — chuẩn vàng cho BCI).
+     - `LinearDiscriminantAnalysis` (bộ giải `lsqr` kèm shrinkage tự động, phương pháp chuẩn cho phân loại ERP đơn trial theo Blankertz et al., 2011).
      - `LogisticRegression` (điều chuẩn L2).
      - `SVC` (RBF kernel, xác suất Platt).
      - `RandomForestClassifier` (100 cây quyết định, `n_jobs=-1`).
-  5. **Xuất bản kết quả thực nghiệm và biểu đồ khoa học**:
-     - Bảng số liệu chi tiết: `results/tables/baseline_metrics.csv`.
+  5. **Kết quả (trung bình ± SD qua 5 fold, ngưỡng 0,5)**:
+     - Logistic Regression: balanced accuracy **0,875 ± 0,037**, ROC-AUC 0,946 ± 0,021.
+     - LDA: ROC-AUC **0,947 ± 0,022**, AP 0,791 ± 0,075; balanced accuracy 0,815 do LDA dùng prior thực nghiệm nên ngưỡng 0,5 lệch về standard (sensitivity 0,659).
+     - RBF SVM: ROC-AUC 0,946; Random Forest: ROC-AUC 0,907 nhưng sensitivity chỉ 0,289 ở ngưỡng mặc định.
+     - Dummy: balanced accuracy 0,497, AP 0,134 (mức ngẫu nhiên).
+  6. **Xuất bản kết quả thực nghiệm và biểu đồ khoa học**:
+     - Bảng số liệu chi tiết: `results/tables/baseline_metrics.csv`; xác suất out-of-fold `results/tables/baseline_oof.npz`.
      - Bộ 3 biểu đồ tiếng Anh Sentence case (300 DPI): `baseline_model_comparison.png`, `baseline_roc_curves.png`, `baseline_pr_curves.png` tại `results/figures/` và `report/figures/`.
-  6. **Viết phần 6 "Mô hình Học máy Truyền thống Baseline"** trong bản thảo báo cáo tiếng Việt (đã xóa), trả lời câu hỏi nghiên cứu 1.
+  7. **Viết phần 6 "Mô hình Học máy Truyền thống Baseline"** trong bản thảo báo cáo tiếng Việt (đã xóa), trả lời câu hỏi nghiên cứu 1.
 - **Bàn giao cho V6**: Bảng kết quả benchmark làm mốc so sánh (Baseline) cho mô hình học sâu.
 
 ---
@@ -250,11 +248,27 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
   3. **Đánh giá cross-subject trên toàn bộ 39 đối tượng (GPU)** — cùng tập dữ liệu và cùng sơ đồ `GroupKFold(n_splits=5)` theo người như V5:
      - Sửa `train_eegnet` để đánh giá tập validation theo batch (tránh tràn VRAM GPU 8 GB khi chạy đủ 39 người).
      - Đã xác minh số trial của từng người khớp ma trận đặc trưng V4, nên 5 fold test trùng hoàn toàn với baseline của V5.
-     - Kết quả (trung bình ± SD qua 5 fold): balanced accuracy **0,907 ± 0,021**, ROC-AUC **0,970 ± 0,010**, PR-AUC **0,873 ± 0,042**, sensitivity **0,884 ± 0,060**, specificity **0,930 ± 0,030** — vượt mọi baseline.
-     - So sánh cặp theo từng người (Wilcoxon, 39 người): ROC-AUC của EEGNet cao hơn LDA ở 35/39 người và cao hơn Logistic Regression ở 34/39 người (p < 10⁻⁸) → `results/tables/ml_vs_dl_per_subject.csv`.
-     - Lưu bảng `eegnet_metrics_real.csv`, `eegnet_folds_real.csv`, xác suất out-of-fold `eegnet_oof_real.npz` và mô hình `results/models/eegnet_real.pt`; khoảng 8 phút/fold trên RTX 4060.
+     - Lần chạy đầu (RTX 4060, khoảng 8 phút/fold): balanced accuracy 0,907 ± 0,021, ROC-AUC 0,970 ± 0,010, vượt mọi baseline. Số liệu này đã được thay bằng lần chạy cuối ở mục 8 và không dùng trong báo cáo.
   4. **Phân tích khả năng giải thích bằng bản đồ độ nhạy (Saliency Map)**: gradient của logit Target theo tensor đầu vào, trung bình trên các trial Target.
-     - Thời gian: đỉnh ở 504 ms; 40,2% saliency trong 300–600 ms (cửa sổ chỉ chiếm 24,9% epoch).
-     - Không gian: điểm nóng ở vùng trung tâm trái (C1, FCC3h, CCP3h, C3), không phải Pz (xếp hạng 37/128); tương quan với hiệu ứng P300 theo kênh r = 0,32. ERP trung bình không lệch trái (C3 vs C4, p = 0,50) → cần kiểm soát thêm giả thuyết tín hiệu vận động do bấm nút.
-     - Xuất `eegnet_saliency_real.png` và topomap `eegnet_saliency_topomap_real.png` (tại `results/figures/` và `report/figures/`).
-  5. **So sánh ML vs DL và trả lời câu hỏi 2, 3**: `results/tables/ml_vs_dl_comparison.csv`, `results/figures/ml_vs_dl_comparison.png`; soạn mục 10 và 11 trong bản thảo báo cáo tiếng Việt (đã xóa).
+     - Bản đầu tính trên mô hình tham chiếu huấn luyện bằng 85% toàn bộ dữ liệu (gồm cả trial được giải thích): đỉnh 504 ms, 40,2% saliency trong 300–600 ms, điểm nóng trung tâm trái (C1, FCC3h, CCP3h, C3), Pz hạng 37/128, r = 0,32.
+     - Phát hiện điểm nóng trung tâm trái gần thời điểm bấm nút là lý do nhóm bổ sung đối chứng distractor không bấm nút và tính lại saliency chỉ trên người test (mục 8).
+  5. **So sánh ML vs DL và trả lời câu hỏi 2, 3**: soạn mục 10 và 11 trong bản thảo báo cáo tiếng Việt (đã xóa); nội dung được chuyển vào phần RQ2/RQ3 của báo cáo tiếng Anh với số liệu cuối.
+
+---
+
+## 8. Đối chứng bổ sung và kiểm chứng số liệu cuối
+
+Phần này được bổ sung sau khi V5 và V6 bàn giao (commit `54c9e4a`, `1b53650`, `2db3ce3`). Mọi số liệu trong báo cáo tiếng Anh lấy từ đây.
+
+- **Đối chứng EEGNet hai bài toán, cùng 5 nhóm người test như V5** (`src/dl/report_controls.py`, RTX 3050 Ti 4 GB, khoảng 14 phút/fold):
+  - Target – standard: balanced accuracy **0,903 ± 0,021**, ROC-AUC **0,970 ± 0,013**, AP **0,865 ± 0,045**, sensitivity 0,880, specificity 0,927.
+  - Distractor – standard (cả hai lớp đều không bấm nút): balanced accuracy 0,855 ± 0,020, ROC-AUC **0,926 ± 0,015**, AP 0,745 ± 0,048.
+- **Saliency chỉ trên trial dương của người test ngoài**, chuẩn hóa từng fold rồi gộp:
+  - Target: đỉnh **504 ms**, **40,7%** saliency trong 300–600 ms, tương quan không gian r = **0,253**, Pz hạng 43/128; kênh dẫn đầu C1, FCC3h, C3.
+  - Distractor: đỉnh 524 ms, 43,9%, r = 0,102; kênh dẫn đầu AFz, AFF2h, FC1.
+- **Đối chứng số kênh cho LDA** (`src/ml/report_controls.py`): 128 kênh × 12 bin 100 ms đạt ROC-AUC 0,949 ± 0,022; 12 kênh đạt 0,937 ± 0,025.
+- **So sánh cặp theo từng người** (Wilcoxon, 39 người): ROC-AUC của EEGNet cao hơn LDA ở 35/39 người (p = 5,0 × 10⁻¹⁰) và cao hơn Logistic Regression ở 35/39 người (p = 3,2 × 10⁻¹⁰) → `results/tables/ml_vs_dl_per_subject.csv`, `ml_vs_dl_paired.json`.
+- **Gộp kết quả chính thức** (`src/dl/finalize_results.py`): thay `eegnet_metrics_real.csv`, `eegnet_folds_real.csv`, `eegnet_oof_real.npz`, `eegnet_saliency_real.npz`, `ml_vs_dl_comparison.csv` và hình bằng lần chạy cuối.
+- **Audit bàn giao epoch/đặc trưng** (`src/preprocessing/audit_epochs.py`): đọc 42 file (27.034 epoch), đối chiếu metadata, kênh, lọc, baseline, average reference, ngưỡng loại epoch, QC, trial/nhãn/RT và `Pz_p3b_mean` với CSV của 39 người. Tất cả đạt → `results/tables/v2_epoch_audit.json`. Script không chạy lại ICA; quyết định ICA được V2 kiểm tra riêng (mục 3, Tuần 3).
+- **Rà soát V3**: sửa kiểm tra latency vòng tròn; thống nhất bảng/ERP trên trial đúng và 300–500 ms; giữ QC 300–600 ms trên toàn bộ trial riêng biệt; không chọn lại người cho ML/DL theo kiểm tra ERP.
+- **Kiểm chứng tự động**: `python -m src.verify_report` tính lại toàn bộ số liệu báo cáo từ bảng và dự đoán đã lưu → `results/tables/report_verification.json`; 11 unit test trong `tests/` đạt (`python -m unittest discover -s tests`).
