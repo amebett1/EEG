@@ -125,7 +125,7 @@ Target fold spatial r ranges from 0.057 to 0.289 (window-matched 300–600 ms po
 
 **RQ1:** EEGNet reaches ROC-AUC 0.970, balanced accuracy 90.3% and AP 0.865 on unseen outer-test participants.
 
-**RQ2:** Yes for the tested pipelines, including the 128-channel LDA control. The threshold-free gains are +0.023 ROC-AUC over LDA and logistic regression and +0.043 AP over 128-channel LDA. The difference remains a pipeline result because temporal representations and optimisation differ. The gain is modest because the P300 is a low-dimensional, largely linear spatio-temporal pattern: shrinkage LDA already captures most of the separable information (Blankertz et al., 2011; Lotte et al., 2018), so additional model capacity mainly refines spatial and temporal filtering.
+**RQ2:** Yes for the tested pipelines, including the 128-channel LDA control. The threshold-free gains are +0.023 ROC-AUC over LDA and logistic regression and +0.043 AP over 128-channel LDA. The difference remains a pipeline result because temporal representations and optimisation differ. The gain is modest because the P300 is a low-dimensional, largely linear spatio-temporal pattern: shrinkage LDA already captures most of the separable information (Blankertz et al., 2011), so additional model capacity mainly refines spatial and temporal filtering. This agrees with the review finding that deep learning had not yet shown convincing improvement over state-of-the-art BCI methods (Lotte et al., 2018).
 
 **RQ3:** Partly. All-five-fold test saliency gives temporal and partial spatial correspondence with the late response. The no-button distractor control reaches ROC-AUC 0.926. These completed controls support stimulus-related decoding while leaving specific motor contributions to target classification unresolved.
 
@@ -135,11 +135,11 @@ Limits: trial-based inner validation, non-grouped SVM probability estimation, no
 
 | Member | Role | Exact share |
 |---|---|---|
-| Nguyễn Văn Vũ | Project management and data | 17.67% |
+| Nguyễn Văn Vũ | Project management, data, documentation, final controls and verification | 17.67% |
 | Thái Nguyễn Hoàng Bách | Preprocessing and QC | 11.65% |
 | Trương Huy Hoàng | ERP and visualisation | 17.67% |
 | Nguyễn Công Kiên | Feature extraction | 17.67% |
-| Nguyễn Việt Đức | ML baselines | 17.67% |
+| Nguyễn Việt Đức | ML baselines and ML/DL comparison code | 17.67% |
 | Đồng Minh Đức | EEGNet and interpretability | 17.67% |
 | Total | | 100% |
 

@@ -29,12 +29,12 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 
 | Vai trò | Thành viên | Trách nhiệm chính | File mã nguồn / Tài liệu phụ trách | Trạng thái |
 |:---:|:---|:---|:---|:---:|
-| **V1** | **Nguyễn Văn Vũ** | **Quản lý dự án, dữ liệu & tài liệu (Project Manager, Data & Documentation)**<br>- Đọc paper dataset (Dzianok et al., 2022), tải dữ liệu GigaDB 100990<br>- Chốt cấu trúc repo và định dạng epoch dùng chung (`config.py`)<br>- Điều phối, theo dõi deadline, chuẩn bị buổi trung gian với GS. Nagels<br>- Ghép báo cáo, kiểm tra tài liệu tham khảo, chốt bảng % đóng góp<br>- Phụ trách vai trò Documentation của Slide 143 (báo cáo, khung slide)<br>- **Đầu ra bàn giao**: kế hoạch 3 tuần, tóm tắt dataset, bảng % đóng góp, báo cáo ghép hoàn chỉnh | `tai_lieu/Ke_hoach_EEG.xlsx`<br>`docs/dataset_cheatsheet.md`<br>`docs/contributions.md`<br>`config.py`<br>`docs/EEG_Final_Report_EN.tex`, `report/REPORT_EN.md`<br>`docs/presentation_slides.md` | **Hoàn thành (Tuần 1, 2, 3)** |
+| **V1** | **Nguyễn Văn Vũ** | **Quản lý dự án, dữ liệu & tài liệu (Project Manager, Data & Documentation)**<br>- Đọc paper dataset (Dzianok et al., 2022), tải dữ liệu GigaDB 100990<br>- Chốt cấu trúc repo và định dạng epoch dùng chung (`config.py`)<br>- Điều phối, theo dõi deadline, chuẩn bị buổi trung gian với GS. Nagels<br>- Ghép báo cáo, kiểm tra tài liệu tham khảo, chốt bảng % đóng góp<br>- Phụ trách vai trò Documentation của Slide 143 (báo cáo, khung slide)<br>- Đối chứng và kiểm chứng cuối: EEGNet target/distractor, saliency trên người test, LDA 128 kênh, audit epoch, unit test, script kiểm chứng số liệu, báo cáo LaTeX (mục 8)<br>- **Đầu ra bàn giao**: kế hoạch 3 tuần, tóm tắt dataset, bảng % đóng góp, báo cáo ghép hoàn chỉnh | `tai_lieu/Ke_hoach_EEG.xlsx`<br>`docs/dataset_cheatsheet.md`<br>`docs/contributions.md`<br>`config.py`, `src/utils/io.py`<br>`src/preprocessing/audit_epochs.py`<br>`src/ml/report_controls.py`, `src/dl/report_controls.py`, `src/dl/finalize_results.py`<br>`src/verify_report.py`, `tests/`<br>`docs/EEG_Final_Report_EN.tex`, `report/REPORT_EN.md`<br>`docs/presentation_slides.md` | **Hoàn thành (Tuần 1, 2, 3)** |
 | **V2** | **Thái Nguyễn Hoàng Bách** | **Tiền xử lý dữ liệu (Preprocessing)**<br>- Lọc dải tần 0,5–40 Hz<br>- Phát hiện và nội suy kênh hỏng (IQR, tương quan lân cận, kênh đối xứng gương)<br>- Picard ICA kết hợp ICLabel loại bỏ artifact (mắt, cơ, tim)<br>- Cắt epoch (−200..+1000 ms), decimation 4 (1000 Hz → 250 Hz), gán nhãn standard/target/distractor<br>- Xuất file QC từng người và `qc_summary.csv`<br>- **Đầu ra bàn giao**: script tiền xử lý và 42 file epoch sạch cho cả nhóm | `notebooks/01_preprocessing.ipynb`<br>`src/preprocessing/`<br>`derivatives/v1/qc/`<br>`report/figures/v2_preprocessing_pipeline.png` | **Hoàn thành (Tuần 1, 2, 3)** |
 | **V3** | **Trương Huy Hoàng** | **Trực quan hóa & Phân tích ERP (Visualization / ERP)**<br>- Grand average ERP (Fz, Pz), scalp map, kiểm tra P300 ở khoảng 300–500 ms<br>- Code vẽ dạng sóng ERP đường giữa (Fz, Cz, Pz) kèm sai số chuẩn SEM<br>- Code vẽ sóng hiệu số (Target − Standard, Distractor − Standard)<br>- Code vẽ bản đồ địa hình da đầu 128 kênh (Scalp Topomap)<br>- Kiểm tra định lượng P300 bằng các tiêu chí do dự án định nghĩa (dựa trên Polich, 2007) trong cửa sổ 300–500 ms<br>- **Đầu ra bàn giao**: hình ERP và topomap chất lượng cao cho báo cáo, slide | `src/erp/plot_erp.py`<br>`notebooks/02_erp_visualization.ipynb`<br>`results/figures/`, `report/figures/`<br>`results/tables/v3_p300_group_results.csv` | **Hoàn thành (Tuần 1, 2, 3)** |
 | **V4** | **Nguyễn Công Kiên** | **Trích xuất đặc trưng (Feature Extraction)**<br>- Biên độ đỉnh và độ trễ của P300 và N100/P200/N200 theo Laton et al. (2014)<br>- Biên độ trung bình các cửa sổ thời gian quan trọng<br>- Năng lượng dải sóng (Delta, Theta, Alpha, Beta) và tham số Hjorth<br>- Spectral entropy, wavelet db4<br>- **Đầu ra bàn giao**: ma trận đặc trưng 21.878 trial × 402 đặc trưng (39 người) cho V5 | `src/features/extract_features.py`<br>`src/features/rank_features.py`<br>`derivatives/v1/features/`<br>`results/tables/v4_feature_auc.csv` | **Hoàn thành (Tuần 1, 2, 3)** |
-| **V5** | **Nguyễn Việt Đức** | **Học máy truyền thống (Machine Learning Baseline)**<br>- Huấn luyện Dummy, LDA, Logistic Regression, RBF SVM, Random Forest<br>- Chia tập chống rò rỉ dữ liệu (GroupKFold theo người)<br>- Xử lý mất cân bằng lớp (class weights; balanced accuracy, ROC-AUC, average precision)<br>- Benchmark trên 39 đối tượng (21.878 trials, 402 đặc trưng)<br>- **Đầu ra bàn giao**: kết quả baseline, trả lời câu hỏi nghiên cứu 1 | `src/ml/train_baseline.py`<br>`notebooks/03_machine_learning.ipynb`<br>`results/tables/baseline_metrics.csv`<br>`results/figures/baseline_*.png` | **Hoàn thành (Tuần 1, 2, 3)** |
-| **V6** | **Đồng Minh Đức** | **Học sâu & Giải thích (Deep Learning & Interpretability)**<br>- Huấn luyện EEGNet-8,2 (PyTorch thuần) trên epoch thô (128 kênh × 301 mẫu)<br>- Đánh giá GroupKFold theo người trên cùng 39 đối tượng như V5<br>- Saliency map theo kênh và thời gian, đối chiếu với P300 (Polich, 2007)<br>- So sánh ML vs DL<br>- **Đầu ra bàn giao**: kết quả DL, trả lời câu hỏi nghiên cứu 2 và 3 | `src/dl/train_eegnet.py`<br>`notebooks/04_deep_learning.ipynb`<br>`results/tables/eegnet_metrics_real.csv`<br>`results/tables/ml_vs_dl_comparison.csv`<br>`results/figures/eegnet_*.png`, `ml_vs_dl_comparison.png`<br>(số liệu cuối: xem mục 8) | **Hoàn thành (Tuần 1, 2, 3)** |
+| **V5** | **Nguyễn Việt Đức** | **Học máy truyền thống (Machine Learning Baseline)**<br>- Huấn luyện Dummy, LDA, Logistic Regression, RBF SVM, Random Forest<br>- Chia tập chống rò rỉ dữ liệu (GroupKFold theo người)<br>- Xử lý mất cân bằng lớp (class weights; balanced accuracy, ROC-AUC, average precision)<br>- Benchmark trên 39 đối tượng (21.878 trials, 402 đặc trưng)<br>- Code so sánh ML vs DL và hàm vẽ ROC/PR, saliency trong `train_eegnet.py` (phối hợp với V6)<br>- **Đầu ra bàn giao**: kết quả baseline, trả lời câu hỏi nghiên cứu 1 | `src/ml/train_baseline.py`<br>`notebooks/03_machine_learning.ipynb`<br>`src/dl/train_eegnet.py` (phần so sánh ML vs DL)<br>`results/tables/baseline_metrics.csv`<br>`results/figures/baseline_*.png` | **Hoàn thành (Tuần 1, 2, 3)** |
+| **V6** | **Đồng Minh Đức** | **Học sâu & Giải thích (Deep Learning & Interpretability)**<br>- Huấn luyện EEGNet-8,2 (PyTorch thuần) trên epoch thô (128 kênh × 301 mẫu)<br>- Đánh giá GroupKFold theo người trên cùng 39 đối tượng như V5<br>- Saliency map theo kênh và thời gian, đối chiếu với P300 (Polich, 2007)<br>- So sánh ML vs DL (phối hợp với V5)<br>- **Đầu ra bàn giao**: kết quả DL, trả lời câu hỏi nghiên cứu 2 và 3 | `src/dl/train_eegnet.py`<br>`notebooks/04_deep_learning.ipynb`<br>`results/tables/eegnet_metrics_real.csv`<br>`results/tables/ml_vs_dl_comparison.csv`<br>`results/figures/eegnet_*.png`, `ml_vs_dl_comparison.png`<br>(số liệu cuối: xem mục 8) | **Hoàn thành (Tuần 1, 2, 3)** |
 
 ---
 
@@ -46,7 +46,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 - **Nhiệm vụ theo kế hoạch**: *Đọc paper dataset, tải data, chốt repo và định dạng epoch, lập bảng đóng góp.*
 - **Chi tiết thực hiện**:
   1. Đọc paper dataset Nencki-Symfonia (Dzianok et al., 2022); ghi nguồn GigaDB 100990 vào `docs/dataset_cheatsheet.md` và chuyển các thông tin cần cho nhóm (mã sự kiện S5/S6/S7 = standard/target/distractor, danh sách người cần lưu ý theo paper) vào `config.py`.
-  2. Tải dữ liệu thô và thống nhất cấu trúc repo dùng chung cho 6 vai trò.
+  2. Tải dữ liệu thô và thống nhất cấu trúc repo dùng chung cho 6 vai trò (`config.py`, `src/utils/io.py`); quản lý và merge các pull request của nhóm.
   3. Chốt định dạng epoch dùng chung trong `config.py`: −200..+1000 ms, 250 Hz (301 mẫu), 128 kênh cùng thứ tự, `EVENT_ID`, danh sách người hiểu sai nhiệm vụ (sub-02, sub-14, sub-17).
   4. Lập kế hoạch 3 tuần và bảng phân công/đóng góp trong `tai_lieu/Ke_hoach_EEG.xlsx`.
 
@@ -64,6 +64,7 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
   2. Ghép bản thảo tiếng Việt (đã xóa) và bản tiếng Anh chính thức `report/REPORT_EN.md`.
   3. Kiểm tra tài liệu tham khảo của các mục.
   4. Lập khung thuyết trình 10 phút `docs/presentation_slides.md` và phân công người nói.
+  5. Bổ sung đối chứng và kiểm chứng số liệu cuối, viết báo cáo LaTeX `docs/EEG_Final_Report_EN.tex` (chi tiết ở mục 8).
 - **Hạn chót**: nộp báo cáo tiếng Anh ít nhất 1 tuần trước buổi thuyết trình (~1/12).
 
 ---
@@ -222,6 +223,8 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
      - Bảng số liệu chi tiết: `results/tables/baseline_metrics.csv`; xác suất out-of-fold `results/tables/baseline_oof.npz`.
      - Bộ 3 biểu đồ tiếng Anh Sentence case (300 DPI): `baseline_model_comparison.png`, `baseline_roc_curves.png`, `baseline_pr_curves.png` tại `results/figures/` và `report/figures/`.
   7. **Viết phần 6 "Mô hình Học máy Truyền thống Baseline"** trong bản thảo báo cáo tiếng Việt (đã xóa), trả lời câu hỏi nghiên cứu 1.
+  8. **Code so sánh ML vs DL (phối hợp với V6)**: thêm vào `src/dl/train_eegnet.py` các hàm `compare_ml_vs_dl`, `plot_roc_pr_curves`, `plot_saliency_analysis` và phần lưu bảng, hình để đặt EEGNet cạnh các baseline (commit `2048c28`).
+  9. **Rà soát và hoàn thiện tài liệu cuối**: cập nhật README, bảng phân công, nhãn hình và nội dung báo cáo tiếng Anh theo kết quả rà soát chéo (commit `0c2eaf1`, `dbdb698`).
 - **Bàn giao cho V6**: Bảng kết quả benchmark làm mốc so sánh (Baseline) cho mô hình học sâu.
 
 ---
@@ -252,13 +255,15 @@ Theo sheet "Vai trò" trong `tai_lieu/Ke_hoach_EEG.xlsx`.
   4. **Phân tích khả năng giải thích bằng bản đồ độ nhạy (Saliency Map)**: gradient của logit Target theo tensor đầu vào, trung bình trên các trial Target.
      - Bản đầu tính trên mô hình tham chiếu huấn luyện bằng 85% toàn bộ dữ liệu (gồm cả trial được giải thích): đỉnh 504 ms, 40,2% saliency trong 300–600 ms, điểm nóng trung tâm trái (C1, FCC3h, CCP3h, C3), Pz hạng 37/128, r = 0,32.
      - Phát hiện điểm nóng trung tâm trái gần thời điểm bấm nút là lý do nhóm bổ sung đối chứng distractor không bấm nút và tính lại saliency chỉ trên người test (mục 8).
-  5. **So sánh ML vs DL và trả lời câu hỏi 2, 3**: soạn mục 10 và 11 trong bản thảo báo cáo tiếng Việt (đã xóa); nội dung được chuyển vào phần RQ2/RQ3 của báo cáo tiếng Anh với số liệu cuối.
+  5. **So sánh ML vs DL và trả lời câu hỏi 2, 3** (code so sánh phối hợp với V5): soạn mục 10 và 11 trong bản thảo báo cáo tiếng Việt (đã xóa); nội dung được chuyển vào phần RQ2/RQ3 của báo cáo tiếng Anh với số liệu cuối.
 
 ---
 
 ## 8. Đối chứng bổ sung và kiểm chứng số liệu cuối
 
-Phần này được bổ sung sau khi V5 và V6 bàn giao (commit `54c9e4a`, `1b53650`, `2db3ce3`). Mọi số liệu trong báo cáo tiếng Anh lấy từ đây.
+- **Người thực hiện**: **Nguyễn Văn Vũ (V1)**, tài khoản git `armordkay`.
+
+Phần này được bổ sung sau khi V5 và V6 bàn giao (commit `54c9e4a`, `1b53650`, `2db3ce3`, `fb99a60`). Mọi số liệu trong báo cáo tiếng Anh lấy từ đây.
 
 - **Đối chứng EEGNet hai bài toán, cùng 5 nhóm người test như V5** (`src/dl/report_controls.py`, RTX 3050 Ti 4 GB, khoảng 14 phút/fold):
   - Target – standard: balanced accuracy **0,903 ± 0,021**, ROC-AUC **0,970 ± 0,013**, AP **0,865 ± 0,045**, sensitivity 0,880, specificity 0,927.
@@ -272,3 +277,18 @@ Phần này được bổ sung sau khi V5 và V6 bàn giao (commit `54c9e4a`, `1
 - **Audit bàn giao epoch/đặc trưng** (`src/preprocessing/audit_epochs.py`): đọc 42 file (27.034 epoch), đối chiếu metadata, kênh, lọc, baseline, average reference, ngưỡng loại epoch, QC, trial/nhãn/RT và `Pz_p3b_mean` với CSV của 39 người. Tất cả đạt → `results/tables/v2_epoch_audit.json`. Script không chạy lại ICA; quyết định ICA được V2 kiểm tra riêng (mục 3, Tuần 3).
 - **Rà soát V3**: sửa kiểm tra latency vòng tròn; thống nhất bảng/ERP trên trial đúng và 300–500 ms; giữ QC 300–600 ms trên toàn bộ trial riêng biệt; không chọn lại người cho ML/DL theo kiểm tra ERP.
 - **Kiểm chứng tự động**: `python -m src.verify_report` tính lại toàn bộ số liệu báo cáo từ bảng và dự đoán đã lưu → `results/tables/report_verification.json`; 11 unit test trong `tests/` đạt (`python -m unittest discover -s tests`).
+
+---
+
+## 9. Đối chiếu với lịch sử git
+
+| Mã | Thành viên | Tài khoản git | Commit chính |
+|:---:|:---|:---|:---|
+| V1 | Nguyễn Văn Vũ | `armordkay` | `5186edb` cấu trúc repo, `config.py`, `io.py`; `54c9e4a` audit epoch, unit test ERP, sửa kiểm tra P300; `1b53650` báo cáo LaTeX, đối chứng LDA, script kiểm chứng; `2db3ce3` đối chứng EEGNet, gộp kết quả; `fb99a60` cập nhật tài liệu; merge PR #1, #2 |
+| V2 | Thái Nguyễn Hoàng Bách | `Thaihoangbach` | `d5f1b7f` notebook tiền xử lý và QC 42 người; `39e60ed` phần Methods; `d79f3e4` kiểm tra ICA, hình pipeline |
+| V3 | Trương Huy Hoàng | `hoangisbest-ai` | `48b400c` `plot_erp.py`, notebook 02; `12cbf0b` khung `extract_features.py`; `5fc00e6`, `83c14a6` ERP và topomap nhóm; `2508089`, `efefc78` phần Results (ERP), tài liệu |
+| V4 | Nguyễn Công Kiên | `Kei` | `c64d58b` trích xuất 402 đặc trưng, `rank_features.py`, bảng AUC; `335ad3b`, `fe482b2` phần Features |
+| V5 | Nguyễn Việt Đức | `duc130406cp`, `Nguyen Viet Duc` | `eaf9bb6` `train_baseline.py`, notebook 03; `2048c28` so sánh ML vs DL; `9832fd7` bảng đóng góp; `0c2eaf1`, `dbdb698` rà soát và hoàn thiện tài liệu |
+| V6 | Đồng Minh Đức | `Đồng Minh Đức` | `ffb2736` khởi tạo repo; `b1f46e6` EEGNet, dữ liệu mô phỏng, notebook 04; `6955960` EEGNet 39 người, saliency, bản đầu báo cáo tiếng Anh và khung slide |
+
+Lịch sử git không ghi lại các việc ngoài repo như họp nhóm, tải dữ liệu, kế hoạch trong `tai_lieu/Ke_hoach_EEG.xlsx` và dữ liệu epoch trên GitHub Release `data-v1`.
