@@ -66,7 +66,7 @@ The deck is specifically paced for a strict 10-minute project presentation (Slid
 | **12** | **RQ3: spatio-temporal saliency reveals true cognitive mechanisms** | **Đồng Minh Đức** (V6 Deep Learning) | **8:30 -- 9:15** | **RQ3 Answer**: Saliency gradient peaks at 504 ms (40.7% energy in 300--600 ms window); spatial topomap shows parietal P3b focus; sensorimotor activation vanishes in distractor condition. |
 | **13** | **Summary answering the three core research questions** | **Nguyễn Văn Vũ** (V1 Lead) | **9:15 -- 9:40** | Synthesis table directly answering RQ1, RQ2, and RQ3 with empirical evidence and theoretical justification. |
 | **14** | **Team contributions aligned with course roles** | **Nguyễn Văn Vũ** (V1 Lead) | **9:40 -- 9:55** | Explicit breakdown of 6 roles (V1 to V6) matching Slide 143 specifications; verified equal 100.00% total contribution. |
-| **15** | **Conclusion** | **Nguyễn Văn Vũ** (V1 Lead) | **9:55 -- 10:00** | Final closing and thank you to the instructor and teaching assistants. |
+| **15** | **Conclusion** | **Nguyễn Văn Vũ** (V1 Lead) | **9:55 -- 10:00** | Final closing and thank you to the evaluation committee and audience. |
 
 ---
 
