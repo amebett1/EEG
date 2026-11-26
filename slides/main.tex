@@ -244,11 +244,11 @@
       \begin{itemize}
         \setlength{\itemsep}{2mm}
         \scriptsize
-        \item Target Pz reaches $7.14\,\mu\text{V}$ compared to $1.51\,\mu\text{V}$ for standard.
+        \item Target Pz mean reaches $6.97 \pm 2.74\,\mu\text{V}$ compared to $1.92 \pm 1.49\,\mu\text{V}$ for standard (300--500 ms).
         \item Target minus standard difference is $5.05 \pm 2.28\,\mu\text{V}$ in 300--500 ms.
-        \item Statistical significance: $t(38) = 16.64, p < 10^{-18}$, Cohen's $d = 2.66$.
+        \item Statistical significance: $t(38) = 13.82,\ p = 2.14 \times 10^{-16}$, Cohen's $d_z = 2.21$.
         \item Parietal gradient: 39 of 39 compliant participants satisfy target $Pz > Fz$.
-        \item Reaction time ($542.1 \pm 65.5\text{ ms}$) negatively correlates with Pz amplitude ($r = -0.493, p = 0.0014$).
+        \item Reaction time ($542.1 \pm 65.5\text{ ms}$) negatively correlates with Pz amplitude ($r = -0.493,\ p = 0.00144$).
       \end{itemize}
     \end{column}
   \end{columns}
@@ -261,32 +261,33 @@
 \begin{frame}{Standardized preprocessing pipeline and quality control}
   \framesubtitle{Automated artifact attenuation with objective participant inclusion criteria}
   \begin{center}
-    \includegraphics[width=0.92\linewidth,height=30mm,keepaspectratio]{v2_preprocessing_pipeline.png}
+    \includegraphics[width=0.92\linewidth,height=28mm,keepaspectratio]{v2_preprocessing_pipeline.png}
   \end{center}
   \vspace{-2mm}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{0.48\textwidth}
-      \textbf{Preprocessing steps}
+      \textbf{Preprocessing steps (in order)}
       \begin{itemize}
-        \setlength{\itemsep}{0.8mm}
+        \setlength{\itemsep}{0.6mm}
         \scriptsize
-        \item Bandpass filtering at 0.5--40 Hz using zero-phase Hamming FIR filter.
-        \item Spherical spline interpolation of bad channels based on IQR and correlation.
-        \item Picard ICA with ICLabel removing ocular, muscle, and cardiac components.
-        \item Epoching [-200, +1000] ms at 250 Hz with average reference.
+        \item Crop to task, add FCz (128~ch), interpolate bad channels (IQR/corr.), average reference.
+        \item Picard ICA (40~ICs) + ICLabel ($p \ge 0.8$, +3 manual blink ICs) for ocular/muscle/cardiac artifacts.
+        \item Zero-phase FIR bandpass (0.5--40~Hz) and apply ICA.
+        \item Epochs [$-200, +1000$]~ms (250~Hz), baseline [$-200, 0$]~ms, reject $>150\,\mu\text{V}$ ptp.
       \end{itemize}
     \end{column}
     \begin{column}{0.48\textwidth}
       \textbf{Cohort quality control}
       \begin{itemize}
-        \setlength{\itemsep}{0.8mm}
+        \setlength{\itemsep}{0.6mm}
         \scriptsize
-        \item Excluded sub-02, sub-14, sub-17 due to task misunderstanding ($>90\%$ distractor false alarms).
-        \item Retained 21,878 clean trials across 39 compliant participants (97.0\% retention).
-        \item Class distribution: 18,927 standards and 2,951 targets (13.49\% target prevalence).
+        \item Artifact rejection retained 27,034/27,865 epochs (97.0\%) across all 42 participants.
+        \item Excluded sub-02, sub-14, sub-17 for task misunderstanding (76.5--98.8\% distractor false alarms; mean 91.0\%).
+        \item Classification set: 21,878 correct binary trials (39 participants): 18,927 standards, 2,951 targets (13.49\%).
       \end{itemize}
     \end{column}
   \end{columns}
+  \vspace{1.2mm}
   \source{Figure 1: Preprocessing pipeline applied identically to all 42 BrainVision recordings}
 \end{frame}
 
@@ -331,23 +332,23 @@
   \framesubtitle{Extensive feature engineering based on Laton et al. 2014 and time-frequency descriptors}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.42\textwidth}
-      \textbf{Feature representation across 12 channels}
+      \textbf{402 features across 12 channels}
       \begin{itemize}
-        \setlength{\itemsep}{1.2mm}
+        \setlength{\itemsep}{0.9mm}
         \scriptsize
-        \item 120 window means across 5 latency windows.
-        \item 54 ERP peak amplitudes and latencies using Laton et al. forced local extrema.
-        \item 48 wavelet db4 subband energies: 0--8, 8--16, and 16--31 Hz.
-        \item 36 Hjorth activity, mobility, and complexity.
-        \item 132 band powers: delta, theta, alpha, beta.
+        \item 120 window amplitude means and SDs (5 latency windows).
+        \item 36 P300 peak amp., latency, and area (300--600 ms) + 18 N1/P2/N2 peaks (Fz/Cz/Pz) + 12 peak-to-peak (200--700 ms).
+        \item 48 db4 wavelet summaries (300--600 ms): energies (0--8, 8--16, 16--31 Hz) and delta--theta mean.
+        \item 36 Hjorth parameters (activity, mobility, complexity).
+        \item 132 Welch spectral features: abs./rel. powers (delta--beta), band ratios, and spectral entropy.
       \end{itemize}
-      \vspace{1.5mm}
+      \vspace{1.2mm}
       \textbf{Validation scheme}
       \begin{itemize}
-        \setlength{\itemsep}{1mm}
+        \setlength{\itemsep}{0.9mm}
         \scriptsize
         \item 5-fold participant-wise GroupKFold.
-        \item Inside-fold feature scaling using StandardScaler.
+        \item Inside-fold StandardScaler (for LDA, LR, SVM).
       \end{itemize}
     \end{column}
     \begin{column}{0.56\textwidth}
@@ -363,19 +364,19 @@
 % SLIDE 8: EEGNET ARCHITECTURE
 % ==============================================================================
 \begin{frame}{Compact deep learning architecture: EEGNet-8,2}
-  \framesubtitle{End-to-end spatiotemporal convolutional representation on raw 128-channel epochs}
+  \framesubtitle{End-to-end spatiotemporal convolutional representation on preprocessed 128-channel epochs}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.42\textwidth}
       \textbf{EEGNet-8,2 specification}
       \begin{itemize}
-        \setlength{\itemsep}{1.5mm}
+        \setlength{\itemsep}{1.3mm}
         \scriptsize
-        \item Input: raw voltage epoch of 128 channels $\times$ 301 timepoints at 250 Hz.
+        \item Input: preprocessed 128-channel $\times$ 301-sample epoch at 250 Hz (before feature engineering).
         \item Temporal convolution: 8 filters of kernel length 125 (500 ms).
-        \item Depthwise spatial convolution: 16 spatial filters across 128 channels.
-        \item Separable convolution: depthwise and pointwise combination.
-        \item Regularization: max-norm constraints and dropout to prevent overfitting.
-        \item Only 2,100 parameters: compact and suitable for small EEG sample sizes.
+        \item Depthwise spatial convolution: 16 spatial filters (multiplier $D=2$) across 128 channels.
+        \item Separable convolution: depthwise ($1\times16$) and pointwise ($1\times1$) to 16 maps.
+        \item Regularization: max-norm constraints (1.0 spatial, 0.25 dense) and dropout ($p=0.5$).
+        \item Compact 3,930 trainable parameters; Adam ($\text{lr}=10^{-3}$), class-weighted cross-entropy, patience 15.
       \end{itemize}
     \end{column}
     \begin{column}{0.56\textwidth}
@@ -434,7 +435,7 @@
       \source{Figure 7: Channel-matched LDA controls vs. EEGNet ROC curves}
     \end{column}
     \begin{column}{0.50\textwidth}
-      \textbf{Channel-matched evaluation}
+      \textbf{Channel-matched evaluation (100 ms bins)}
       \begin{center}
         \renewcommand{\arraystretch}{1.15}
         \scriptsize
@@ -442,8 +443,8 @@
           \toprule
           Model and input & Bal. acc. & ROC-AUC & AP \\
           \midrule
-          LDA 12 channels & 0.804 & 0.937 & 0.774 \\
-          LDA 128 channels & 0.830 & 0.949 & 0.821 \\
+          LDA 12 ch (144 feat.) & 0.804 & 0.937 & 0.774 \\
+          LDA 128 ch (1,536 feat.) & 0.830 & 0.949 & 0.821 \\
           EEGNet 128 channels & \textbf{0.903} & \textbf{0.970} & \textbf{0.865} \\
           \bottomrule
         \end{tabular}
@@ -453,8 +454,8 @@
       \begin{itemize}
         \setlength{\itemsep}{1.2mm}
         \scriptsize
-        \item \textbf{Yes, deep learning is better}: EEGNet outperforms LDA by $+0.023$ ROC-AUC and $+0.074$ AP ($p = 5.0 \times 10^{-10}$, Wilcoxon test).
-        \item \textbf{Electrode count alone does not explain gain}: 128-channel LDA reaches 0.949, leaving a $+0.021$ AUC margin for EEGNet.
+        \item \textbf{Yes, deep learning is better}: EEGNet outperforms 402-feature LDA by $+0.023$ ROC-AUC (exploratory Wilcoxon $p = 5.0 \times 10^{-10}$, 35/39 subjects) and $+0.074$ AP.
+        \item \textbf{Electrode count alone does not explain gain}: 128-channel LDA reaches 0.949 ($+0.012$ over 12-ch), leaving a $+0.021$ AUC ($+0.043$ AP) margin for EEGNet.
         \item \textbf{Why gain is modest}: P300 is predominantly a low-dimensional linear dipole. Linear shrinkage already captures most variance; EEGNet refines spatio-temporal filter synthesis (Lotte et al., 2018).
       \end{itemize}
     \end{column}
@@ -471,7 +472,7 @@
       \begin{center}
         \includegraphics[width=0.98\linewidth,height=50mm,keepaspectratio]{eegnet_controls_oof.png}
       \end{center}
-      \source{Figure 8: Out-of-fold ROC, temporal saliency, and channel weights for both tasks}
+      \source{Figure 8: Out-of-fold ROC, temporal saliency, and channel-wise correspondence for both tasks}
     \end{column}
     \begin{column}{0.44\textwidth}
       \textbf{Distractor versus standard experiment}
@@ -563,19 +564,19 @@
       \toprule
       Member & Main project responsibilities & Role code & Share \\
       \midrule
-      Nguyễn Văn Vũ & Project coordination, dataset management, documentation, final controls & V1 & 17.67\% \\
+      Nguyễn Văn Vũ & Project coordination, dataset management, documentation, final controls and verification & V1 & 17.67\% \\
       Thái Nguyễn Hoàng Bách & Preprocessing pipeline, Picard ICA, ICLabel artifact review, QC summary & V2 & 11.65\% \\
       Trương Huy Hoàng & ERP waveforms, operational verification, group statistics, visualization & V3 & 17.67\% \\
       Nguyễn Công Kiên & Feature engineering (402 features), time-frequency, db4 wavelet, ranking & V4 & 17.67\% \\
       Nguyễn Việt Đức & Conventional ML pipelines (LDA, SVM, RF, LR), GroupKFold, comparisons & V5 & 17.67\% \\
-      Đồng Minh Đức & PyTorch EEGNet-8,2, test-fold gradient saliency, no-button controls & V6 & 17.67\% \\
+      Đồng Minh Đức & PyTorch EEGNet-8,2, gradient saliency, ML/DL comparison & V6 & 17.67\% \\
       \midrule
       \multicolumn{2}{l}{\textbf{Total contribution across all group members}} & & \textbf{100.00\%} \\
       \bottomrule
     \end{tabularx}
   \end{center}
   \vspace{1.5mm}
-  \takeaway{Fully reproducible repository with automated pipelines, unit tests, and identical random seeds.}
+  \takeaway{Fully reproducible repository with automated pipelines, 11 unit tests, and fixed random seeds.}
   \source{Table 12: Member contributions documented in report and contributions log}
 \end{frame}
 
