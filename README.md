@@ -2,7 +2,7 @@
 
 Phân loại đơn trial standard và target trong nhiệm vụ oddball thị giác (Nencki-Symfonia, GigaDB 100990), môn AIT3012 Neuroscience (GS. Guy Nagels, VUB).
 
-Báo cáo nộp: [PDF tiếng Anh](docs/EEG_Final_Report_EN.pdf) · [nguồn LaTeX](docs/EEG_Final_Report_EN.tex) · [bản Markdown](report/REPORT_EN.md). Phân công và tỷ lệ đóng góp: [docs/contributions.md](docs/contributions.md). Khung thuyết trình: [docs/presentation_slides.md](docs/presentation_slides.md).
+Báo cáo nộp: [PDF tiếng Anh](docs/EEG_Final_Report_EN.pdf) · [nguồn LaTeX](docs/EEG_Final_Report_EN.tex) · [bản Markdown](report/REPORT_EN.md). Slide thuyết trình: [PDF Beamer (15 slide)](slides/main.pdf) · [nguồn Beamer](slides/main.tex) · [kịch bản 10 phút](slides/README.md). Phân công và tỷ lệ đóng góp: [docs/contributions.md](docs/contributions.md). Khung nháp & ngân hàng Q&A: [docs/presentation_slides.md](docs/presentation_slides.md).
 
 ## Kết quả chính
 
@@ -36,8 +36,12 @@ EEG/
 │   ├── EEG_Final_Report_EN.pdf/.tex  # Báo cáo tiếng Anh chính thức
 │   ├── report_figures/               # Hình dùng khi biên dịch LaTeX
 │   ├── contributions.md              # Vai trò V1–V6, tỷ lệ đóng góp, nhật ký công việc
-│   ├── presentation_slides.md        # Khung thuyết trình 10 phút
+│   ├── presentation_slides.md        # Khung nháp 8 slide ban đầu & ngân hàng Q&A
 │   └── dataset_cheatsheet.md         # Nguồn dataset
+├── slides/
+│   ├── main.pdf/.tex                 # Slide thuyết trình Beamer chính thức (15 slide, 16:9)
+│   ├── README.md                     # Hướng dẫn biên dịch, kịch bản 10 phút & Q&A bảo vệ
+│   └── images/                       # Logo UET/AI và 9 hình trích từ báo cáo chính thức
 ├── notebooks/
 │   ├── 00_explore_dataset.ipynb      # Khảo sát dữ liệu: 42 người, montage Colin27, tỉ lệ kích thích, RT
 │   ├── 01_preprocessing.ipynb        # V2: tải dữ liệu, kênh hỏng, ICA/ICLabel, lọc, epoch, QC

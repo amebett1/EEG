@@ -1,4 +1,6 @@
-# Khung thuyết trình 10 phút — Single-trial P300 classification
+# Khung thuyết trình nháp (8 slide) & Ngân hàng Q&A — Single-trial P300 classification
+
+> **Lưu ý:** Bộ slide bảo vệ chính thức (15 slide LaTeX Beamer 16:9) và kịch bản phân bổ thời lượng mới nhất nằm tại [`slides/main.pdf`](../slides/main.pdf), [`slides/main.tex`](../slides/main.tex) và [`slides/README.md`](../slides/README.md). File này được giữ lại làm khung tham khảo ban đầu và ngân hàng câu hỏi Q&A mở rộng ở cuối trang.
 
 Môn AIT3012 Neuroscience (GS. Guy Nagels, VUB). Thời lượng tối đa **10 phút** (Slide 144) → khung dưới đây dự kiến **9 phút 45 giây**, chừa 15 giây dự phòng.
 

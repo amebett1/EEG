@@ -90,6 +90,7 @@
   \end{beamercolorbox}}
 
 \newcommand{\source}[1]{\par\vspace{0.6mm}{\fontsize{6.2}{7.5}\selectfont\color{Muted}Source: #1.\par}}
+\newcommand{\fignote}[1]{\par\vspace{0.6mm}{\fontsize{6.2}{7.5}\selectfont\color{Muted}#1.\par}}
 \newcommand{\takeaway}[1]{\par\vspace{0.8mm}%
   \begingroup\setlength{\fboxsep}{1.2mm}\colorbox{PaleBlue}{%
     \parbox{\dimexpr\linewidth-2.4mm\relax}{\fontsize{8}{9.6}\selectfont\color{Navy}#1}}\endgroup\par}
@@ -188,90 +189,63 @@
       \end{enumerate}
     \end{column}
   \end{columns}
-  \vspace{1mm}
-  \takeaway{Our 10-minute presentation directly answers these three questions using rigorous cross-subject benchmarks and interpretability analysis.}
-  \source{Lecture slide 142; Dzianok et al., GigaScience (2022)}
+  \vspace{2mm}
+  \source{Dzianok et al., GigaScience (2022)}
 \end{frame}
 
 % ==============================================================================
-% SLIDE 3: NEUROPHYSIOLOGICAL BASIS (POLICH MODEL)
+% SLIDE 3: PREPROCESSING PIPELINE & QUALITY CONTROL (FIGURE 1)
 % ==============================================================================
 \renewcommand{\sectionindex}{02}
-\begin{frame}{P300 framework (Polich, 2007) and difference waves}
-  \framesubtitle{Target and distractor contrasts in an easy visual oddball task}
-  \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.38\textwidth}
-      \textbf{Integrative theory (Polich, 2007)}
-      \begin{itemize}
-        \setlength{\itemsep}{1.5mm}
-        \scriptsize
-        \item P3b: task-relevant context updating to targets with a parietal maximum ($Pz > Fz$).
-        \item Fronto-central P3a appears mainly when target--standard discrimination is difficult; easy tasks elicit a parietal distractor P3.
-      \end{itemize}
-      \vspace{1.8mm}
-      \textbf{Observed difference waves (300--500~ms)}
-      \begin{itemize}
-        \setlength{\itemsep}{1.3mm}
-        \scriptsize
-        \item Target $-$ standard: strong parietal P3b ($+5.05\,\mu\text{V}$ at Pz).
-        \item Distractor $-$ standard: also predominantly parietal ($+3.54\,\mu\text{V}$ at Pz; $-1.06\,\mu\text{V}$ at Fz) --- not a canonical frontal P3a.
-        \item Relative anterior shift vs.\ targets in 26/39 participants ($+1.43 \pm 2.46\,\mu\text{V}$).
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.60\textwidth}
-      \begin{center}
-        \includegraphics[width=0.98\linewidth,height=52mm,keepaspectratio]{grand_average_difference_waves.png}
-      \end{center}
-      \source{Figure 4: Group difference waves at Fz, Cz, and Pz across 39 compliant participants}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-% ==============================================================================
-% SLIDE 4: GROUP ERP & ODDBALL EFFECT
-% ==============================================================================
-\begin{frame}{Group event-related potentials and parietal effect}
-  \framesubtitle{Equally weighted group average confirms massive parietal oddball effect}
-  \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.61\textwidth}
-      \begin{center}
-        \includegraphics[width=0.98\linewidth,height=50mm,keepaspectratio]{grand_average_fz_pz.png}
-      \end{center}
-      \source{Figure 2: Equal-participant-weight ERPs at Fz and Pz across 39 participants}
-    \end{column}
-    \begin{column}{0.37\textwidth}
-      \textbf{Quantitative ERP findings}
-      \begin{itemize}
-        \setlength{\itemsep}{2mm}
-        \scriptsize
-        \item Target Pz mean reaches $6.97 \pm 2.74\,\mu\text{V}$ compared to $1.92 \pm 1.49\,\mu\text{V}$ for standard (300--500 ms).
-        \item Target minus standard difference is $5.05 \pm 2.28\,\mu\text{V}$ in 300--500 ms.
-        \item Statistical significance: $t(38) = 13.82,\ p = 2.14 \times 10^{-16}$, Cohen's $d_z = 2.21$.
-        \item Parietal gradient: 39 of 39 compliant participants satisfy target $Pz > Fz$.
-        \item Reaction time ($542.1 \pm 65.5\text{ ms}$) negatively correlates with Pz amplitude ($r = -0.493,\ p = 0.00144$).
-      \end{itemize}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-% ==============================================================================
-% SLIDE 5: PREPROCESSING PIPELINE & QUALITY CONTROL
-% ==============================================================================
-\renewcommand{\sectionindex}{03}
 \begin{frame}{Standardized preprocessing pipeline and quality control}
   \framesubtitle{Automated artifact attenuation with objective participant inclusion criteria}
   \begin{center}
-    \includegraphics[width=0.92\linewidth,height=28mm,keepaspectratio]{v2_preprocessing_pipeline.png}
+    \begin{tikzpicture}[
+      box/.style={draw=Navy!45, fill=PaleBlue!70, rounded corners=1.4mm,
+                  minimum width=33.5mm, minimum height=13.5mm, align=center,
+                  font=\fontsize{5.8}{7.1}\selectfont, text=black, inner sep=1.2mm},
+      outbox/.style={draw=orange!80!red, line width=0.8pt, fill=orange!10, rounded corners=1.4mm,
+                     minimum width=33.5mm, minimum height=13.5mm, align=center,
+                     font=\fontsize{5.8}{7.1}\selectfont, text=black, inner sep=1.2mm},
+      arr/.style={-{Stealth[length=1.8mm]}, draw=Navy!60, line width=0.6pt}
+    ]
+      % Row 1
+      \node[box] (s1) at (0,0) {\textbf{\color{DeepNavy}1. Load \& harmonise}\\[0.5mm]
+        127 electrodes + FCz = 128~ch\\common channel order\\Colin27 positions};
+      \node[box] (s2) at (37mm,0) {\textbf{\color{DeepNavy}2. Crop to task}\\[0.5mm]
+        first stimulus $-$ 5~s\\to last epoch $+$ 5~s\\73~s removed / subject};
+      \node[box] (s3) at (74mm,0) {\textbf{\color{DeepNavy}3. Bad channels}\\[0.5mm]
+        IQR $|z|>4$ $\cdot$ neighb.\ $r<0.4$\\anti-correlated $r<-0.8$\\2.9 interpolated / subject};
+      \node[box] (s4) at (111mm,0) {\textbf{\color{DeepNavy}4. ICA + ICLabel}\\[0.5mm]
+        Picard, 40~ICs (1--100~Hz)\\eye / heart / muscle $p \ge 0.8$\\15.0 removed (+3 manual)};
+      % Row 2
+      \node[box] (s5) at (0,-17.5mm) {\textbf{\color{DeepNavy}5. Band-pass}\\[0.5mm]
+        0.5--40~Hz\\zero-phase FIR\\(as in dataset paper)};
+      \node[box] (s6) at (37mm,-17.5mm) {\textbf{\color{DeepNavy}6. Epochs}\\[0.5mm]
+        $-200$ to $+1000$~ms, baseline\\1000 $\to$ 250~Hz (301 samples)\\reject $>150\,\mu\text{V}$: 97.0\% kept};
+      \node[box] (s7) at (74mm,-17.5mm) {\textbf{\color{DeepNavy}7. Labels \& behaviour}\\[0.5mm]
+        standard / target / distractor\\RT, correct response\\RT 542.1~ms = dataset paper};
+      \node[outbox] (s8) at (111mm,-17.5mm) {\textbf{\color{orange!80!red}Output}\\[0.5mm]
+        42 subjects $\cdot$ 27,034 epochs\\3 excluded (misunderstood)\\39 subjects $\cdot$ 21,878 trials (13.5\%)};
+      % Arrows
+      \draw[arr] (s1) -- (s2);
+      \draw[arr] (s2) -- (s3);
+      \draw[arr] (s3) -- (s4);
+      \draw[arr, dashed] (s4.south) -- ++(0,-1.8mm) -| (s5.north);
+      \draw[arr] (s5) -- (s6);
+      \draw[arr] (s6) -- (s7);
+      \draw[arr] (s7) -- (s8);
+    \end{tikzpicture}
   \end{center}
-  \vspace{-2mm}
+  \vspace{-1.5mm}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{0.48\textwidth}
       \textbf{Preprocessing steps (in order)}
       \begin{itemize}
-        \setlength{\itemsep}{0.6mm}
+        \setlength{\itemsep}{0.45mm}
         \scriptsize
-        \item Crop to task, add FCz (128~ch), interpolate bad channels (IQR/corr.), average reference.
-        \item Picard ICA (40~ICs) + ICLabel ($p \ge 0.8$, +3 manual blink ICs) for ocular/muscle/cardiac artifacts.
+        \item Crop to task, add FCz (128~ch), interpolate bad channels, average reference.
+        \item Picard ICA (40~ICs) + ICLabel ($p \ge 0.8$, +3 manual blink ICs).
         \item Zero-phase FIR bandpass (0.5--40~Hz) and apply ICA.
         \item Epochs [$-200, +1000$]~ms (250~Hz), baseline [$-200, 0$]~ms, reject $>150\,\mu\text{V}$ ptp.
       \end{itemize}
@@ -279,20 +253,48 @@
     \begin{column}{0.48\textwidth}
       \textbf{Cohort quality control}
       \begin{itemize}
-        \setlength{\itemsep}{0.6mm}
+        \setlength{\itemsep}{0.45mm}
         \scriptsize
         \item Artifact rejection retained 27,034/27,865 epochs (97.0\%) across all 42 participants.
-        \item Excluded sub-02, sub-14, sub-17 for task misunderstanding (76.5--98.8\% distractor false alarms; mean 91.0\%).
+        \item Excluded sub-02, sub-14, sub-17 for task misunderstanding (76.5--98.8\% distractor FA; mean 91.0\%).
         \item Classification set: 21,878 correct binary trials (39 participants): 18,927 standards, 2,951 targets (13.49\%).
       \end{itemize}
     \end{column}
   \end{columns}
-  \vspace{1.2mm}
-  \source{Figure 1: Preprocessing pipeline applied identically to all 42 BrainVision recordings}
+  \vspace{0.8mm}
+  \fignote{Standardised MNE-Python 1.13.2 preprocessing pipeline applied identically to all 42 BrainVision recordings}
 \end{frame}
 
 % ==============================================================================
-% SLIDE 6: SPATIOTEMPORAL DYNAMICS & TOPOMAPS
+% SLIDE 4: GROUP ERP & ODDBALL EFFECT (FIGURE 2)
+% ==============================================================================
+\renewcommand{\sectionindex}{03}
+\begin{frame}{Group event-related potentials and parietal effect}
+  \framesubtitle{Equally weighted group average confirms strong parietal oddball effect}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{0.61\textwidth}
+      \begin{center}
+        \includegraphics[width=0.98\linewidth,height=51mm,keepaspectratio]{grand_average_fz_pz.png}
+      \end{center}
+      \fignote{Equal-participant-weight ERPs at Fz/Pz ($N=39$). Red marker shows grand-average within-window peak (8.8~$\mu$V, 480~ms); bullets report 300--500~ms means}
+    \end{column}
+    \begin{column}{0.37\textwidth}
+      \textbf{Quantitative ERP findings}
+      \begin{itemize}
+        \setlength{\itemsep}{1.8mm}
+        \scriptsize
+        \item Target Pz mean reaches $6.97 \pm 2.74\,\mu\text{V}$ vs.\ $1.92 \pm 1.49\,\mu\text{V}$ for standard (300--500~ms).
+        \item Paired difference: $5.05 \pm 2.28\,\mu\text{V}$ in 300--500~ms.
+        \item Significance: $t(38) = 13.82$, $p = 2.14 \times 10^{-16}$, Cohen's $d_z = 2.21$.
+        \item Parietal gradient: 39/39 compliant participants satisfy target $Pz > Fz$.
+        \item Target RT ($542.1 \pm 65.5$~ms) correlates negatively with Pz amplitude ($r = -0.493,\ p = 0.00144$).
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 5: GROUP SCALP TOPOGRAPHY & OPERATIONAL CHECKS (FIGURE 3)
 % ==============================================================================
 \begin{frame}{Group scalp topography and individual variability}
   \framesubtitle{128-channel mean potentials (300--500~ms) and cross-subject P300 timing}
@@ -323,76 +325,117 @@
     \end{column}
   \end{columns}
   \vspace{1.2mm}
-  \source{Figure 3: Grand average scalp potentials and difference maps in 300--500~ms (checks from Table 4)}
+  \fignote{Grand average scalp potentials and difference maps in 300--500~ms ($N=39$, correct trials, equal subject weights)}
 \end{frame}
 
 % ==============================================================================
-% SLIDE 7: MACHINE LEARNING BASELINE
+% SLIDE 6: POLICH FRAMEWORK & DIFFERENCE WAVES (FIGURE 4)
+% ==============================================================================
+\begin{frame}{P300 framework (Polich, 2007) and difference waves}
+  \framesubtitle{Target and distractor contrasts across Fz, Cz, and Pz in an easy visual oddball task}
+  \begin{center}
+    \includegraphics[width=0.96\linewidth,height=34mm,keepaspectratio]{grand_average_difference_waves.png}
+  \end{center}
+  \vspace{-1.5mm}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \textbf{Integrative theory (Polich, 2007)}
+      \begin{itemize}
+        \setlength{\itemsep}{0.6mm}
+        \scriptsize
+        \item P3b reflects task-relevant context updating to targets with a parietal maximum ($Pz > Fz$).
+        \item Fronto-central P3a appears mainly under difficult target--standard discrimination; easy tasks elicit a parietal distractor P3.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{Observed difference waves (300--500~ms)}
+      \begin{itemize}
+        \setlength{\itemsep}{0.6mm}
+        \scriptsize
+        \item Target $-$ standard: strong parietal P3b ($+5.05\,\mu\text{V}$ at Pz).
+        \item Distractor $-$ standard: also parietal ($+3.54\,\mu\text{V}$ at Pz; $+0.71\,\mu\text{V}$ at Cz; $-1.06\,\mu\text{V}$ at Fz) --- not a canonical frontal P3a.
+        \item Relative anterior shift vs.\ targets in 26/39 participants ($+1.43 \pm 2.46\,\mu\text{V}$).
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vspace{1mm}
+  \fignote{Group difference waves at Fz, Cz, and Pz across 39 compliant participants (correct trials, equal subject weights)}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 7: MACHINE LEARNING BASELINE (FIGURE 5)
 % ==============================================================================
 \renewcommand{\sectionindex}{04}
 \begin{frame}{Conventional machine learning baseline with 402 features}
-  \framesubtitle{Extensive feature engineering based on Laton et al. 2014 and time-frequency descriptors}
+  \framesubtitle{Feature engineering adapted from Laton et al.\ (2014) and time-frequency descriptors}
   \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.42\textwidth}
+    \begin{column}{0.44\textwidth}
       \textbf{402 features across 12 channels}
       \begin{itemize}
-        \setlength{\itemsep}{0.9mm}
+        \setlength{\itemsep}{0.75mm}
         \scriptsize
         \item 120 window amplitude means and SDs (5 latency windows).
-        \item 36 P300 peak amp., latency, and area (300--600 ms) + 18 N1/P2/N2 peaks (Fz/Cz/Pz) + 12 peak-to-peak (200--700 ms).
-        \item 48 db4 wavelet summaries (300--600 ms): energies (0--8, 8--16, 16--31 Hz) and delta--theta mean.
-        \item 36 Hjorth parameters (activity, mobility, complexity).
-        \item 132 Welch spectral features: abs./rel. powers (delta--beta), band ratios, and spectral entropy.
+        \item 36 P300 peak amp., latency, and area (300--600~ms) + 18 N1/P2/N2 peaks (Fz/Cz/Pz) + 12 peak-to-peak (200--700~ms).
+        \item 48 db4 wavelet summaries (300--600~ms): energies (0--8, 8--16, 16--31~Hz) and delta--theta mean.
+        \item 36 Hjorth parameters + 132 Welch spectral features (abs./rel.\ powers, ratios, entropy).
+        \item Strongest single feature: \texttt{Pz\_p3b\_mean} (400--600~ms, exploratory AUC 0.836).
       \end{itemize}
-      \vspace{1.2mm}
-      \textbf{Validation scheme}
+      \vspace{1mm}
+      \textbf{Leakage-free validation}
       \begin{itemize}
-        \setlength{\itemsep}{0.9mm}
+        \setlength{\itemsep}{0.6mm}
         \scriptsize
-        \item 5-fold participant-wise GroupKFold.
-        \item Inside-fold StandardScaler (for LDA, LR, SVM).
+        \item 5-fold participant-wise GroupKFold; inside-fold StandardScaler (LDA, LR, SVM).
       \end{itemize}
     \end{column}
-    \begin{column}{0.56\textwidth}
+    \begin{column}{0.54\textwidth}
       \begin{center}
         \includegraphics[width=0.98\linewidth,height=52mm,keepaspectratio]{baseline_roc_curves.png}
       \end{center}
-      \source{Figure 5: Pooled out-of-fold ROC curves for conventional baseline classifiers}
+      \fignote{Pooled OOF ROC curves (LDA/LR/SVM $\approx 0.942$, RF $= 0.900$); fold-mean scores follow in RQ1 benchmark}
     \end{column}
   \end{columns}
 \end{frame}
 
 % ==============================================================================
-% SLIDE 8: EEGNET ARCHITECTURE
+% SLIDE 8: EEGNET ARCHITECTURE (FIGURE 6)
 % ==============================================================================
 \begin{frame}{Compact deep learning architecture: EEGNet-8,2}
   \framesubtitle{End-to-end spatiotemporal convolutional representation on preprocessed 128-channel epochs}
-  \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.42\textwidth}
-      \textbf{EEGNet-8,2 specification}
+  \begin{center}
+    \includegraphics[width=0.88\linewidth,height=34mm,keepaspectratio]{eegnet_roc_pr_real.png}
+  \end{center}
+  \vspace{-1.5mm}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \textbf{Architecture (3,930 trainable params)}
       \begin{itemize}
-        \setlength{\itemsep}{1.3mm}
+        \setlength{\itemsep}{0.55mm}
         \scriptsize
-        \item Input: preprocessed 128-channel $\times$ 301-sample epoch at 250 Hz (before feature engineering).
-        \item Temporal convolution: 8 filters of kernel length 125 (500 ms).
-        \item Depthwise spatial convolution: 16 spatial filters (multiplier $D=2$) across 128 channels.
-        \item Separable convolution: depthwise ($1\times16$) and pointwise ($1\times1$) to 16 maps.
-        \item Regularization: max-norm constraints (1.0 spatial, 0.25 dense) and dropout ($p=0.5$).
-        \item Compact 3,930 trainable parameters; Adam ($\text{lr}=10^{-3}$), class-weighted cross-entropy, patience 15.
+        \item Input: preprocessed $128 \times 301$ epoch (250~Hz), no manual feature engineering.
+        \item Block 1: 8 temporal filters ($1\times125$, 500~ms) + 16 depthwise spatial filters ($D=2$), AvgPool $1\times4$.
+        \item Block 2: separable conv ($1\times16$ depthwise + $1\times1$ pointwise to 16 maps), AvgPool $1\times8$, linear head.
       \end{itemize}
     \end{column}
-    \begin{column}{0.56\textwidth}
-      \begin{center}
-        \includegraphics[width=0.98\linewidth,height=52mm,keepaspectratio]{eegnet_roc_pr_real.png}
-      \end{center}
-      \source{Figure 6: EEGNet pooled out-of-fold ROC and precision-recall curves}
+    \begin{column}{0.48\textwidth}
+      \textbf{Regularization and training}
+      \begin{itemize}
+        \setlength{\itemsep}{0.55mm}
+        \scriptsize
+        \item Max-norm constraints (1.0 spatial, 0.25 classifier) and dropout ($p=0.5$).
+        \item Adam ($\text{lr}=10^{-3}$), class-weighted cross-entropy, batch 64, global train-SD scaling.
+        \item Same 5 outer GroupKFold splits; 15\% trial-stratified inner val, patience 15 (max 50 epochs).
+      \end{itemize}
     \end{column}
   \end{columns}
+  \vspace{1mm}
+  \fignote{Pooled OOF ROC (0.968) and PR (AP 0.853) curves at 13.49\% target prevalence; 5-fold means are 0.970 and 0.865}
 \end{frame}
 
 % ==============================================================================
 % SLIDE 9: RESEARCH QUESTION 1 (DIRECT ANSWER)
 % ==============================================================================
+\renewcommand{\sectionindex}{05}
 \begin{frame}{Research question 1: best single-trial classification}
   \framesubtitle{Benchmark comparison across five outer test folds on 21,878 single trials}
   \begin{center}
@@ -415,35 +458,35 @@
   \vspace{1.5mm}
   \textbf{Direct answer to research question 1}
   \begin{itemize}
-    \setlength{\itemsep}{1.5mm}
+    \setlength{\itemsep}{1.4mm}
     \scriptsize
-    \item Best overall single-trial model is \textbf{EEGNet-8,2}, reaching ROC-AUC $0.970 \pm 0.013$, average precision $0.865 \pm 0.045$, and balanced accuracy $0.903 \pm 0.021$.
-    \item Best linear conventional model is \textbf{shrinkage-LDA} in ROC-AUC ($0.947 \pm 0.022$) and \textbf{logistic regression} in balanced accuracy ($0.875 \pm 0.037$).
+    \item Best overall single-trial model is \textbf{EEGNet-8,2}, reaching ROC-AUC $0.970 \pm 0.013$, average precision $0.865 \pm 0.045$, and balanced accuracy $0.903 \pm 0.021$ (sensitivity 0.880, specificity 0.927).
+    \item Best conventional models are \textbf{shrinkage-LDA} in ROC-AUC ($0.947 \pm 0.022$) and \textbf{logistic regression} in balanced accuracy ($0.875 \pm 0.037$).
     \item At threshold 0.5 under 13.5\% target prevalence, empirical priors and calibration lower sensitivity for LDA (65.9\%), RBF SVM (62.5\%), and Random Forest (28.9\%, specificity 98.8\%); threshold-free ROC-AUC and AP are therefore the fairest ranking comparisons.
   \end{itemize}
-  \source{Table 6: Five-fold participant-wise cross-validation results across 39 participants}
+  \fignote{Mean $\pm$ sample SD across 5 participant-disjoint folds (39 subjects; pooled OOF EEGNet: AUC 0.968, AP 0.853)}
 \end{frame}
 
 % ==============================================================================
-% SLIDE 10: RESEARCH QUESTION 2 (DIRECT ANSWER & CHANNEL CONTROL)
+% SLIDE 10: RESEARCH QUESTION 2 (DIRECT ANSWER & CHANNEL CONTROL, FIGURE 7)
 % ==============================================================================
 \begin{frame}{Research question 2: deep learning versus machine learning}
   \framesubtitle{Deep learning improves classification, but gain is modest due to P300 linearity}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.48\textwidth}
       \begin{center}
-        \includegraphics[width=0.98\linewidth,height=50mm,keepaspectratio]{lda_channel_controls_roc.png}
+        \includegraphics[width=0.98\linewidth,height=51mm,keepaspectratio]{lda_channel_controls_roc.png}
       \end{center}
-      \source{Figure 7: Channel-matched LDA controls vs. EEGNet ROC curves}
+      \fignote{Pooled OOF ROC for channel controls vs.\ EEGNet; table on right reports 5-fold means}
     \end{column}
     \begin{column}{0.50\textwidth}
-      \textbf{Channel-matched evaluation (100 ms bins)}
+      \textbf{Channel-matched evaluation (100~ms bins)}
       \begin{center}
         \renewcommand{\arraystretch}{1.15}
         \scriptsize
         \begin{tabular}{lccc}
           \toprule
-          Model and input & Bal. acc. & ROC-AUC & AP \\
+          Model and input & Bal.\ acc. & ROC-AUC & AP \\
           \midrule
           LDA 12 ch (144 feat.) & 0.804 & 0.937 & 0.774 \\
           LDA 128 ch (1,536 feat.) & 0.830 & 0.949 & 0.821 \\
@@ -465,50 +508,49 @@
 \end{frame}
 
 % ==============================================================================
-% SLIDE 11: DISTRACTOR CONTROL (NO-BUTTON EXPERIMENT)
+% SLIDE 11: DISTRACTOR CONTROL & OOF SALIENCY OVERVIEW (FIGURE 8)
 % ==============================================================================
-\begin{frame}{No-button distractor control}
-  \framesubtitle{Testing whether EEGNet can decode rare stimuli without a motor-response contrast}
+\begin{frame}{No-button distractor control and outer-test profiles}
+  \framesubtitle{Testing rare-stimulus decoding without a motor-response contrast across all five test folds}
   \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.54\textwidth}
+    \begin{column}{0.56\textwidth}
       \begin{center}
-        \includegraphics[width=0.98\linewidth,height=50mm,keepaspectratio]{eegnet_controls_oof.png}
+        \includegraphics[width=0.98\linewidth,height=53mm,keepaspectratio]{eegnet_controls_oof.png}
       \end{center}
-      \source{Figure 8: Out-of-fold ROC, temporal saliency, and channel-wise correspondence for both tasks}
+      \fignote{Pooled OOF ROC, outer-test temporal saliency, and channel-wise ERP correspondence (300--600~ms)}
     \end{column}
-    \begin{column}{0.44\textwidth}
-      \textbf{Distractor versus standard control}
+    \begin{column}{0.42\textwidth}
+      \textbf{No-button control design}
       \begin{itemize}
-        \setlength{\itemsep}{1.4mm}
+        \setlength{\itemsep}{1.1mm}
         \scriptsize
-        \item Target trials require a button press, introducing potential motor-related cues.
-        \item Five matched EEGNet models were trained on correct distractor vs.\ standard trials (21,748 trials; identical outer test folds).
-        \item Neither class involves a button response (verified from metadata).
+        \item Target trials require a button press; to test no-button decoding, 5 matched EEGNet models were trained on correct distractor vs.\ standard trials (21,748 trials; identical outer folds).
+        \item Neither class involves a button response (verified in metadata).
       \end{itemize}
-      \vspace{1.2mm}
-      \textbf{Control results and scope}
+      \vspace{1.1mm}
+      \textbf{Control results and OOF profiles}
       \begin{itemize}
-        \setlength{\itemsep}{1.3mm}
+        \setlength{\itemsep}{1.1mm}
         \scriptsize
-        \item ROC-AUC: \mbox{\textbf{0.926 $\pm$ 0.015}}; Bal.\ acc.: \mbox{\textbf{0.855 $\pm$ 0.020}}; AP: \mbox{\textbf{0.745 $\pm$ 0.048}}.
-        \item Shows EEGNet can discriminate rare stimuli without a button-press contrast.
-        \item \textbf{Scope caveat}: does not quantify target motor share --- stimulus identity, task relevance, and ERP shape also differ.
+        \item Fold means: ROC-AUC \mbox{\textbf{0.926 $\pm$ 0.015}}, \mbox{Bal.\ acc.\ \textbf{0.855 $\pm$ 0.020}}, AP \mbox{\textbf{0.745 $\pm$ 0.048}} (pooled AUC 0.925 vs.\ 0.968).
+        \item Temporal saliency peaks late in both tasks (504~ms target, 524~ms distractor), with partial channel-wise ERP correlation ($r = 0.253$ vs.\ $0.102$).
+        \item \textbf{Scope caveat}: shows rare-stimulus decoding without button presses, but does not quantify target motor share (stimuli, relevance, and ERPs also differ).
       \end{itemize}
     \end{column}
   \end{columns}
 \end{frame}
 
 % ==============================================================================
-% SLIDE 12: RESEARCH QUESTION 3 (SALIENCY & INTERPRETABILITY)
+% SLIDE 12: RESEARCH QUESTION 3 (SPATIAL SALIENCY TOPOMAPS, FIGURE 9)
 % ==============================================================================
-\begin{frame}{Research question 3: outer-test gradient saliency}
+\begin{frame}{Research question 3: outer-test gradient saliency topomaps}
   \framesubtitle{Partial physiological correspondence alongside sensorimotor, anterior, and visual sensitivity}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.52\textwidth}
       \begin{center}
-        \includegraphics[width=0.98\linewidth,height=50mm,keepaspectratio]{eegnet_controls_topomaps.png}
+        \includegraphics[width=0.98\linewidth,height=53mm,keepaspectratio]{eegnet_controls_topomaps.png}
       \end{center}
-      \source{Figure 9: Saliency topomaps (300--600~ms) and ERP voltage differences for both tasks}
+      \fignote{Outer-test saliency (left) and OOF ERP differences (right) in 300--600~ms (separate colour scales)}
     \end{column}
     \begin{column}{0.46\textwidth}
       \textbf{Direct answer to research question 3}
@@ -528,18 +570,18 @@
 % ==============================================================================
 % SLIDE 13: SUMMARY TABLE OF THE 3 RESEARCH QUESTIONS
 % ==============================================================================
-\renewcommand{\sectionindex}{05}
+\renewcommand{\sectionindex}{06}
 \begin{frame}{Summary of answers to the three research questions}
-  \framesubtitle{Evidence-based synthesis aligned with the final report}
+  \framesubtitle{Evidence-based synthesis of single-trial P300 classification findings}
   \begin{center}
-    \renewcommand{\arraystretch}{1.3}
+    \renewcommand{\arraystretch}{1.32}
     \scriptsize
     \begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{46mm}}
       \toprule
       Question & Core quantitative evidence & Neuroscientific and ML rationale \\
       \midrule
       \textbf{RQ1: Best single-trial result} &
-      EEGNet achieves ROC-AUC $0.970 \pm 0.013$, average precision $0.865 \pm 0.045$, and balanced accuracy $0.903 \pm 0.021$. Best linear baselines: shrinkage-LDA (AUC 0.947) and LR (Bal.\ acc.\ 0.875). &
+      EEGNet achieves ROC-AUC $0.970 \pm 0.013$, AP $0.865 \pm 0.045$, and Bal.\ acc.\ $0.903 \pm 0.021$. Best linear baselines: shrinkage-LDA (AUC 0.947) and LR (Bal.\ acc.\ 0.875). &
       End-to-end spatiotemporal filters learn directly from preprocessed 128-ch epochs without fixed latency-window loss. \\
       \midrule
       \textbf{RQ2: Is deep learning better?} &
@@ -558,11 +600,11 @@
 % SLIDE 14: TEAM CONTRIBUTIONS
 % ==============================================================================
 \begin{frame}{Team roles and contribution shares}
-  \framesubtitle{Strictly compliant with slide 143: individual responsibilities and shares summing to 100\%}
+  \framesubtitle{Individual responsibilities and contribution shares summing to 100\%}
   \begin{center}
-    \renewcommand{\arraystretch}{1.2}
+    \renewcommand{\arraystretch}{1.28}
     \scriptsize
-    \begin{tabularx}{\linewidth}{lXcc}
+    \begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}Xcc}
       \toprule
       Member & Main project responsibilities & Role code & Share \\
       \midrule
@@ -577,9 +619,6 @@
       \bottomrule
     \end{tabularx}
   \end{center}
-  \vspace{1.5mm}
-  \takeaway{Fully reproducible repository with automated pipelines, 11 unit tests, and fixed random seeds.}
-  \source{Table 12: Member contributions documented in report and contributions log}
 \end{frame}
 
 % ==============================================================================
