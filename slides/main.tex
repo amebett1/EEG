@@ -197,28 +197,28 @@
 % SLIDE 3: NEUROPHYSIOLOGICAL BASIS (POLICH MODEL)
 % ==============================================================================
 \renewcommand{\sectionindex}{02}
-\begin{frame}{Dual-process P300 model and difference waves}
-  \framesubtitle{Dissociating involuntary P3a orienting from voluntary P3b context updating}
+\begin{frame}{P300 framework (Polich, 2007) and difference waves}
+  \framesubtitle{Target and distractor contrasts in an easy visual oddball task}
   \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.37\textwidth}
-      \textbf{Integrative theory of Polich 2007}
-      \begin{itemize}
-        \setlength{\itemsep}{2mm}
-        \scriptsize
-        \item P3a: involuntary fronto-central orienting reflex to distractor stimuli ($Fz, Cz > Pz$).
-        \item P3b: task-relevant working memory updating to target stimuli ($Pz > Cz > Fz$).
-      \end{itemize}
-      \vspace{2mm}
-      \textbf{Difference waves}
+    \begin{column}{0.38\textwidth}
+      \textbf{Integrative theory (Polich, 2007)}
       \begin{itemize}
         \setlength{\itemsep}{1.5mm}
         \scriptsize
-        \item Target minus standard isolates pure P3b.
-        \item Distractor minus standard isolates pure P3a.
-        \item Early sensory potentials (P1, N1, P2) are subtracted out.
+        \item P3b: task-relevant context updating to targets with a parietal maximum ($Pz > Fz$).
+        \item Fronto-central P3a appears mainly when target--standard discrimination is difficult; easy tasks elicit a parietal distractor P3.
+      \end{itemize}
+      \vspace{1.8mm}
+      \textbf{Observed difference waves (300--500~ms)}
+      \begin{itemize}
+        \setlength{\itemsep}{1.3mm}
+        \scriptsize
+        \item Target $-$ standard: strong parietal P3b ($+5.05\,\mu\text{V}$ at Pz).
+        \item Distractor $-$ standard: also predominantly parietal ($+3.54\,\mu\text{V}$ at Pz; $-1.06\,\mu\text{V}$ at Fz) --- not a canonical frontal P3a.
+        \item Relative anterior shift vs.\ targets in 26/39 participants ($+1.43 \pm 2.46\,\mu\text{V}$).
       \end{itemize}
     \end{column}
-    \begin{column}{0.61\textwidth}
+    \begin{column}{0.60\textwidth}
       \begin{center}
         \includegraphics[width=0.98\linewidth,height=52mm,keepaspectratio]{grand_average_difference_waves.png}
       \end{center}
@@ -294,34 +294,36 @@
 % ==============================================================================
 % SLIDE 6: SPATIOTEMPORAL DYNAMICS & TOPOMAPS
 % ==============================================================================
-\begin{frame}{Spatiotemporal dynamics and scalp topography}
-  \framesubtitle{128-channel topomaps reveal focal parietal activation during P300 window}
+\begin{frame}{Group scalp topography and individual variability}
+  \framesubtitle{128-channel mean potentials (300--500~ms) and cross-subject P300 timing}
   \begin{center}
-    \includegraphics[width=0.95\linewidth,height=35mm,keepaspectratio]{grand_average_p300_summary_topomap.png}
+    \includegraphics[width=0.95\linewidth,height=32mm,keepaspectratio]{grand_average_p300_summary_topomap.png}
   \end{center}
-  \vspace{-1mm}
+  \vspace{-1.5mm}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{0.48\textwidth}
-      \textbf{Temporal activation sequence}
+      \textbf{Topographic findings (300--500~ms)}
       \begin{itemize}
-        \setlength{\itemsep}{0.8mm}
+        \setlength{\itemsep}{0.6mm}
         \scriptsize
-        \item 150--250 ms: early visual sensory potentials over occipital cortex.
-        \item 250--350 ms: fronto-central positivity reflecting involuntary P3a orienting.
-        \item 350--550 ms: sustained positive wave over centroparietal electrodes.
+        \item Target $-$ standard exhibits a focal parietal maximum around Pz and CPz.
+        \item Distractor $-$ standard is also predominantly parietal, with a modest relative frontal shift vs.\ targets (26/39).
+        \item Consistent with easy discrimination (5.6\% target misses, 0.27\% standard false alarms).
       \end{itemize}
     \end{column}
     \begin{column}{0.48\textwidth}
-      \textbf{Topographic validation}
+      \textbf{Operational P300 checks ($N=39$)}
       \begin{itemize}
-        \setlength{\itemsep}{0.8mm}
+        \setlength{\itemsep}{0.6mm}
         \scriptsize
-        \item Voltage difference map exhibits a clear focal peak centered at Pz, CPz, and POz.
-        \item Validates parietal feature extraction windows for single-trial classification.
+        \item Target $Pz > Fz$: 39/39; oddball contrast $\ge 1.5\,\mu\text{V}$: 37/39.
+        \item Independent 200--800~ms peak search: 22/39 peak within 300--500~ms; 17/39 peak later (508--748~ms).
+        \item Widening acceptance to 300--600~ms raises core pass rate to 32/39 (motivating 300--600~ms P3 features).
       \end{itemize}
     \end{column}
   \end{columns}
-  \source{Figure 3: Grand average scalp topomap and difference maps in 300--500 ms}
+  \vspace{1.2mm}
+  \source{Figure 3: Grand average scalp potentials and difference maps in 300--500~ms (checks from Table 4)}
 \end{frame}
 
 % ==============================================================================
@@ -417,7 +419,7 @@
     \scriptsize
     \item Best overall single-trial model is \textbf{EEGNet-8,2}, reaching ROC-AUC $0.970 \pm 0.013$, average precision $0.865 \pm 0.045$, and balanced accuracy $0.903 \pm 0.021$.
     \item Best linear conventional model is \textbf{shrinkage-LDA} in ROC-AUC ($0.947 \pm 0.022$) and \textbf{logistic regression} in balanced accuracy ($0.875 \pm 0.037$).
-    \item Random forest shows poor sensitivity (28.9\%) due to feature dilution across 402 correlated dimensions.
+    \item At threshold 0.5 under 13.5\% target prevalence, empirical priors and calibration lower sensitivity for LDA (65.9\%), RBF SVM (62.5\%), and Random Forest (28.9\%, specificity 98.8\%); threshold-free ROC-AUC and AP are therefore the fairest ranking comparisons.
   \end{itemize}
   \source{Table 6: Five-fold participant-wise cross-validation results across 39 participants}
 \end{frame}
@@ -452,11 +454,11 @@
       \vspace{1mm}
       \textbf{Direct answer to research question 2}
       \begin{itemize}
-        \setlength{\itemsep}{1.2mm}
+        \setlength{\itemsep}{1.1mm}
         \scriptsize
-        \item \textbf{Yes, deep learning is better}: EEGNet outperforms 402-feature LDA by $+0.023$ ROC-AUC (exploratory Wilcoxon $p = 5.0 \times 10^{-10}$, 35/39 subjects) and $+0.074$ AP.
+        \item \textbf{Yes, for the tested pipelines}: EEGNet outperforms 402-feature LDA by $+0.023$ ROC-AUC (exploratory Wilcoxon $p = 5.0 \times 10^{-10}$, 35/39 subjects) and $+0.074$ AP.
         \item \textbf{Electrode count alone does not explain gain}: 128-channel LDA reaches 0.949 ($+0.012$ over 12-ch), leaving a $+0.021$ AUC ($+0.043$ AP) margin for EEGNet.
-        \item \textbf{Why gain is modest}: P300 is predominantly a low-dimensional linear dipole. Linear shrinkage already captures most variance; EEGNet refines spatio-temporal filter synthesis (Lotte et al., 2018).
+        \item \textbf{Why gain is modest}: P300 behaves as a low-dimensional, largely linear spatio-temporal pattern; shrinkage LDA already captures most separable information, while EEGNet refines spatial--temporal filtering (Blankertz et al., 2011; Lotte et al., 2018).
       \end{itemize}
     \end{column}
   \end{columns}
@@ -465,8 +467,8 @@
 % ==============================================================================
 % SLIDE 11: DISTRACTOR CONTROL (NO-BUTTON EXPERIMENT)
 % ==============================================================================
-\begin{frame}{Distractor control: isolating P300 from motor response}
-  \framesubtitle{Classifying distractors without button press confirms neural origin of target detection}
+\begin{frame}{No-button distractor control}
+  \framesubtitle{Testing whether EEGNet can decode rare stimuli without a motor-response contrast}
   \begin{columns}[c,onlytextwidth]
     \begin{column}{0.54\textwidth}
       \begin{center}
@@ -475,22 +477,22 @@
       \source{Figure 8: Out-of-fold ROC, temporal saliency, and channel-wise correspondence for both tasks}
     \end{column}
     \begin{column}{0.44\textwidth}
-      \textbf{Distractor versus standard experiment}
+      \textbf{Distractor versus standard control}
       \begin{itemize}
-        \setlength{\itemsep}{1.8mm}
+        \setlength{\itemsep}{1.4mm}
         \scriptsize
-        \item Target trials require a button press, introducing motor cortex activation.
-        \item To test whether EEGNet merely detects button press, we trained EEGNet on distractor versus standard across 21,748 trials.
-        \item Neither condition involves a motor response.
+        \item Target trials require a button press, introducing potential motor-related cues.
+        \item Five matched EEGNet models were trained on correct distractor vs.\ standard trials (21,748 trials; identical outer test folds).
+        \item Neither class involves a button response (verified from metadata).
       \end{itemize}
-      \vspace{1.5mm}
-      \textbf{Control results}
+      \vspace{1.2mm}
+      \textbf{Control results and scope}
       \begin{itemize}
-        \setlength{\itemsep}{1.5mm}
+        \setlength{\itemsep}{1.3mm}
         \scriptsize
-        \item Distractor ROC-AUC reaches \textbf{0.926 $\pm$ 0.015}.
-        \item Balanced accuracy reaches \textbf{0.855 $\pm$ 0.020}.
-        \item Proves model decodes genuine cognitive P300 rather than motor artifacts.
+        \item ROC-AUC: \mbox{\textbf{0.926 $\pm$ 0.015}}; Bal.\ acc.: \mbox{\textbf{0.855 $\pm$ 0.020}}; AP: \mbox{\textbf{0.745 $\pm$ 0.048}}.
+        \item Shows EEGNet can discriminate rare stimuli without a button-press contrast.
+        \item \textbf{Scope caveat}: does not quantify target motor share --- stimulus identity, task relevance, and ERP shape also differ.
       \end{itemize}
     \end{column}
   \end{columns}
@@ -499,25 +501,25 @@
 % ==============================================================================
 % SLIDE 12: RESEARCH QUESTION 3 (SALIENCY & INTERPRETABILITY)
 % ==============================================================================
-\begin{frame}{Research question 3: interpretability via gradient saliency}
-  \framesubtitle{Input gradients reveal temporal alignment with P300 and physiological spatial loci}
+\begin{frame}{Research question 3: outer-test gradient saliency}
+  \framesubtitle{Partial physiological correspondence alongside sensorimotor, anterior, and visual sensitivity}
   \begin{columns}[c,onlytextwidth]
-    \begin{column}{0.54\textwidth}
+    \begin{column}{0.52\textwidth}
       \begin{center}
         \includegraphics[width=0.98\linewidth,height=50mm,keepaspectratio]{eegnet_controls_topomaps.png}
       \end{center}
-      \source{Figure 9: Saliency topomaps (300--600 ms) and ERP voltage differences for both tasks}
+      \source{Figure 9: Saliency topomaps (300--600~ms) and ERP voltage differences for both tasks}
     \end{column}
-    \begin{column}{0.44\textwidth}
+    \begin{column}{0.46\textwidth}
       \textbf{Direct answer to research question 3}
       \begin{itemize}
-        \setlength{\itemsep}{1.5mm}
+        \setlength{\itemsep}{1.1mm}
         \scriptsize
-        \item \textbf{Features are explainable}: Saliency on unseen test trials concentrates temporally and spatially on expected P300 regions.
-        \item \textbf{Temporal profile}: Target saliency peaks at 504 ms (near mean reaction time 542 ms), with 40.7\% mass in 300--600 ms.
-        \item \textbf{Spatial profile}: Correlates with ERP difference map ($r = 0.253$).
-        \item \textbf{Dual activation locus}: Target saliency reflects both parietal P3b electrodes and left-central motor sites (C1, FCC3h, C3) matching right-hand button press.
-        \item \textbf{Distractor validation}: Motor cluster completely vanishes in distractor saliency (peak 524 ms, 43.9\% in 300--600 ms).
+        \item \textbf{Partly interpretable}: computed strictly on positive outer-test trials (all 5 folds, L1-normalised before pooling).
+        \item \textbf{Target temporal alignment}: peak at 504~ms (near 542.1~ms mean RT), 40.7\% mass in 300--600~ms (1.61$\times$ uniform).
+        \item \textbf{Partial spatial match}: $r = 0.253$ full-epoch ($0.203$ in 300--600~ms; fold range 0.057--0.289); Pz ranks 43/128; top sites are left-central (C1, FCC3h, C3) + Oz, P2.
+        \item \textbf{Distractor shift}: peak 524~ms (43.9\%); left-central cluster vanishes ($r = 0.102$, Pz rank 56/128), shifting to anterior sites (AFz, AFF2h, FC1, AF3 --- possible residual ocular signal) and Oz ($\sim$100~ms visual peak).
+        \item \textbf{Caution}: input gradients measure local predictive sensitivity, not neural sources (Haufe et al., 2014).
       \end{itemize}
     \end{column}
   \end{columns}
@@ -528,25 +530,25 @@
 % ==============================================================================
 \renewcommand{\sectionindex}{05}
 \begin{frame}{Summary of answers to the three research questions}
-  \framesubtitle{Evidence-based synthesis directly addressing the assignment objectives}
+  \framesubtitle{Evidence-based synthesis aligned with the final report}
   \begin{center}
-    \renewcommand{\arraystretch}{1.35}
+    \renewcommand{\arraystretch}{1.3}
     \scriptsize
-    \begin{tabularx}{\linewidth}{lXp{42mm}}
+    \begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{46mm}}
       \toprule
       Question & Core quantitative evidence & Neuroscientific and ML rationale \\
       \midrule
       \textbf{RQ1: Best single-trial result} &
-      EEGNet achieves ROC-AUC $0.970 \pm 0.013$, average precision $0.865 \pm 0.045$, and balanced accuracy $0.903 \pm 0.021$. Best linear baseline is shrinkage-LDA with ROC-AUC $0.947$. &
-      End-to-end spatiotemporal filters preserve phase and avoid information loss from fixed latency windows. \\
+      EEGNet achieves ROC-AUC $0.970 \pm 0.013$, average precision $0.865 \pm 0.045$, and balanced accuracy $0.903 \pm 0.021$. Best linear baselines: shrinkage-LDA (AUC 0.947) and LR (Bal.\ acc.\ 0.875). &
+      End-to-end spatiotemporal filters learn directly from preprocessed 128-ch epochs without fixed latency-window loss. \\
       \midrule
       \textbf{RQ2: Is deep learning better?} &
-      Yes, statistically higher performance: $+0.023$ ROC-AUC over LDA ($p = 5.0 \times 10^{-10}$; higher in 35 of 39 participants). Gain over 128-channel LDA is $+0.021$. &
-      P300 is predominantly a linear dipole pattern where shrinkage LDA already captures most variance. EEGNet refines filter synthesis rather than non-linear mapping. \\
+      \textbf{Yes, for tested pipelines}: $+0.023$ ROC-AUC over 402-feature LDA (exploratory $p = 5.0 \times 10^{-10}$; 35/39 higher) and $+0.021$ over 128-ch LDA ($+0.043$ AP). &
+      P300 behaves as a low-dimensional, largely linear spatio-temporal pattern where shrinkage LDA captures most separable signal; EEGNet refines spatial--temporal filtering. \\
       \midrule
       \textbf{RQ3: Are features explainable?} &
-      Yes. Saliency peaks at 504 ms with 40.7\% mass in 300--600 ms ($r=0.253$ with ERP difference). Distractor reaches $0.926$ ROC-AUC without motor cues. &
-      Saliency combines parietal P3b with left-central motor response. No-button control confirms robust cognitive P3 decoding independent of motor activity. \\
+      \textbf{Partly.} Outer-test saliency peaks at 504~ms (40.7\% in 300--600~ms), partial spatial $r = 0.253$ (Pz rank 43/128). No-button distractor reaches 0.926 ROC-AUC ($r = 0.102$). &
+      Shows stimulus decoding without a button press, while left-central target sensitivity (C1/C3), distractor anterior/visual cues (AFz/Oz), and Haufe et al.\ (2014) leave exact mechanisms open. \\
       \bottomrule
     \end{tabularx}
   \end{center}
